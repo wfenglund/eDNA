@@ -1,0 +1,17 @@
+Package: MetaBAnalysis
+Title: Analysis of metabarcoding data
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Thomas",
+           family = "Källman",
+           role = c("aut", "cre"),
+           email = "thomas.kallman@naturhistoriska.com")
+Description: Tools and functions to automate analysis of ngs data.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
+    Biostrings,
+    stats

@@ -1,0 +1,256 @@
+---
+title: "proj_test"
+author: ""
+date: '202X-XX-XX'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(reticulate)
+knitr::opts_chunk$set(echo = TRUE)
+knitr::knit_engines$set(python = reticulate::eng_python)
+```
+
+Import python-packages:
+```{python}
+import subprocess
+import os
+```
+
+Define inputs for the project:
+```{python}
+project_name = "proj_test"
+PrimerF = "CAYCGTGCTATGCATGCTGT" # Forward primer
+PrimerR = "AGGCATRTGCCAAACATGA" # Reverse primer
+###
+f_format = "scilife" #scilife or novo
+anchored_flag = "yes" #yes or no
+reads_folder = "../Data"
+```
+
+### Python functions:
+```{python}
+def revcomp(sequence): # Function that takes a sequence (a string), upper or lower case, and reverse-complements it
+    sequence = sequence[::-1] # Reverse the sequence
+    new_seq = "" # Initialize the new sequence
+    for nucleotide in sequence: # For every nucleotide/character in the sequence
+        if nucleotide == "A" or nucleotide == "a":
+            nucleotide = nucleotide.replace("A","T")
+            nucleotide = nucleotide.replace("a","t")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "T" or nucleotide == "t":
+            nucleotide = nucleotide.replace("T","A")
+            nucleotide = nucleotide.replace("t","a")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "G" or nucleotide == "g":
+            nucleotide = nucleotide.replace("G","C")
+            nucleotide = nucleotide.replace("g","c")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "C" or nucleotide == "c":
+            nucleotide = nucleotide.replace("C","G")
+            nucleotide = nucleotide.replace("c","g")
+            new_seq = new_seq + nucleotide
+            continue
+    return new_seq # Return the new sequence
+```
+
+
+### Set parameters:
+```{python}
+test1 = 0
+test2 = 0
+if anchored_flag == "no":
+    regular_primer = PrimerF
+    reverse_primer = PrimerR
+    test1 = 1
+elif anchored_flag == "yes":
+    PrimerF_rc = revcomp(PrimerF)
+    PrimerR_rc = revcomp(PrimerR)
+    regular_primer = PrimerF + "..." + PrimerR_rc
+    reverse_primer = PrimerR + "..." + PrimerF_rc
+    test1 = 1
+if f_format == "scilife":
+    file_end1 = "_R1_001.fastq.gz"
+    file_end2 = "_R1_001.fastq.gz"
+    repl_from = "R1"
+    repl_to = "R2"
+    test2 = 1
+elif f_format == "novo":
+    file_end1 = "_L1_1.fq.gz"
+    file_end2 = "_L2_1.fq.gz"
+    repl_from = "_1.fq"
+    repl_to = "_2.fq"
+    test2 = 1
+if test1 + test2 != 2:
+    print("Please revisit your input variables. Program terminates.")
+    quit()
+```
+
+### Run cutadapt and get filenames:
+```{python}
+sample_list = list()
+reads_list = list()
+for file in os.listdir(reads_folder): #For every file in folder containing reads
+    if file.endswith(file_end1) or file.endswith(file_end2): #Check if file is a .fastq-read-file
+        sample = file.replace(file_end1, "") #Extract sample name
+        sample = sample.replace(file_end2, "") #Extract sample name
+        sample_list.append(sample) #Make a list containing all the sample-names
+        current_list = list([sample + "_outFwd_1.fastq.gz", sample + "_outFwd_2.fastq.gz", sample + "_outRev_1.fastq.gz", sample + "_outRev_2.fastq.gz"]) #Create filtering names and store in a list
+        reads_list.append(current_list) #Store list of filterings in a list containing all filtered reads
+        
+        subprocess.run(["cd " + reads_folder + "; cutadapt -j 0 --max-n=0 --discard-untrimmed -g " + regular_primer + " -G " + reverse_primer + " -o " + current_list[0] + " -p " + current_list[1] + " " + file + " " + file.replace(repl_from, repl_to)], shell=True) #Run cutadapt for regular direction
+        subprocess.run(["cd " + reads_folder + "; cutadapt -j 0 --max-n=0 --discard-untrimmed -g " + regular_primer + " -G " + reverse_primer + " -o " + current_list[2] + " -p " + current_list[3] + " " + file.replace(repl_from, repl_to) + " " + file], shell=True) #Run cutadapt in reverse direction
+```
+
+### Import python variables into r:
+```{r}
+proj_name <- py$project_name
+primer_list <- c(py$PrimerF, py$PrimerF_rc, py$PrimerR, py$PrimerR_rc)
+all_samples <- py$sample_list
+all_reads <- py$reads_list
+```
+
+### Filter the data and run dada2:
+```{r}
+library(dada2)
+library(edgeR)
+
+dadaAnalysis <- function(forward, reverse) {
+  errF <- dada2::learnErrors(forward, multithread = TRUE)
+  errR <- dada2::learnErrors(reverse, multithread = TRUE)
+  derepsF <- dada2::derepFastq(forward)
+  derepsR <- dada2::derepFastq(reverse)
+  dadaF <- dada(derepsF, err = errF, multithread = TRUE)
+  dadaR <- dada(derepsR, err = errR, multithread = TRUE)
+  mergers <- mergePairs(dadaF, derepsF, dadaR, derepsR, verbose = TRUE)
+  seqtab <- makeSequenceTable(mergers)
+  seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = TRUE)
+  return(seqtab.nochim)
+}
+
+forward <- list.files("../Data", pattern = "_1.fastq.gz", full.names = TRUE) # Gets all the names ending with _1 with "full" path
+reverse <- list.files("../Data", pattern = "_2.fastq.gz", full.names = TRUE) # Gets -"- ending with _2
+forwardC <- list.files("../Data", pattern = "_1.fastq.gz", full.names = FALSE) # Gets all names ending with _1 without full path
+reverseC <- list.files("../Data", pattern = "_2.fastq.gz", full.names = FALSE) # Gets -"- ending with _2
+filtFs <- file.path("../Data", "filtered", forwardC) # Creates paths for (future?) filtered forward reads
+filtRs <- file.path("../Data", "filtered", reverseC) # Creates paths for (future?) filtered reverse reads
+
+out_combine <- function(dataset, samples) { # Function that summarizes rows of forward and reverse counts in the "out"-object
+  counter <- 0
+    for(i in samples) {
+      if (counter == 0) {
+        comb_out <- data.frame()
+        counter <- counter + 1
+        }
+      comb_out <- rbind(comb_out, S2 = colSums(dataset[grepl(x = rownames(dataset), pattern = i),]))
+      rownames(comb_out)[rownames(comb_out) == "1"] <- i
+      rownames(comb_out)[rownames(comb_out) == "S2"] <- i
+    }
+  names(comb_out) <- c("reads.in", "reads.out")
+  return(comb_out)
+}
+
+out <- filterAndTrim(forward, filtFs, reverse, filtRs,
+              maxN=0, truncQ=2, rm.phix=TRUE,
+              compress=TRUE, multithread=TRUE) # On Windows set multithread=FALSE # maxEE=c(2,3),
+
+comb_out <- out_combine(out, all_samples) # Summarize forward and reverse for every sample
+
+fwd.counts2 <- dadaAnalysis(filtFs, filtRs)
+df.fwd<- as.data.frame(t(fwd.counts2))
+y.fwd <- DGEList(df.fwd)
+```
+
+### Combine columns in "df.fwd" and convert to DGEList "y.all"
+```{r}
+df_combine <- function(dataset, samples) {
+  counter <- 0
+    for(i in samples) {
+      if (counter == 0) {
+        df.all <- data.frame(S2 = rowSums(dataset[,grepl(x = names(dataset), pattern = i)]))
+        counter <- counter + 1
+        names(df.all)[names(df.all) == "S2"] <- i
+        next
+        }
+      df.all <- cbind(df.all, S2 = rowSums(dataset[,grepl(x = names(dataset), pattern = i)]))
+      names(df.all)[names(df.all) == "S2"] <- i
+      }
+  return(df.all)
+}
+
+df.all <- df_combine(df.fwd, all_samples)
+y.all <- DGEList(df.all)
+saveRDS(y.all, file="y.all.rds")
+```
+
+### Export fasta-file:
+```{r}
+library(Biostrings)
+
+exportFa <- function(count_data, filename) {
+  seqs <- row.names(count_data)
+  names(seqs) <- paste("Seq", 1:length(seqs), sep = "_")
+  writeXStringSet(DNAStringSet(seqs, use.names = TRUE), filename)
+  sprintf("Wrote %s sequences to %s", length(seqs), filename) 
+}
+
+exportFa(y.all, "ymideca2.fa")
+```
+
+### Parse BLAST-results:
+```{r}
+library(taxize)
+library(gtools)
+
+blastParse <- function(DGEList, blastRes.out) {
+  
+  sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
+  blast_res <- read.table(blastRes.out, sep = "\t", quote = "'", stringsAsFactors = FALSE)
+  names(blast_res) <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "staxids", "sscinames", "scomnames")
+  blast_res_un <- blast_res[!duplicated(blast_res$qseqid),] # Retain only best hits
+  
+  # Slow down the query speed in a for loop to avoid time outs at NCBI
+  taxonomy <- list()
+  for(i in levels(factor(blast_res_un$sscinames))) {
+    taxonomy[[i]] <- tax_name(sci = i, get = c("superkingdom", "phylum", "order", "class", "family"), db = "ncbi")
+    Sys.sleep(.5)}
+  taxonomy <- do.call("rbind",taxonomy)
+  
+  blast_tax <- merge(blast_res_un, taxonomy, by.x = "sscinames", by.y = "query", all.x = TRUE)
+  blast_tax <- blast_tax[,c(2,3,4,12, 1, 17:21)]
+  names(blast_tax) <- c("id", "besthit", "identity", "e-value", "species", "superkingdom", "phylum", "order", "class", "family")
+  seq_tax <- merge(sequences, blast_tax, by.x = "id", by.y = "id", all.x = TRUE)
+  seq_tax$id <- as.character(seq_tax$id)
+  seq_tax <- seq_tax[mixedorder(seq_tax$id),]
+  seq_tax$superkingdom <- factor(seq_tax$superkingdom)
+  seq_tax$phylum <- factor(seq_tax$phylum)
+  seq_tax$order <- factor(seq_tax$order)
+  seq_tax$class <- factor(seq_tax$class)
+  seq_tax$family <- factor(seq_tax$family)
+  seq_tax
+}
+
+blastResY <- blastParse(y.all, "y_mideca2.out")
+```
+
+### Create Summaryfiles from the BLAST-results:
+```{r}
+grep_group <- grepl("Arthropoda", blastResY$phylum) # Set which group to put in "GroupSummary"
+
+genes_counts <- cbind(blastResY, y.all$counts)
+SummaryAll <- aggregate(genes_counts[,12:dim(genes_counts)[2]], by=list(genes_counts$species), FUN = sum)
+SummaryAll <- SummaryAll[order(rowSums(SummaryAll[,-1]), decreasing = TRUE),]
+genes.onlyGroup <- blastResY[grep_group ,]
+y.onlyGroup <- y.all[row.names(y.all$counts) %in% genes.onlyGroup$seq,]
+genes_counts.onlyGroup <- cbind(genes.onlyGroup, y.onlyGroup$counts)
+GroupSummary <- aggregate(genes_counts.onlyGroup[,12:dim(genes_counts)[2]], by=list(genes_counts.onlyGroup$species), FUN=sum)
+GroupSummary <- GroupSummary[order(rowSums(GroupSummary[,-1]), decreasing = TRUE),]
+
+saveRDS(y.all, file = "y.all.rds")
+saveRDS(genes_counts, file = "genes_counts.rds")
+saveRDS(GroupSummary, file = "GroupSummary.rds")
+saveRDS(SummaryAll, file = "SummaryAll.rds")
+```

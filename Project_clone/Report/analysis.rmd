@@ -108,7 +108,7 @@ for file in os.listdir(reads_folder): #For every file in folder containing reads
 ### Import python variables into r:
 ```{r}
 projectName <- py$project_name
-primerList <- c(py$PrimerF, py$PrimerF_rc, py$PrimerR, py$PrimerR_rc)
+primerList <- c(py$primer_f, py$primer_f_rc, py$primer_r, py$primer_r_rc)
 allSamples <- py$sample_list
 allReads <- py$reads_list
 ```
@@ -123,12 +123,12 @@ DadaAnalysis <- function(forward, reverse) {
   errR <- dada2::learnErrors(reverse, multithread = TRUE)
   derepsF <- dada2::derepFastq(forward)
   derepsR <- dada2::derepFastq(reverse)
-  dadaF <- dada(derepsF, err = errF, multithread = TRUE)
-  dadaR <- dada(derepsR, err = errR, multithread = TRUE)
+  dadaF <- dada2::dada(derepsF, err = errF, multithread = TRUE)
+  dadaR <- dada2::dada(derepsR, err = errR, multithread = TRUE)
   mergers <- dada2::mergePairs(dadaF, derepsF, dadaR, derepsR, verbose = TRUE)
-  seqtab <- dada2::makeSequenceTable(mergers)
-  seqtab.nochim <- dada2::removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = TRUE)
-  return(seqtab.nochim)
+  seqTab <- dada2::makeSequenceTable(mergers)
+  seqTabNoChim <- dada2::removeBimeraDenovo(seqTab, method = "consensus", multithread = TRUE, verbose = TRUE)
+  return(seqTabNoChim)
 }
 
 forward <- list.files("../Data", pattern = "_1.fastq.gz", full.names = TRUE) # Gets all the names ending with _1 with "full" path
@@ -190,11 +190,11 @@ saveRDS(yAll, file = "yAll.rds")
 ```{r}
 library(Biostrings)
 
-ExportFasta <- function(count_data, filename) {
-  seqs <- row.names(count_data)
+ExportFasta <- function(countData, fileName) {
+  seqs <- row.names(countData)
   names(seqs) <- paste("Seq", 1:length(seqs), sep = "_")
-  Biostrings::writeXStringSet(Biostrings::DNAStringSet(seqs, use.names = TRUE), filename)
-  sprintf("Wrote %s sequences to %s", length(seqs), filename) 
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(seqs, use.names = TRUE), fileName)
+  sprintf("Wrote %s sequences to %s", length(seqs), fileName) 
 }
 
 ExportFasta(yAll, "y_test.fa")
@@ -249,7 +249,7 @@ groupSummary <- aggregate(genesCountsGroup[,12:dim(genesCounts)[2]], by = list(g
 groupSummary <- groupSummary[order(rowSums(groupSummary[,-1]), decreasing = TRUE),]
 
 saveRDS(yAll, file = "yAll.rds")
-saveRDS(genes_counts, file = "genesCounts.rds")
+saveRDS(genesCounts, file = "genesCounts.rds")
 saveRDS(groupSummary, file = "groupSummary.rds")
 saveRDS(summaryAll, file = "summaryAll.rds")
 ```

@@ -11,17 +11,17 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::knit_engines$set(python = reticulate::eng_python)
 ```
 
-Import python-packages:
+### Import python-packages:
 ```{python}
 import subprocess
 import os
 ```
 
-Define inputs for the project:
+### Define inputs for the project:
 ```{python}
 project_name = "proj_test"
-PrimerF = "CAYCGTGCTATGCATGCTGT" # Forward primer
-PrimerR = "AGGCATRTGCCAAACATGA" # Reverse primer
+primer_f = "CAYCGTGCTATGCATGCTGT" # Forward primer
+primer_r = "AGGCATRTGCCAAACATGA" # Reverse primer
 ###
 f_format = "scilife" #scilife or novo
 anchored_flag = "yes" #yes or no
@@ -30,7 +30,7 @@ reads_folder = "../Data"
 
 ### Python functions:
 ```{python}
-def revcomp(sequence): # Function that takes a sequence (a string), upper or lower case, and reverse-complements it
+def rev_comp(sequence): # Function that takes a sequence (a string), upper or lower case, and reverse-complements it
     sequence = sequence[::-1] # Reverse the sequence
     new_seq = "" # Initialize the new sequence
     for nucleotide in sequence: # For every nucleotide/character in the sequence
@@ -63,14 +63,14 @@ def revcomp(sequence): # Function that takes a sequence (a string), upper or low
 test1 = 0
 test2 = 0
 if anchored_flag == "no":
-    regular_primer = PrimerF
-    reverse_primer = PrimerR
+    regular_primer = primer_f
+    reverse_primer = primer_r
     test1 = 1
 elif anchored_flag == "yes":
-    PrimerF_rc = revcomp(PrimerF)
-    PrimerR_rc = revcomp(PrimerR)
-    regular_primer = PrimerF + "..." + PrimerR_rc
-    reverse_primer = PrimerR + "..." + PrimerF_rc
+    primer_f_rc = rev_comp(primer_f)
+    primer_r_rc = rev_comp(primer_r)
+    regular_primer = primer_f + "..." + primer_r_rc
+    reverse_primer = primer_r + "..." + primer_f_rc
     test1 = 1
 if f_format == "scilife":
     file_end1 = "_R1_001.fastq.gz"
@@ -107,10 +107,10 @@ for file in os.listdir(reads_folder): #For every file in folder containing reads
 
 ### Import python variables into r:
 ```{r}
-proj_name <- py$project_name
-primer_list <- c(py$PrimerF, py$PrimerF_rc, py$PrimerR, py$PrimerR_rc)
-all_samples <- py$sample_list
-all_reads <- py$reads_list
+projectName <- py$project_name
+primerList <- c(py$PrimerF, py$PrimerF_rc, py$PrimerR, py$PrimerR_rc)
+allSamples <- py$sample_list
+allReads <- py$reads_list
 ```
 
 ### Filter the data and run dada2:
@@ -118,16 +118,16 @@ all_reads <- py$reads_list
 library(dada2)
 library(edgeR)
 
-dadaAnalysis <- function(forward, reverse) {
+DadaAnalysis <- function(forward, reverse) {
   errF <- dada2::learnErrors(forward, multithread = TRUE)
   errR <- dada2::learnErrors(reverse, multithread = TRUE)
   derepsF <- dada2::derepFastq(forward)
   derepsR <- dada2::derepFastq(reverse)
   dadaF <- dada(derepsF, err = errF, multithread = TRUE)
   dadaR <- dada(derepsR, err = errR, multithread = TRUE)
-  mergers <- mergePairs(dadaF, derepsF, dadaR, derepsR, verbose = TRUE)
-  seqtab <- makeSequenceTable(mergers)
-  seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = TRUE)
+  mergers <- dada2::mergePairs(dadaF, derepsF, dadaR, derepsR, verbose = TRUE)
+  seqtab <- dada2::makeSequenceTable(mergers)
+  seqtab.nochim <- dada2::removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = TRUE)
   return(seqtab.nochim)
 }
 
@@ -138,66 +138,66 @@ reverseC <- list.files("../Data", pattern = "_2.fastq.gz", full.names = FALSE) #
 filtFs <- file.path("../Data", "filtered", forwardC) # Creates paths for (future?) filtered forward reads
 filtRs <- file.path("../Data", "filtered", reverseC) # Creates paths for (future?) filtered reverse reads
 
-out_combine <- function(dataset, samples) { # Function that summarizes rows of forward and reverse counts in the "out"-object
+OutCombine <- function(dataset, samples) { # Function that summarizes rows of forward and reverse counts in the "out"-object
   counter <- 0
     for(i in samples) {
       if (counter == 0) {
-        comb_out <- data.frame()
+        output <- data.frame()
         counter <- counter + 1
         }
-      comb_out <- rbind(comb_out, S2 = colSums(dataset[grepl(x = rownames(dataset), pattern = i),]))
-      rownames(comb_out)[rownames(comb_out) == "1"] <- i
-      rownames(comb_out)[rownames(comb_out) == "S2"] <- i
+      output <- rbind(output, S2 = colSums(dataset[grepl(x = rownames(dataset), pattern = i),]))
+      rownames(output)[rownames(output) == "1"] <- i
+      rownames(output)[rownames(output) == "S2"] <- i
     }
-  names(comb_out) <- c("reads.in", "reads.out")
-  return(comb_out)
+  names(output) <- c("reads.in", "reads.out")
+  return(output)
 }
 
-out <- filterAndTrim(forward, filtFs, reverse, filtRs,
+out <- dada2::filterAndTrim(forward, filtFs, reverse, filtRs,
               maxN=0, truncQ=2, rm.phix=TRUE,
               compress=TRUE, multithread=TRUE) # On Windows set multithread=FALSE # maxEE=c(2,3),
 
-comb_out <- out_combine(out, all_samples) # Summarize forward and reverse for every sample
+outCombined <- OutCombine(out, allSamples) # Summarize forward and reverse for every sample
 
-fwd.counts2 <- dadaAnalysis(filtFs, filtRs)
-df.fwd<- as.data.frame(t(fwd.counts2))
-y.fwd <- DGEList(df.fwd)
+forwardCounts2 <- DadaAnalysis(filtFs, filtRs)
+dfForward<- as.data.frame(t(forwardCounts2))
+yForward <- edgeR::DGEList(dfForward)
 ```
 
-### Combine columns in "df.fwd" and convert to DGEList "y.all"
+### Combine columns in "dfForward" and convert to DGEList "yAll"
 ```{r}
-df_combine <- function(dataset, samples) {
+DFCombine <- function(dataset, samples) {
   counter <- 0
     for(i in samples) {
       if (counter == 0) {
-        df.all <- data.frame(S2 = rowSums(dataset[,grepl(x = names(dataset), pattern = i)]))
+        output <- data.frame(S2 = rowSums(dataset[, grepl(x = names(dataset), pattern = i)]))
         counter <- counter + 1
-        names(df.all)[names(df.all) == "S2"] <- i
+        names(output)[names(output) == "S2"] <- i
         next
         }
-      df.all <- cbind(df.all, S2 = rowSums(dataset[,grepl(x = names(dataset), pattern = i)]))
-      names(df.all)[names(df.all) == "S2"] <- i
+      output <- cbind(output, S2 = rowSums(dataset[, grepl(x = names(dataset), pattern = i)]))
+      names(output)[names(output) == "S2"] <- i
       }
-  return(df.all)
+  return(output)
 }
 
-df.all <- df_combine(df.fwd, all_samples)
-y.all <- DGEList(df.all)
-saveRDS(y.all, file="y.all.rds")
+dfAll <- DFCombine(dfForward, allSamples)
+yAll <- edgeR::DGEList(dfAll)
+saveRDS(yAll, file = "yAll.rds")
 ```
 
 ### Export fasta-file:
 ```{r}
 library(Biostrings)
 
-exportFa <- function(count_data, filename) {
+ExportFasta <- function(count_data, filename) {
   seqs <- row.names(count_data)
   names(seqs) <- paste("Seq", 1:length(seqs), sep = "_")
-  writeXStringSet(DNAStringSet(seqs, use.names = TRUE), filename)
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(seqs, use.names = TRUE), filename)
   sprintf("Wrote %s sequences to %s", length(seqs), filename) 
 }
 
-exportFa(y.all, "ymideca2.fa")
+ExportFasta(yAll, "y_test.fa")
 ```
 
 ### Parse BLAST-results:
@@ -205,52 +205,51 @@ exportFa(y.all, "ymideca2.fa")
 library(taxize)
 library(gtools)
 
-blastParse <- function(DGEList, blastRes.out) {
-  
+BlastParse <- function(DGEList, blastRes.out) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
-  blast_res <- read.table(blastRes.out, sep = "\t", quote = "'", stringsAsFactors = FALSE)
-  names(blast_res) <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "staxids", "sscinames", "scomnames")
-  blast_res_un <- blast_res[!duplicated(blast_res$qseqid),] # Retain only best hits
+  blastResult <- read.table(blastRes.out, sep = "\t", quote = "'", stringsAsFactors = FALSE)
+  names(blastResult) <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "staxids", "sscinames", "scomnames")
+  blastResultUn <- blastResult[!duplicated(blastResult$qseqid),] # Retain only best hits
   
   # Slow down the query speed in a for loop to avoid time outs at NCBI
   taxonomy <- list()
-  for(i in levels(factor(blast_res_un$sscinames))) {
-    taxonomy[[i]] <- tax_name(sci = i, get = c("superkingdom", "phylum", "order", "class", "family"), db = "ncbi")
+  for(i in levels(factor(blastResultUn$sscinames))) {
+    taxonomy[[i]] <- taxize::tax_name(sci = i, get = c("superkingdom", "phylum", "order", "class", "family"), db = "ncbi")
     Sys.sleep(.5)}
-  taxonomy <- do.call("rbind",taxonomy)
+  taxonomy <- do.call("rbind", taxonomy)
   
-  blast_tax <- merge(blast_res_un, taxonomy, by.x = "sscinames", by.y = "query", all.x = TRUE)
-  blast_tax <- blast_tax[,c(2,3,4,12, 1, 17:21)]
-  names(blast_tax) <- c("id", "besthit", "identity", "e-value", "species", "superkingdom", "phylum", "order", "class", "family")
-  seq_tax <- merge(sequences, blast_tax, by.x = "id", by.y = "id", all.x = TRUE)
-  seq_tax$id <- as.character(seq_tax$id)
-  seq_tax <- seq_tax[mixedorder(seq_tax$id),]
-  seq_tax$superkingdom <- factor(seq_tax$superkingdom)
-  seq_tax$phylum <- factor(seq_tax$phylum)
-  seq_tax$order <- factor(seq_tax$order)
-  seq_tax$class <- factor(seq_tax$class)
-  seq_tax$family <- factor(seq_tax$family)
-  seq_tax
+  blastTax <- merge(blastResultUn, taxonomy, by.x = "sscinames", by.y = "query", all.x = TRUE)
+  blastTax <- blastTax[, c(2,3,4,12, 1, 17:21)]
+  names(blastTax) <- c("id", "besthit", "identity", "e-value", "species", "superkingdom", "phylum", "order", "class", "family")
+  seqTax <- merge(sequences, blastTax, by.x = "id", by.y = "id", all.x = TRUE)
+  seqTax$id <- as.character(seqTax$id)
+  seqTax <- seqTax[mixedorder(seqTax$id),]
+  seqTax$superkingdom <- factor(seqTax$superkingdom)
+  seqTax$phylum <- factor(seqTax$phylum)
+  seqTax$order <- factor(seqTax$order)
+  seqTax$class <- factor(seqTax$class)
+  seqTax$family <- factor(seqTax$family)
+  return(seqTax)
 }
 
-blastResY <- blastParse(y.all, "y_mideca2.out")
+blastResY <- BlastParse(yAll, "y_test.out")
 ```
 
 ### Create Summaryfiles from the BLAST-results:
 ```{r}
-grep_group <- grepl("Arthropoda", blastResY$phylum) # Set which group to put in "GroupSummary"
+grepGroup <- grepl("Arthropoda", blastResY$phylum) # Set which group to put in "groupSummary"
 
-genes_counts <- cbind(blastResY, y.all$counts)
-SummaryAll <- aggregate(genes_counts[,12:dim(genes_counts)[2]], by=list(genes_counts$species), FUN = sum)
-SummaryAll <- SummaryAll[order(rowSums(SummaryAll[,-1]), decreasing = TRUE),]
-genes.onlyGroup <- blastResY[grep_group ,]
-y.onlyGroup <- y.all[row.names(y.all$counts) %in% genes.onlyGroup$seq,]
-genes_counts.onlyGroup <- cbind(genes.onlyGroup, y.onlyGroup$counts)
-GroupSummary <- aggregate(genes_counts.onlyGroup[,12:dim(genes_counts)[2]], by=list(genes_counts.onlyGroup$species), FUN=sum)
-GroupSummary <- GroupSummary[order(rowSums(GroupSummary[,-1]), decreasing = TRUE),]
+genesCounts <- cbind(blastResY, yAll$counts)
+summaryAll <- aggregate(genesCounts[,12:dim(genesCounts)[2]], by = list(genesCounts$species), FUN = sum)
+summaryAll <- summaryAll[order(rowSums(summaryAll[,-1]), decreasing = TRUE),]
+genesGroup <- blastResY[grepGroup,]
+yGroup <- yAll[row.names(yAll$counts) %in% genesGroup$seq,]
+genesCountsGroup <- cbind(genesGroup, yGroup$counts)
+groupSummary <- aggregate(genesCountsGroup[,12:dim(genesCounts)[2]], by = list(genesCountsGroup$species), FUN=sum)
+groupSummary <- groupSummary[order(rowSums(groupSummary[,-1]), decreasing = TRUE),]
 
-saveRDS(y.all, file = "y.all.rds")
-saveRDS(genes_counts, file = "genes_counts.rds")
-saveRDS(GroupSummary, file = "GroupSummary.rds")
-saveRDS(SummaryAll, file = "SummaryAll.rds")
+saveRDS(yAll, file = "yAll.rds")
+saveRDS(genes_counts, file = "genesCounts.rds")
+saveRDS(groupSummary, file = "groupSummary.rds")
+saveRDS(summaryAll, file = "summaryAll.rds")
 ```

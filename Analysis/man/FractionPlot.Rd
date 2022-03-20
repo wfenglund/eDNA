@@ -2,9 +2,9 @@
 % Please edit documentation in R/plots.R
 \name{FractionPlot}
 \alias{FractionPlot}
-\title{FractionPlot}
+\title{Barplots with fractions}
 \usage{
-FractionPlot(data, species, col)
+FractionPlot(data, species, col, inset = c(-0.3, 0.01))
 }
 \arguments{
 \item{data}{a dataframe with count data from each species on rows}
@@ -13,6 +13,8 @@ FractionPlot(data, species, col)
 as the appear in the data}
 
 \item{col}{of colors to use in legend and plot.}
+
+\item{inset}{inset values for legend plot}
 }
 \description{
 Creates a simple horizontal barplot showing the fraction of the
@@ -22,5 +24,6 @@ total from each species.
 data <- data.frame(A = 1:3, B = c(1,4,0), C = c(2, 3, 7))
 species <- c("Abramis brama", "Salmo trutta", "Salmo salar")
 col <- c("blue", "orange", "grey")
-fractionPlot(data = data, species = species, col = col)
+inset <- c(-0.3, 0.01)
+FractionPlot(data = data, species = species, col = col, inset = inset)
 }

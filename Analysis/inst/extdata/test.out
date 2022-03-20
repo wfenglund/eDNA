@@ -1,0 +1,15 @@
+Seq_1	gi|1476682340|gb|MH918117.1|	100.000	165	0	0	1	165	246	410	3.03e-79	305	134920	Pungitius pungitius	ninespine stickleback
+Seq_1	gi|1096114287|dbj|LC193253.1|	100.000	165	0	0	1	165	5	169	3.03e-79	305	1913175	Pungitius sp. Freshwater type	Pungitius sp. Freshwater type
+Seq_1	gi|1096114286|dbj|LC193252.1|	100.000	165	0	0	1	165	5	169	3.03e-79	305	1913177	Pungitius sp. Omono type	Pungitius sp. Omono type
+Seq_1	gi|1018242409|dbj|LC146203.1|	100.000	165	0	0	1	165	5	169	3.03e-79	305	134920	Pungitius pungitius	ninespine stickleback
+Seq_1	gi|988043889|gb|KT989571.1|	100.000	165	0	0	1	165	318	482	3.03e-79	305	134920	Pungitius pungitius	ninespine stickleback
+Seq_2	gi|1750939978|gb|MK770342.1|	100.000	183	0	0	1	183	1384	1566	3.40e-89	339	8839	Anas platyrhynchos	mallard
+Seq_2	gi|1481358124|gb|MH744426.1|	100.000	183	0	0	1	183	335	517	3.40e-89	339	8839	Anas platyrhynchos	mallard
+Seq_2	gi|1245686026|gb|MF069251.1|	100.000	183	0	0	1	183	1381	1563	3.40e-89	339	8839	Anas platyrhynchos	mallard
+Seq_2	gi|1245686012|gb|MF069250.1|	100.000	183	0	0	1	183	1386	1568	3.40e-89	339	8839	Anas platyrhynchos	mallard
+Seq_2	gi|1245685998|gb|MF069249.1|	100.000	183	0	0	1	183	1382	1564	3.40e-89	339	8839	Anas platyrhynchos	mallard
+Seq_3	gi|1777083700|gb|MN122898.1|	99.435	177	1	0	1	177	329	505	3.28e-84	322	48155	Sylvia atricapilla	blackcap
+Seq_3	gi|164414693|emb|AM889140.1|	99.435	177	1	0	1	177	329	505	3.28e-84	322	48155	Sylvia atricapilla	blackcap
+Seq_3	gi|30840863|gb|AF484931.1|	95.480	177	8	0	1	177	204	380	1.55e-72	283	121426	Curruca melanocephala	Sardinian warbler
+Seq_3	gi|1566349807|gb|MG681102.1|	94.915	177	9	0	1	177	328	504	7.21e-71	278	43163	Sylvia curruca	lesser whitethroat
+Seq_3	gi|164414707|emb|AM889141.1|	94.915	177	9	0	1	177	328	504	7.21e-71	278	216226	Sylvia crassirostris	eastern orphean warbler

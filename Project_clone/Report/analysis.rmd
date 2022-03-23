@@ -39,9 +39,9 @@ def rev_comp(sequence): # Function that takes a sequence (a string), upper or lo
             nucleotide = nucleotide.replace("a","t")
             new_seq = new_seq + nucleotide
             continue
-        elif nucleotide == "T" or nucleotide == "t":
-            nucleotide = nucleotide.replace("T","A")
-            nucleotide = nucleotide.replace("t","a")
+        elif nucleotide == "C" or nucleotide == "c":
+            nucleotide = nucleotide.replace("C","G")
+            nucleotide = nucleotide.replace("c","g")
             new_seq = new_seq + nucleotide
             continue
         elif nucleotide == "G" or nucleotide == "g":
@@ -49,9 +49,54 @@ def rev_comp(sequence): # Function that takes a sequence (a string), upper or lo
             nucleotide = nucleotide.replace("g","c")
             new_seq = new_seq + nucleotide
             continue
-        elif nucleotide == "C" or nucleotide == "c":
-            nucleotide = nucleotide.replace("C","G")
-            nucleotide = nucleotide.replace("c","g")
+        elif nucleotide == "T" or nucleotide == "t" or nucleotide == "U" or nucleotide == "u":
+            nucleotide = nucleotide.replace("T","A")
+            nucleotide = nucleotide.replace("t","a")
+            nucleotide = nucleotide.replace("U","A")
+            nucleotide = nucleotide.replace("u","a")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "M" or nucleotide == "m":
+            nucleotide = nucleotide.replace("M","K")
+            nucleotide = nucleotide.replace("m","k")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "R" or nucleotide == "r":
+            nucleotide = nucleotide.replace("R","Y")
+            nucleotide = nucleotide.replace("r","y")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "Y" or nucleotide == "y":
+            nucleotide = nucleotide.replace("Y","R")
+            nucleotide = nucleotide.replace("y","r")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "K" or nucleotide == "k":
+            nucleotide = nucleotide.replace("K","M")
+            nucleotide = nucleotide.replace("k","m")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "V" or nucleotide == "v":
+            nucleotide = nucleotide.replace("V","B")
+            nucleotide = nucleotide.replace("v","b")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "H" or nucleotide == "h":
+            nucleotide = nucleotide.replace("H","D")
+            nucleotide = nucleotide.replace("h","d")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "D" or nucleotide == "d":
+            nucleotide = nucleotide.replace("D","H")
+            nucleotide = nucleotide.replace("d","h")
+            new_seq = new_seq + nucleotide
+            continue
+        elif nucleotide == "B" or nucleotide == "b":
+            nucleotide = nucleotide.replace("B","V")
+            nucleotide = nucleotide.replace("b","v")
+            new_seq = new_seq + nucleotide
+            continue
+        else:
             new_seq = new_seq + nucleotide
             continue
     return new_seq # Return the new sequence
@@ -63,6 +108,8 @@ def rev_comp(sequence): # Function that takes a sequence (a string), upper or lo
 test1 = 0
 test2 = 0
 if anchored_flag == "no":
+    primer_f_rc = ""
+    primer_r_rc = ""
     regular_primer = primer_f
     reverse_primer = primer_r
     test1 = 1
@@ -73,14 +120,12 @@ elif anchored_flag == "yes":
     reverse_primer = primer_r + "..." + primer_f_rc
     test1 = 1
 if f_format == "scilife":
-    file_end1 = "_R1_001.fastq.gz"
-    file_end2 = "_R1_001.fastq.gz"
+    file_end = "_R1_001.fastq.gz"
     repl_from = "R1"
     repl_to = "R2"
     test2 = 1
 elif f_format == "novo":
-    file_end1 = "_L1_1.fq.gz"
-    file_end2 = "_L2_1.fq.gz"
+    file_end = "_1.fq.gz"
     repl_from = "_1.fq"
     repl_to = "_2.fq"
     test2 = 1
@@ -94,9 +139,8 @@ if test1 + test2 != 2:
 sample_list = list()
 reads_list = list()
 for file in os.listdir(reads_folder): #For every file in folder containing reads
-    if file.endswith(file_end1) or file.endswith(file_end2): #Check if file is a .fastq-read-file
-        sample = file.replace(file_end1, "") #Extract sample name
-        sample = sample.replace(file_end2, "") #Extract sample name
+    if file.endswith(file_end): #Check if file is a .fastq-read-file
+        sample = file.replace(file_end, "") #Extract sample name
         sample_list.append(sample) #Make a list containing all the sample-names
         current_list = list([sample + "_outFwd_1.fastq.gz", sample + "_outFwd_2.fastq.gz", sample + "_outRev_1.fastq.gz", sample + "_outRev_2.fastq.gz"]) #Create filtering names and store in a list
         reads_list.append(current_list) #Store list of filterings in a list containing all filtered reads

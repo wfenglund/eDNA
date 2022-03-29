@@ -136,14 +136,10 @@ if test1 + test2 != 2:
 
 ### Run cutadapt and get filenames:
 ```{python}
-sample_list = list()
-reads_list = list()
 for file in os.listdir(reads_folder): #For every file in folder containing reads
     if file.endswith(file_end): #Check if file is a .fastq-read-file
         sample = file.replace(file_end, "") #Extract sample name
-        sample_list.append(sample) #Make a list containing all the sample-names
         current_list = list([sample + "_outFwd_1.fastq.gz", sample + "_outFwd_2.fastq.gz", sample + "_outRev_1.fastq.gz", sample + "_outRev_2.fastq.gz"]) #Create filtering names and store in a list
-        reads_list.append(current_list) #Store list of filterings in a list containing all filtered reads
         
         subprocess.run(["cd " + reads_folder + "; cutadapt -j 0 --max-n=0 --discard-untrimmed -g " + regular_primer + " -G " + reverse_primer + " -o " + current_list[0] + " -p " + current_list[1] + " " + file + " " + file.replace(repl_from, repl_to)], shell=True) #Run cutadapt for regular direction
         subprocess.run(["cd " + reads_folder + "; cutadapt -j 0 --max-n=0 --discard-untrimmed -g " + regular_primer + " -G " + reverse_primer + " -o " + current_list[2] + " -p " + current_list[3] + " " + file.replace(repl_from, repl_to) + " " + file], shell=True) #Run cutadapt in reverse direction
@@ -153,8 +149,6 @@ for file in os.listdir(reads_folder): #For every file in folder containing reads
 ```{r}
 projectName <- py$project_name
 primerList <- c(py$primer_f, py$primer_f_rc, py$primer_r, py$primer_r_rc)
-allSamples <- py$sample_list
-allReads <- py$reads_list
 ```
 
 ### Filter the data and run dada2:
@@ -181,6 +175,8 @@ forwardC <- list.files("../Data", pattern = "_1.fastq.gz", full.names = FALSE) #
 reverseC <- list.files("../Data", pattern = "_2.fastq.gz", full.names = FALSE) # Gets -"- ending with _2
 filtFs <- file.path("../Data", "filtered", forwardC) # Creates paths for (future?) filtered forward reads
 filtRs <- file.path("../Data", "filtered", reverseC) # Creates paths for (future?) filtered reverse reads
+
+allSamples <- c(forwardC, reverseC)
 
 OutCombine <- function(dataset, samples) { # Function that summarizes rows of forward and reverse counts in the "out"-object
   counter <- 0

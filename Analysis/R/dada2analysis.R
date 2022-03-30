@@ -81,9 +81,14 @@ BlastParse <- function(dgeList, blastRes) {
                         "sscinames",
                         "scomnames")
   blastResUn <- blastRes[!duplicated(blastRes$qseqid),] # Retain only
-                                        # best hits check manually
+                                                        # best hits check manually
   taxonomy <- taxize::tax_name(sci = levels(factor(blastResUn$sscinames)),
-                       get = c("superkingdom", "phylum", "order", "class", "family"), db = "ncbi")
+                               get = c("superkingdom",
+                                       "phylum",
+                                       "order",
+                                       "class",
+                                       "family"),
+                               db = "ncbi")
   
   blastTax <- merge(blastResUn, taxonomy, by.x = "sscinames", by.y = "query", all.x = TRUE)
   blastTax <- blastTax[,c(2,3,4,12, 1, 17:21)]
@@ -136,7 +141,7 @@ SumRes <- function(blastRes, counts, taxGroup) {
     if(!taxGroup %in% names(taxGroupConv)) {
         cat("This taxonomic group is not supported.\n
              Supported groups are:\n")
-        names(taxGroupConv)
+        cat(paste0(names(taxGroupConv), "\n"))
     } else {
     taxSel <- taxGroupConv[names(taxGroupConv) == taxGroup] 
     genesCounts <- cbind(blastRes, counts)
@@ -145,22 +150,25 @@ SumRes <- function(blastRes, counts, taxGroup) {
                         by = list(genesCounts$species),
                         FUN = sum)
     sumAll <- sumAll[order(rowSums(sumAll[,-1]), decreasing = TRUE),]
+    names(sumAll) <- c("Species", names(sumAll)[-1])
     if(taxGroup != "Fish") {
         genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
     } else {
-        # In case of the taxonomic group studied is fish the lampreys
-        # will be included by also selecting the family
-        # Petromyzontidae. Similar ideas might be needed for other
-        # groups but are currently not supported
+             # In case of the taxonomic group studied is fish the lampreys
+             # will be included by also selecting the family
+             # Petromyzontidae. Similar ideas might be needed for other
+             # groups but are currently not supported
         genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class) |
-                                    grepl("Petromyzontidae",
-                                          blastRes$family),]
+                                       grepl("Petromyzontidae",
+                                             blastRes$family),]
     }
     
     sumFilt <- aggregate(genesCountsFilt[,12:colStart],
                          by = list(genesCountsFilt$species),
                          FUN = sum)
-    sumFilt <- sumFilt[order(rowSums(sumFilt[,-1]), decreasing = TRUE),]
+    sumFilt <- sumFilt[order(rowSums(sumFilt[,-1]), decreasing =
+                                                        TRUE),]
+    names(sumFilt) <- c("Species", names(sumFilt)[-1])
     resCount <- list(sumAll = sumAll, sumFilt = sumFilt)
     names(resCount) <- c("AllSpecies", taxGroup)
     return(resCount)

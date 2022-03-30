@@ -74,6 +74,6 @@ ImportMeta <- function(file) {
                 ReadLength = proj4[2],
                 PairEnd    = proj4[3],
                 Samples    = proj5))
-    }
+
+}
     
-                

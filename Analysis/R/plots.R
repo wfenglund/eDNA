@@ -32,14 +32,14 @@ FractionPlot <- function(data, species, col, inset = c(-0.3, 0.01)) {
 #' @param data dataframe with count data
 #' @param sample name of sample to be plotted
 #' @param title title to be put on the plot
-#' @param species vector of species names
+#' @param species colname in data that holds species names
 #' @import forcats ggplot2 
 #' @export 
 #' 
 
 SeqPlot <- function(data, sample, title, species) {
     Fs <- data[data[,sample]>0,]
-    speciesFactors <- forcats::fct_reorder(as.factor(species))
+    speciesFactors <- forcats::fct_reorder(as.factor(Fs[,species]))
     P1 <- ggplot(Fs) + 
         geom_point(aes_string(y = sample,
                               x = speciesFactors,

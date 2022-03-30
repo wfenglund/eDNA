@@ -13,7 +13,7 @@ SeqPlot(data, sample, title, species)
 
 \item{title}{title to be put on the plot}
 
-\item{species}{vector of species names}
+\item{species}{colname in data that holds species names}
 }
 \description{
 Create a simple plot showing count data from individual samples

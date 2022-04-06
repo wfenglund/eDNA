@@ -176,7 +176,7 @@ reverseC <- list.files("../Data", pattern = "_2.fastq.gz", full.names = FALSE) #
 filtFs <- file.path("../Data", "filtered", forwardC) # Creates paths for (future?) filtered forward reads
 filtRs <- file.path("../Data", "filtered", reverseC) # Creates paths for (future?) filtered reverse reads
 
-allSamples <- c(forwardC, reverseC)
+allSamples <- unique(gsub("_outFwd_1.fastq.gz|_outRev_1.fastq.gz", "", forwardC))
 
 OutCombine <- function(dataset, samples) { # Function that summarizes rows of forward and reverse counts in the "out"-object
   counter <- 0

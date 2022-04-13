@@ -77,3 +77,69 @@ ImportMeta <- function(file) {
 
 }
     
+#' DropSpecies
+#' 
+#' Takes the name of a species and a dataframe of counts and returns the dataframe without the given species.
+#' 
+#' @param species a string containing the name of the species to be removed.
+#' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
+#' 
+#' @return the given dataframe without the species specified when calling the function.
+#' @export
+DropSpecies <- function(name, dataFrame) {
+  dataFrame <- dataFrame[!grepl(name, dataFrame[,1]),]
+  return(dataFrame)
+}
+
+#' RenameSpecies
+#' 
+#' Renames a species in a dataframe containing counts of species.
+#' 
+#' @param oldName a string containing the old name of the species to be renamed.
+#' @param newName a string containing the new name of the species to be renamed
+#' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
+#' 
+#' @return the given dataframe with the specified species renamed from the old name to the new name.
+#' @export
+RenameSpecies <- function(oldName, newName, dataFrame) {
+  dataFrame[grepl(oldName, dataFrame[,1]),1] <- newName
+  return(dataFrame)
+}
+
+#' CombineSpecies
+#' 
+#' Takes the names of two species and a dataframe of counts and returns the dataframe with the counts of the two species combined.
+#' 
+#' @param species1 a string containing the name of the first species to be combined (this name will be kept).
+#' @param species2 a string containing the name of the second species to be combined.
+#' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
+#' 
+#' @return the given dataframe with the two species counts combined under the first name given.
+#' @export
+CombineSpecies <- function(species1, species2, dataFrame) {
+  speciesSum <- dataFrame[grepl(species1, dataFrame[,1]),2:ncol(dataFrame)] + dataFrame[grepl(species2, dataFrame[,1]),2:ncol(dataFrame)]
+  speciesSum <- cbind(Species = species1, speciesSum)
+  names(speciesSum)[names(speciesSum) == "Species"] <- names(dataFrame[1])
+  dataFrame <- dataFrame[!grepl(species1, dataFrame[,1]),]
+  dataFrame <- dataFrame[!grepl(species2, dataFrame[,1]),]
+  dataFrame <- rbind(dataFrame, speciesSum)
+  return(dataFrame)
+}
+
+#' SpeciesPercent
+#' 
+#' Takes a dataframe of species counts and returns a vector with the percentage of counts per species.
+#' 
+#' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
+#' 
+#' @return a vector of species percentages.
+#' @export
+SpeciesPercent <- function(dataFrame) {
+  percentVector <- c()
+  for(row in 1:nrow(dataFrame)) {
+    ratio <- sum(dataFrame[row,2:ncol(dataFrame)]) / sum(dataFrame[,2:ncol(dataFrame)])
+    percent <- ratio * 100
+    percentVector <- c(percentVector, round(percent, 5))
+  }
+  return(percentVector)
+}

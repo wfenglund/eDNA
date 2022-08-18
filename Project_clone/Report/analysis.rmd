@@ -29,12 +29,12 @@ DadaAnalysis <- function(forward, reverse) {
   return(seqTabNoChim)
 }
 
-forward <- list.files("../Data", pattern = "_1.fastq.gz", full.names = TRUE) # Gets all the names ending with _1 with "full" path
-reverse <- list.files("../Data", pattern = "_2.fastq.gz", full.names = TRUE) # Gets -"- ending with _2
-forwardC <- list.files("../Data", pattern = "_1.fastq.gz", full.names = FALSE) # Gets all names ending with _1 without full path
-reverseC <- list.files("../Data", pattern = "_2.fastq.gz", full.names = FALSE) # Gets -"- ending with _2
-filtFs <- file.path("../Data", "filtered", forwardC) # Creates paths for (future?) filtered forward reads
-filtRs <- file.path("../Data", "filtered", reverseC) # Creates paths for (future?) filtered reverse reads
+forward <- list.files("../Raw_data", pattern = "_1.fastq.gz", full.names = TRUE) # Gets all the names ending with _1 with "full" path
+reverse <- list.files("../Raw_data", pattern = "_2.fastq.gz", full.names = TRUE) # Gets -"- ending with _2
+forwardC <- list.files("../Raw_data", pattern = "_1.fastq.gz", full.names = FALSE) # Gets all names ending with _1 without full path
+reverseC <- list.files("../Raw_data", pattern = "_2.fastq.gz", full.names = FALSE) # Gets -"- ending with _2
+filtFs <- file.path("../Filtered_data", "filtered", forwardC) # Creates paths for filtered forward reads
+filtRs <- file.path("../Filtered_data", "filtered", reverseC) # Creates paths for filtered reverse reads
 
 allSamples <- unique(gsub("_outFwd_1.fastq.gz|_outRev_1.fastq.gz", "", forwardC))
 

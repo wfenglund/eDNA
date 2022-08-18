@@ -3,7 +3,7 @@ import gzip
 import re
 from operator import itemgetter
 
-def get_unique_dicts(file_folder = '../Data', line_length = 20, sample_lines = 100000):
+def get_unique_dicts(file_folder = '../Raw_data', line_length = 20, sample_lines = 100000):
     unique_dict_forward = {}
     unique_dict_reverse = {}
     for file in os.listdir(file_folder):

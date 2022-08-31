@@ -4,8 +4,8 @@ import subprocess
 
 ###Inputs:
 project_name = "proj_test"
-primer_f = "CAYCGTGCTATGCATGCTGT" # Forward primer
-primer_r = "AGGCATRTGCCAAACATGA" # Reverse primer
+primer_f = "AAACTCGTGCCAGCCACC" # Forward primer (default = MiFish)
+primer_r = "GGGTATCTAATCCCAGTTTG" # Reverse primer (default = MiFish)
 ###
 f_format = "novo" #scilife or novo
 anchored_flag = "yes" #yes or no

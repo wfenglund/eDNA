@@ -81,8 +81,17 @@ DFCombine <- function(dataset, samples) {
   return(output)
 }
 
-dfAll <- DFCombine(dfForward, allSamples)
-yAll <- edgeR::DGEList(dfAll)
+MakeDGEList <- function(dataset, samples, forwardSamples) { # Function that combines forward and reverse runs if reverse runs are present
+  if(any(grepl("outRev", forwardSamples))) {
+    dfAll <- DFCombine(dataset, samples)
+    yAll <- edgeR::DGEList(dfAll)
+  } else {
+    yAll <- edgeR::DGEList(dataset)
+  }
+  return(yAll)
+}
+
+yAll <- MakeDGEList(dfForward, allSamples, forwardC)
 saveRDS(yAll, file = "yAll.rds")
 ```
 

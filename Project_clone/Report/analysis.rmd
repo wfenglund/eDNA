@@ -162,3 +162,80 @@ saveRDS(genesCounts, file = "genesCounts.rds")
 saveRDS(groupSummary, file = "groupSummary.rds")
 saveRDS(summaryAll, file = "summaryAll.rds")
 ```
+
+### Functions:
+```{r}
+RenameSpecies <- function(oldName, newName, dataFrame) {
+  dataFrame[grepl(oldName, dataFrame[,1]),1] <- newName
+  return(dataFrame)
+}
+
+CombineSpecies <- function(species1, species2, dataFrame) {
+  speciesSum <- dataFrame[grepl(species1, dataFrame[,4]),5:ncol(dataFrame)] + dataFrame[grepl(species2, dataFrame[,4]),5:ncol(dataFrame)]
+  speciesSum <- cbind(dataFrame[grepl(species1, dataFrame[,4]),1:4], speciesSum)
+  names(speciesSum)[1:4] <- names(dataFrame[1:4])
+  dataFrame <- dataFrame[!grepl(species1, dataFrame[,4]),]
+  dataFrame <- dataFrame[!grepl(species2, dataFrame[,4]),]
+  dataFrame <- rbind(dataFrame, speciesSum)
+  return(dataFrame)
+}
+
+SpeciesPercent <- function(dataFrame) {
+  percentVector <- c()
+  for(row in 1:nrow(dataFrame)) {
+    ratio <- sum(dataFrame[row,2:ncol(dataFrame)]) / sum(dataFrame[,2:ncol(dataFrame)])
+    percent <- ratio * 100
+    percentVector <- c(percentVector, round(percent, 5))
+  }
+  return(percentVector)
+}
+
+QSeqGetter <- function(species_name) {
+  species_seq <- paste0(">", blastResY[grepl(species_name, blastResY$species),1], "\n", blastResY[grepl(species_name, blastResY$species),2])
+  writeLines(species_seq, "current_sequence.txt")
+  file.edit("current_sequence.txt")
+}
+
+RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
+  output <- data.frame(dataset[, 1:4])
+  for(column in 5:ncol(dataset)){
+    ratio <- dataset[, column] / sum(dataset[, column]) * 100
+    dataset[ratio < threshold, column] <- subValue
+    output <- cbind(output, dataset[, column])
+  }
+  colnames(output) <- colnames(dataset)
+  return(output)
+}
+```
+
+### Curate the groupSummary-object:
+```{r}
+library(MetaBAnalysis)
+{
+  groupNotes <- groupSummary
+  # groupNotes <- RenameSpecies("old latin name", "new latin name", groupNotes)
+  groupNotes <- groupNotes[order(rowSums(groupNotes[,-1]), decreasing = TRUE),]
+  groupNotes <- cbind(Percent_all = SpeciesPercent(groupNotes), groupNotes)
+  groupNotes <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(groupNotes$Group.1), groupNotes)
+  # groupNotes[grepl("latin name", groupNotes$Group.1),1] <- "new common name"
+  groupNotes <- cbind(Notes = c(
+                                # edit here to correspond to the number of species in the groupSummary-object
+				"", "", "", "", "",
+                                "", "", "", "", "",
+                                "", "", "", "", "",
+                                "", "", "", "", ""
+                                ), groupNotes) # add notes for different species
+  # groupNotes <- CombineSpecies("species to be kept", "species to be absorbed", groupNotes)
+  groupNotes <- groupNotes[order(rowSums(groupNotes[,-c(1, 2, 3, 4)]), decreasing = TRUE),]
+  # groupNotes <- groupNotes[!grepl("drop", groupNotes$Notes),] # Drop all species that has the word "drop" in their notes
+  # groupNotes <- RemoveLowFreqSeqs(groupNotes, 0.5) # remove species within samples below a threshold
+  # groupNotes <- groupNotes[groupNotes$Percent_all >= 0.5,] # remove species from all samples below a threshold
+  groupClean <- groupNotes[,-c(1, 3)]
+  columnNames <- colnames(groupClean)
+  columnNames[grepl("Group.1", columnNames)] <- "Latin"
+  # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
+  names(groupClean) <- columnNames
+}
+
+saveRDS(groupClean, "groupClean.rds") # save the clean object to be used in the report
+```

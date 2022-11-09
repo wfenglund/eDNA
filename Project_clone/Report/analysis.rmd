@@ -114,17 +114,31 @@ ExportFasta(yAll, "y_test.fa")
 library(taxize)
 library(gtools)
 
-BlastParse <- function(DGEList, blastRes.out) {
+BlastParse <- function(DGEList, blastRes.out, threshold = 95) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
   blastResult <- read.table(blastRes.out, sep = "\t", quote = "'", stringsAsFactors = FALSE)
+  blastResult <- blastResult[blastResult$V3 > threshold,]
   names(blastResult) <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "staxids", "sscinames", "scomnames")
   blastResultUn <- blastResult[!duplicated(blastResult$qseqid),] # Retain only best hits
   
   # Slow down the query speed in a for loop to avoid time outs at NCBI
   taxonomy <- list()
+  taxLength <- length(taxonomy)
   for(i in levels(factor(blastResultUn$sscinames))) {
-    taxonomy[[i]] <- taxize::tax_name(sci = i, get = c("superkingdom", "phylum", "order", "class", "family"), db = "ncbi")
-    Sys.sleep(.5)}
+    Sys.sleep(1)
+    taxonomy[[i]] <- try(taxize::tax_name(sci = i, get = c("superkingdom", "phylum", "order", "class", "family"), db = "ncbi"))
+    if(taxLength == length(taxonomy)) {
+      print("Try 2")
+      Sys.sleep(1)
+      taxonomy[[i]] <- taxize::tax_name(sci = i, get = c("superkingdom", "phylum", "order", "class", "family"), db = "ncbi")
+      if(taxLength == length(taxonomy)) {
+        print("Try 3")
+        Sys.sleep(1)
+        taxonomy[[i]] <- taxize::tax_name(sci = i, get = c("superkingdom", "phylum", "order", "class", "family"), db = "ncbi")
+      }
+    }
+    taxLength <- length(taxonomy)
+    }
   taxonomy <- do.call("rbind", taxonomy)
   
   blastTax <- merge(blastResultUn, taxonomy, by.x = "sscinames", by.y = "query", all.x = TRUE)
@@ -142,6 +156,7 @@ BlastParse <- function(DGEList, blastRes.out) {
 }
 
 blastResY <- BlastParse(yAll, "y_test.out")
+saveRDS(blastResY, file = "blastResY.rds")
 ```
 
 ### Create Summaryfiles from the BLAST-results:

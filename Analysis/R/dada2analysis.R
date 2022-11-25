@@ -8,6 +8,7 @@
 #'
 #' @return a matrix with count for all inferred sequence variants
 #' @import dada2
+#' @import edgeR
 #'
 #' @export
 #'
@@ -16,7 +17,7 @@
 #' package = "MetaBAnalysis")
 #' fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
 #' package = "MetaBAnalysis")
-#' DadaAnalysis(fastqR1, fastqR2, muthread = FALSE)
+#' DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 DadaAnalysis <- function(forward, reverse, muThread = TRUE,
   justConcatenate = FALSE) {
   errF <- dada2::learnErrors(forward, multithread = muThread)
@@ -40,13 +41,13 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
 #' This function will create a dataframe with sequence names,
 #' sequences similarity from blast analysis together with taxonomic
 #' information from NCBI.
-#' 
+#'
 #' NB! for optimal performance make sure to get a token from NCBI as
 #' the function relies on a online query to the NCBI taxonomic
 #' database. It hence also needs an active internet connection to
 #' work.
-#' 
-#' 
+#'
+#'
 #' @param dgeList count data in the form of DGEList
 #' @param blastRes file with blast results assumes blastoutput option
 #' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
@@ -56,12 +57,21 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
 #' @importFrom gtools mixedorder
 #'
 #' @return seqTax a dataframe with annotation of results from sequence
-#' comparisons using blast. 
+#' comparisons using blast.
+#'
+#' @export
 #'
 #' @examples
-#' 
+#' fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
+#' package = "MetaBAnalysis")
+#' fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
+#' package = "MetaBAnalysis")
+#' parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+#' dfForward <- as.data.frame(t(parseTest))
+#' yForward <- edgeR::DGEList(dfForward)
+#' BlastParse(dgeList = yForward, blastRes = system.file("extdata", "test.out", package = "MetaBAnalysis"))
 
-BlastParse <- function(dgeList, blastRes) {  
+BlastParse <- function(dgeList, blastRes) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(dgeList)), sep = "_"),
                           seq = row.names(dgeList))
   blastRes <- read.table(blastRes, sep = "\t", quote = "'", stringsAsFactors = FALSE)
@@ -89,7 +99,7 @@ BlastParse <- function(dgeList, blastRes) {
                                        "class",
                                        "family"),
                                db = "ncbi")
-  
+
   blastTax <- merge(blastResUn, taxonomy, by.x = "sscinames", by.y = "query", all.x = TRUE)
   blastTax <- blastTax[,c(2,3,4,12, 1, 17:21)]
   names(blastTax) <- c("id",
@@ -137,13 +147,13 @@ SumRes <- function(blastRes, counts, taxGroup) {
                              "Gastropoda")
     names(taxGroupConv) <- c("Fish", "Birds", "Mussels", "Insects",
                              "Mammals", "Spiders", "Snails")
-    
+
     if(!taxGroup %in% names(taxGroupConv)) {
         cat("This taxonomic group is not supported.\n
              Supported groups are:\n")
         cat(paste0(names(taxGroupConv), "\n"))
     } else {
-    taxSel <- taxGroupConv[names(taxGroupConv) == taxGroup] 
+    taxSel <- taxGroupConv[names(taxGroupConv) == taxGroup]
     genesCounts <- cbind(blastRes, counts)
     colStart <- ncol(genesCounts)
     sumAll <- aggregate(genesCounts[,12:colStart],
@@ -162,7 +172,7 @@ SumRes <- function(blastRes, counts, taxGroup) {
                                        grepl("Petromyzontidae",
                                              blastRes$family),]
     }
-    
+
     sumFilt <- aggregate(genesCountsFilt[,12:colStart],
                          by = list(genesCountsFilt$species),
                          FUN = sum)
@@ -173,6 +183,6 @@ SumRes <- function(blastRes, counts, taxGroup) {
     names(resCount) <- c("AllSpecies", taxGroup)
     return(resCount)
     }
-    
+
 }
 

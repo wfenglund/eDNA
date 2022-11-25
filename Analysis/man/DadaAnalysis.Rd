@@ -25,5 +25,5 @@ fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
 package = "MetaBAnalysis")
 fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
 package = "MetaBAnalysis")
-DadaAnalysis(fastqR1, fastqR2, muthread = FALSE)
+DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 }

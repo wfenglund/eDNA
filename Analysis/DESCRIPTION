@@ -1,17 +1,21 @@
 Package: MetaBAnalysis
 Title: Analysis of metabarcoding data
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R: c( 
     person(given = "Thomas",
            family = "Källman",
            role = c("aut", "cre"),
-           email = "thomas.kallman@naturhistoriska.com")
-Description: Tools and functions to automate analysis of ngs data.
+           email = "thomas.kallman@naturhistoriska.com"),
+           person(given = "William",
+           family = "Englund",
+           role = c("aut"),
+           email = "william.englund@naturhistoriska.com"))
+Description: Tools and functions to automate analysis of ngs eDNA data.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Imports: 
     Biostrings,
     stats,

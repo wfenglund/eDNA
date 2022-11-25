@@ -29,5 +29,12 @@ database. It hence also needs an active internet connection to
 work.
 }
 \examples{
-
+fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
+package = "MetaBAnalysis")
+fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
+package = "MetaBAnalysis")
+parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+dfForward <- as.data.frame(t(parseTest))
+yForward <- edgeR::DGEList(dfForward)
+BlastParse(dgeList = yForward, blastRes = system.file("extdata", "test.out", package = "MetaBAnalysis"))
 }

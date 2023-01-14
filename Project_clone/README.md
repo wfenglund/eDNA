@@ -10,4 +10,4 @@ If you want to clone this folder to initialize a new project without a need to c
 6. git checkout main
 7. cp Project_clone ~/New_projectname
 
-NB! Make sure to update the Project_clone regurarly so you are using the lates templates files.
+NB! Make sure to update the Project_clone regurarly so you are using the latest templates files.

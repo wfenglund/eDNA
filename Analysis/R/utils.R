@@ -117,11 +117,11 @@ RenameSpecies <- function(oldName, newName, dataFrame) {
 #' @return the given dataframe with the two species counts combined under the first name given.
 #' @export
 CombineSpecies <- function(species1, species2, dataFrame) {
-  speciesSum <- dataFrame[grepl(species1, dataFrame[,1]),2:ncol(dataFrame)] + dataFrame[grepl(species2, dataFrame[,1]),2:ncol(dataFrame)]
-  speciesSum <- cbind(Species = species1, speciesSum)
-  names(speciesSum)[names(speciesSum) == "Species"] <- names(dataFrame[1])
-  dataFrame <- dataFrame[!grepl(species1, dataFrame[,1]),]
-  dataFrame <- dataFrame[!grepl(species2, dataFrame[,1]),]
+  speciesSum <- dataFrame[grepl(species1, dataFrame[,4]),5:ncol(dataFrame)] + dataFrame[grepl(species2, dataFrame[,4]),5:ncol(dataFrame)]
+  speciesSum <- cbind(dataFrame[grepl(species1, dataFrame[,4]),1:4], speciesSum)
+  names(speciesSum)[1:4] <- names(dataFrame[1:4])
+  dataFrame <- dataFrame[!grepl(species1, dataFrame[,4]),]
+  dataFrame <- dataFrame[!grepl(species2, dataFrame[,4]),]
   dataFrame <- rbind(dataFrame, speciesSum)
   return(dataFrame)
 }

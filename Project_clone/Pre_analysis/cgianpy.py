@@ -1,6 +1,5 @@
 import os
 import gzip
-import re
 from operator import itemgetter
 
 def get_unique_dicts(file_folder = '../Raw_data', line_length = 20, sample_lines = 100000):
@@ -13,7 +12,7 @@ def get_unique_dicts(file_folder = '../Raw_data', line_length = 20, sample_lines
                 for line in current_fastq:
                     line = line.decode('utf-8')
                     line_start = line[0:line_length]
-                    if re.match("^[ATGC]{5}", line_start):
+                    if (counter == 1) or ((counter - 1) % 4 == 0): # if the position is a sequence position
                         if file.endswith('_1.fq.gz') or file.endswith('R1_001.fastq.gz'):
                             if line_start not in unique_dict_forward.keys():
                                 unique_dict_forward[line_start] = 0
@@ -22,8 +21,8 @@ def get_unique_dicts(file_folder = '../Raw_data', line_length = 20, sample_lines
                             if line_start not in unique_dict_reverse.keys():
                                 unique_dict_reverse[line_start] = 0
                             unique_dict_reverse[line_start] = unique_dict_reverse[line_start] + 1
-                        counter = counter + 1
-                    if counter >= sample_lines:
+                    counter = counter + 1
+                    if counter >= sample_lines * 4:
                         break
     return unique_dict_forward, unique_dict_reverse
 

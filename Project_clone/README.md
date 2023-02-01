@@ -3,7 +3,7 @@ This folder contains the project structure that we use to initialize new project
 If you want to clone this folder to initialize a new project without a need to clone the entire repo do the following:
 
 1. git --version needs to return a number higher than 2.25 if not upgrade git
-2. git clone --no-checkout https://github.com/Naturhistoriska/eDNA
+2. git clone --no-checkout git://github.com/Naturhistoriska/eDNA
 3. cd eDNA
 4. git sparse-checkout init --cone
 5. git sparse-checkout set Project_clone

@@ -183,12 +183,12 @@ saveRDS(blastResY, file = "blastResY.rds")
 grepGroup <- grepl("Arthropoda", blastResY$phylum) # Set which group to put in "groupSummary"
 
 genesCounts <- cbind(blastResY, yAll$counts)
-summaryAll <- aggregate(genesCounts[,12:dim(genesCounts)[2]], by = list(genesCounts$species), FUN = sum)
+summaryAll <- aggregate(genesCounts[,13:dim(genesCounts)[2]], by = list(genesCounts$species), FUN = sum)
 summaryAll <- summaryAll[order(rowSums(summaryAll[,-1]), decreasing = TRUE),]
 genesGroup <- blastResY[grepGroup,]
 yGroup <- yAll[row.names(yAll$counts) %in% genesGroup$seq,]
 genesCountsGroup <- cbind(genesGroup, yGroup$counts)
-groupSummary <- aggregate(genesCountsGroup[,12:dim(genesCounts)[2]], by = list(genesCountsGroup$species), FUN=sum)
+groupSummary <- aggregate(genesCountsGroup[,13:dim(genesCounts)[2]], by = list(genesCountsGroup$species), FUN=sum)
 groupSummary <- groupSummary[order(rowSums(groupSummary[,-1]), decreasing = TRUE),]
 
 saveRDS(yAll, file = "yAll.rds")

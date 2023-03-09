@@ -126,19 +126,23 @@ compactNameDump <- read.table("../../Suppl_data/compact_names.csv", sep = "\t")
 compactNodeDump <- read.table("../../Suppl_data/compact_nodes.csv", sep = "\t")
 
 GetTaxonomy <- function(searchName, nameDump, nodeDump) {
-  if(grepl(".|'", searchName) || length(strsplit(searchName, split = " ")[[1]]) > 2) { # Look out for species with "sp.", quotations or more than two names
+  if(grepl("\\.|'", searchName) || length(strsplit(searchName, split = " ")[[1]]) > 2) { # Look out for species with "sp.", quotations or more than two names
     searchName <- strsplit(searchName, split = " ")[[1]][1]
   }
+  taxList <- c("unknown", "unknown", "unknown", "unknown", "unknown", "unknown")
   taxId <- nameDump[searchName == nameDump$V2, 1]
-  taxList <- c()
-  while(taxId != 1) {
+  if(length(taxId) == 0) { # If searchName does not hit anything
+    return(taxList)
+  }
+  taxId <- taxId[1]
+  while(taxId > 2) {
     taxId  <- nodeDump[taxId == nodeDump$V1, 2]
     taxGroup <- nodeDump[taxId == nodeDump$V1, 3]
-    if (taxGroup %in% c("family", "order", "class", "phylum", "kingdom", "superkingdom")) {
-      taxList <- c(taxList, taxId)
+    if(taxGroup %in% c("family", "order", "class", "phylum", "kingdom", "superkingdom")) {
+      taxList[match(taxGroup, c("family", "order", "class", "phylum", "kingdom", "superkingdom"))] <- nameDump[match(taxId, nameDump$V1), 2]
     }
   }
-  return(nameDump[match(taxList, nameDump$V1), 2])
+  return(taxList)
 }
 
 BlastParse <- function(DGEList, blastRes.out, threshold = 95) {
@@ -155,10 +159,11 @@ BlastParse <- function(DGEList, blastRes.out, threshold = 95) {
   blastResultUn$scomnames <- unlist(lapply(blastResultUn$scomnames, GetFirstItem))
   taxonomy <- list()
   for(i in unique(blastResultUn$sscinames)) { # Get taxonomy locally
+    print(i) # Print current taxa
     taxonomy[[i]] <- GetTaxonomy(i, nameDump = compactNameDump, nodeDump = compactNodeDump)
   }
   taxonomy <- do.call("rbind", taxonomy)
-  taxonomy <- cbind(rownames(taxonomy1), taxonomy)
+  taxonomy <- cbind(rownames(taxonomy), taxonomy)
   blastTax <- merge(blastResultUn, taxonomy, by.x = "sscinames", by.y = "V1", all.x = TRUE)
   blastTax <- blastTax[, c(2,3,4,12, 1, 16:21)]
   colnames(blastTax) <- c("id", "besthit", "identity", "e-value", "species", "family", "order", "class", "phylum", "kingdom", "superkingdom")
@@ -254,7 +259,7 @@ library(MetaBAnalysis)
   # groupNotes[grepl("latin name", groupNotes$Group.1),1] <- "new common name"
   groupNotes <- cbind(Notes = c(
                                 # edit here to correspond to the number of species in the groupSummary-object
-				"", "", "", "", "",
+                                "", "", "", "", "",
                                 "", "", "", "", "",
                                 "", "", "", "", "",
                                 "", "", "", "", ""

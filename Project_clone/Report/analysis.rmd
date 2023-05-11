@@ -148,11 +148,13 @@ GetTaxonomy <- function(searchName, nameDump, nodeDump) {
 BlastParse <- function(DGEList, blastRes.out, threshold = 95) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
   blastResult <- read.table(blastRes.out, sep = "\t", quote = "€", stringsAsFactors = FALSE)
+  blastResult$V3 <- as.numeric(blastResult$V3)
+  blastResult$V3[is.na(blastResult$V3)] <- 0 # If the input file contained empty values, assign them to 0
   blastResult <- blastResult[blastResult$V3 > threshold,]
   names(blastResult) <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "staxids", "sscinames", "scomnames")
   blastResultUn <- blastResult[!duplicated(blastResult$qseqid),] # Retain only best hits
   GetFirstItem <- function(name) { # Function that returns the first of items separated by semicolons
-    return(strsplit(name, split = ";")[[1]][1])
+    return(strsplit(as.character(name), split = ";")[[1]][1])
   }
   blastResultUn$staxids <- unlist(lapply(blastResultUn$staxids, GetFirstItem))
   blastResultUn$sscinames <- unlist(lapply(blastResultUn$sscinames, GetFirstItem))

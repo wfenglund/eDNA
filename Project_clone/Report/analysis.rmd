@@ -381,3 +381,23 @@ library(MetaBAnalysis)
 
 saveRDS(groupClean, "groupClean.rds") # save the clean object to be used in the report
 ```
+
+### Generate information about the sequences for use in report:
+```{r}
+library(rvest)
+
+readRawReport <- rvest::read_html(x = "../path/to/report.html") # read the html report
+rawDataTable <- as.data.frame(rvest::html_table(readRawReport, fill = TRUE)[4]) # select the relevant table
+
+rawSeqs <- rawDataTable$Raw.reads
+
+sum(rawSeqs)
+min(rawSeqs)
+max(rawSeqs)
+
+primerSeqs <- sum(out[, 1])
+primerSeqs / sum(rawSeqs) # ratio of sequences left after primer trimming and filtration
+
+groupSeqs <- sum(groupClean[, -c(1, 2)])
+groupSeqs / primerSeqs # ratio of filtered sequences belonging to target group
+```

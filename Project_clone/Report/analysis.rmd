@@ -386,10 +386,23 @@ saveRDS(groupClean, "groupClean.rds") # save the clean object to be used in the 
 ```{r}
 library(rvest)
 
-readRawReport <- rvest::read_html(x = "../path/to/report.html") # read the html report
-rawDataTable <- as.data.frame(rvest::html_table(readRawReport, fill = TRUE)[4]) # select the relevant table
+getRawSeqs <- function(searchFolder = "../Pre_analysis", searchPattern = "_fastqc.html") { # Function that extracts raw reads from fastqc reports
+  rawPaths <- list.files(path = searchFolder, pattern = searchPattern, full.names = TRUE)
+  rawFiles <- lapply(rawPaths, rvest::read_html)
+  getRawTable <- function(inFile) {
+    inTable <- as.data.frame(rvest::html_table(inFile, fill = TRUE)[1]) # select first table in report
+    outTable <- data.frame(filename = inTable[inTable$Measure == "Filename", 2], nreads = inTable[inTable$Measure == "Total Sequences", 2])
+    return(outTable)
+    }
+  rawTables <- lapply(rawFiles, getRawTable)
+  allTable <- do.call("rbind", rawTables)
+  allTable$nreads <- as.numeric(allTable$nreads)
+  return(allTable)
+}
 
-rawSeqs <- rawDataTable$Raw.reads
+rawSeqsTable <- getRawSeqs()
+
+rawSeqs <- rawSeqsTable$nreads
 
 sum(rawSeqs)
 min(rawSeqs)

@@ -13,21 +13,9 @@ knitr::knit_engines$set(python = reticulate::eng_python)
 
 ### Filter the data and run dada2:
 ```{r}
+library(MetaBAnalysis)
 library(dada2)
 library(edgeR)
-
-DadaAnalysis <- function(forward, reverse) {
-  errF <- dada2::learnErrors(forward, multithread = TRUE)
-  errR <- dada2::learnErrors(reverse, multithread = TRUE)
-  derepsF <- dada2::derepFastq(forward)
-  derepsR <- dada2::derepFastq(reverse)
-  dadaF <- dada2::dada(derepsF, err = errF, multithread = TRUE)
-  dadaR <- dada2::dada(derepsR, err = errR, multithread = TRUE)
-  mergers <- dada2::mergePairs(dadaF, derepsF, dadaR, derepsR, verbose = TRUE)
-  seqTab <- dada2::makeSequenceTable(mergers)
-  seqTabNoChim <- dada2::removeBimeraDenovo(seqTab, method = "consensus", multithread = TRUE, verbose = TRUE)
-  return(seqTabNoChim)
-}
 
 forward <- list.files("../Filtered_data", pattern = "_1.fastq.gz", full.names = TRUE) # Gets all the names ending with _1 with "full" path
 reverse <- list.files("../Filtered_data", pattern = "_2.fastq.gz", full.names = TRUE) # Gets -"- ending with _2

@@ -156,7 +156,7 @@ SumRes <- function(blastRes, counts, taxGroup) {
     taxSel <- taxGroupConv[names(taxGroupConv) == taxGroup]
     genesCounts <- cbind(blastRes, counts)
     colStart <- ncol(genesCounts)
-    sumAll <- aggregate(genesCounts[,12:colStart],
+    sumAll <- aggregate(genesCounts[,13:colStart],
                         by = list(genesCounts$species),
                         FUN = sum)
     sumAll <- sumAll[order(rowSums(sumAll[,-1]), decreasing = TRUE),]
@@ -173,7 +173,7 @@ SumRes <- function(blastRes, counts, taxGroup) {
                                              blastRes$family),]
     }
 
-    sumFilt <- aggregate(genesCountsFilt[,12:colStart],
+    sumFilt <- aggregate(genesCountsFilt[,13:colStart],
                          by = list(genesCountsFilt$species),
                          FUN = sum)
     sumFilt <- sumFilt[order(rowSums(sumFilt[,-1]), decreasing =

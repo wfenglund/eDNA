@@ -50,7 +50,7 @@ outCombined <- OutCombine(out, allSamples) # Summarize forward and reverse for e
 forwardCounts2 <- DadaAnalysis(filtFs, filtRs)
 ```
 
-### Combine columns in "dfForward" and convert to DGEList "yAll"
+### Convert and modify  matrix "forwardCounts2" to DGEList "yAll"
 ```{r}
 DFCombine <- function(dataset, samples) {
   counter <- 0

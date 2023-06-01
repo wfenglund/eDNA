@@ -1,6 +1,6 @@
-#' Convience function to run dada2
+#' Convenience function to run dada2
 #'
-#' This largely run several of the standard steps in a dada2 analysis
+#' This largely runs several of the standard steps in a dada2 analysis
 #' with default parameters.
 #' @param forward vector with file names for filtered forward reads
 #' @param reverse vector with file names for filtered reverse reads

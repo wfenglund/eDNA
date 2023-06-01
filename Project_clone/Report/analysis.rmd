@@ -331,7 +331,7 @@ library(MetaBAnalysis)
   groupNotes <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(groupNotes$Species), groupNotes)
   # groupNotes[grepl("latin name", groupNotes$Species),1] <- "new common name"
   groupNotes <- cbind(Notes = c(
-                                # edit here to correspond to the number of species in the groupSummary-object
+                                # edit here to correspond to the number of species in the groupNotes-object
                                 "", "", "", "", "",
                                 "", "", "", "", "",
                                 "", "", "", "", "",

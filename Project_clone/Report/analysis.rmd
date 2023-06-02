@@ -275,21 +275,7 @@ saveRDS(blastResY, file = "blastResY.rds")
 
 ### Create Summaryfiles from the BLAST-results:
 ```{r}
-grepGroup <- grepl("Arthropoda", blastResY$phylum) # Set which group to put in "groupSummary"
-
-genesCounts <- cbind(blastResY, yAll$counts)
-summaryAll <- aggregate(genesCounts[,13:dim(genesCounts)[2]], by = list(genesCounts$species), FUN = sum)
-summaryAll <- summaryAll[order(rowSums(summaryAll[,-1]), decreasing = TRUE),]
-genesGroup <- blastResY[grepGroup,]
-yGroup <- yAll[row.names(yAll$counts) %in% genesGroup$seq,]
-genesCountsGroup <- cbind(genesGroup, yGroup$counts)
-groupSummary <- aggregate(genesCountsGroup[,13:dim(genesCounts)[2]], by = list(genesCountsGroup$species), FUN=sum)
-groupSummary <- groupSummary[order(rowSums(groupSummary[,-1]), decreasing = TRUE),]
-
-saveRDS(yAll, file = "yAll.rds")
-saveRDS(genesCounts, file = "genesCounts.rds")
-saveRDS(groupSummary, file = "groupSummary.rds")
-saveRDS(summaryAll, file = "summaryAll.rds")
+allResults <- SumRes(blastRes = blastResY, counts = yAll$counts, taxgroup = "Fish") # Summarize a list of result objects
 ```
 
 ### Functions:
@@ -334,18 +320,18 @@ RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
 }
 ```
 
-### Curate the groupSummary-object:
+### Curate the results:
 ```{r}
 library(MetaBAnalysis)
 {
-  groupNotes <- groupSummary
+  groupNotes <- allResults$Fish
   # groupNotes <- RenameSpecies("old latin name", "new latin name", groupNotes)
   groupNotes <- groupNotes[order(rowSums(groupNotes[,-1]), decreasing = TRUE),]
   groupNotes <- cbind(Percent_all = SpeciesPercent(groupNotes), groupNotes)
-  groupNotes <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(groupNotes$Group.1), groupNotes)
-  # groupNotes[grepl("latin name", groupNotes$Group.1),1] <- "new common name"
+  groupNotes <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(groupNotes$Species), groupNotes)
+  # groupNotes[grepl("latin name", groupNotes$Species),1] <- "new common name"
   groupNotes <- cbind(Notes = c(
-                                # edit here to correspond to the number of species in the groupSummary-object
+                                # edit here to correspond to the number of species in the groupNotes-object
                                 "", "", "", "", "",
                                 "", "", "", "", "",
                                 "", "", "", "", "",
@@ -358,12 +344,13 @@ library(MetaBAnalysis)
   # groupNotes <- groupNotes[groupNotes$Percent_all >= 0.5,] # remove species from all samples below a threshold
   groupClean <- groupNotes[,-c(1, 3)]
   columnNames <- colnames(groupClean)
-  columnNames[grepl("Group.1", columnNames)] <- "Latin"
+  columnNames[grepl("Species", columnNames)] <- "Latin"
   # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
   names(groupClean) <- columnNames
+  allResults$Clean <- groupClean
 }
 
-saveRDS(groupClean, "groupClean.rds") # save the clean object to be used in the report
+saveRDS(allResults, "allResults.rds") # save the clean object to be used in the report
 ```
 
 ### Generate information about the sequences for use in report:

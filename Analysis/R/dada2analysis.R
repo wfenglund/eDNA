@@ -142,7 +142,7 @@ BlastParse <- function(dgeList, blastRes) {
 #'
 
 SumRes <- function(blastRes, counts, taxGroup) {
-    taxGroupConv <- c("Actinopteri", "Aves", "Bivalvia",
+    taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia",
                              "Insecta", "Mammalia", "Arachnida",
                              "Gastropoda")
     names(taxGroupConv) <- c("Fish", "Birds", "Mussels", "Insects",
@@ -161,17 +161,7 @@ SumRes <- function(blastRes, counts, taxGroup) {
                         FUN = sum)
     sumAll <- sumAll[order(rowSums(sumAll[,-1]), decreasing = TRUE),]
     names(sumAll) <- c("Species", names(sumAll)[-1])
-    if(taxGroup != "Fish") {
-        genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
-    } else {
-             # In case of the taxonomic group studied is fish the lampreys
-             # will be included by also selecting the family
-             # Petromyzontidae. Similar ideas might be needed for other
-             # groups but are currently not supported
-        genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class) |
-                                       grepl("Petromyzontidae",
-                                             blastRes$family),]
-    }
+    genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
 
     sumFilt <- aggregate(genesCountsFilt[,13:colStart],
                          by = list(genesCountsFilt$species),
@@ -183,6 +173,5 @@ SumRes <- function(blastRes, counts, taxGroup) {
     names(resCount) <- c("AllSpecies", taxGroup)
     return(resCount)
     }
-
 }
 

@@ -48,10 +48,9 @@ saveRDS(out, file = "out.rds")
 outCombined <- OutCombine(out, allSamples) # Summarize forward and reverse for every sample
 
 forwardCounts2 <- DadaAnalysis(filtFs, filtRs)
-dfForward<- as.data.frame(t(forwardCounts2))
 ```
 
-### Combine columns in "dfForward" and convert to DGEList "yAll"
+### Convert and modify  matrix "forwardCounts2" to DGEList "yAll"
 ```{r}
 DFCombine <- function(dataset, samples) {
   counter <- 0
@@ -69,11 +68,12 @@ DFCombine <- function(dataset, samples) {
 }
 
 MakeDGEList <- function(dataset, samples, forwardSamples) { # Function that combines forward and reverse runs if reverse runs are present
+  datasetDF <- as.data.frame(t(dataset))
   if(any(grepl("outRev", forwardSamples))) {
-    dfAll <- DFCombine(dataset, samples)
+    dfAll <- DFCombine(datasetDF, samples)
     yAll <- edgeR::DGEList(dfAll)
   } else {
-    yAll <- edgeR::DGEList(dataset)
+    yAll <- edgeR::DGEList(datasetDF)
   }
   return(yAll)
 }

@@ -170,7 +170,7 @@ SumRes <- function(blastRes, counts, taxGroup) {
                                                         TRUE),]
     names(sumFilt) <- c("Species", names(sumFilt)[-1])
     resCount <- list(sumAll = sumAll, sumFilt = sumFilt)
-    names(resCount) <- c("AllSpecies", taxGroup)
+    names(resCount) <- c("AllSpecies", "TargetGroup")
     return(resCount)
     }
 }

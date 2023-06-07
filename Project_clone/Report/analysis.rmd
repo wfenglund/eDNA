@@ -324,7 +324,7 @@ RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
 ```{r}
 library(MetaBAnalysis)
 {
-  groupNotes <- allResults$Fish
+  groupNotes <- allResults$TargetGroup
   # groupNotes <- RenameSpecies("old latin name", "new latin name", groupNotes)
   groupNotes <- groupNotes[order(rowSums(groupNotes[,-1]), decreasing = TRUE),]
   groupNotes <- cbind(Percent_all = SpeciesPercent(groupNotes), groupNotes)

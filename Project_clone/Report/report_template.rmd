@@ -1,0 +1,256 @@
+---
+title: ""
+author: ""
+date: ""
+header-includes:
+   - \usepackage{geometry}
+   - \usepackage{fancyhdr}
+   - \usepackage[swedish]{babel}
+   - \usepackage[default]{lato}
+   - \usepackage{float}
+   - \pagestyle{fancy}
+   - \fancyhf{}
+   - \lhead{\includegraphics[height=1cm]{./NRM_figures/naturhistoriska-riksmuseet2.png}}
+   - \rhead{Diarienummer 4.1-XXX-20XX}
+   - \chead{Månad 20XX}
+   - \lfoot{}
+   - \usepackage{xcolor}
+   - \definecolor{forest}{RGB}{60, 122, 94}
+   - \definecolor{forest2}{RGB}{20, 72, 54}
+   - \usepackage{afterpage}
+output: pdf_document
+bibliography: references.bib
+biblio-style: unsrt
+---
+```{r setup, include=FALSE, cache = FALSE}
+require("knitr")
+## setting working directory
+#opts_knit$set(root.dir = "~/Desktop/InsectGenome")
+knitr::opts_chunk$set(eval = TRUE, echo = FALSE, warning = FALSE)
+options(knitr.kable.NA = '')
+```
+
+```{r setup2, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(cowplot)
+library(kableExtra)
+library(readxl)
+library(wesanderson)
+library(MetaBAnalysis)
+```
+
+```{r}
+# User set variables:
+projectTitle <- "eDNA-detektering av fisk" # The title of this report
+projectId <- "4.1-XXX-20XX" # Diarienummer assigned to this project
+authorName <- "FIRST LAST" # Name of the author of this report
+
+samplesNo <- "NUMBER" # Number of samples analysed
+blastDate <- "MONTH 20XX" # Which month the blast search was performed
+sampleCutoff <- "0,X" # Within sample cutoff
+```
+
+\begin{titlepage}
+\center
+\vspace{2cm}
+NATURHISTORISKA RIKSMUSEET • FORSKAR, BEVARAR OCH FÖRKLARAR • NRM.SE \\
+	\colorbox{forest2}{
+		\parbox[t]{0.93\textwidth}{ % Outer full width box
+			\parbox[t]{0.91\textwidth}{ % Inner box for inner right text margin
+				\center % Right align the text
+				\fontsize{30pt}{40pt}\selectfont % Title font size, the first argument is the font size and the second is the line spacing, adjust depending on title length
+				\vspace{0.7cm} % Space between the start of the title and the top of the grey box
+				\textcolor{white}{
+				`r projectTitle`}\\
+				\vspace{0.5cm} 
+				\Large
+				\textcolor{white}{
+				Diarienummer NRM `r projectId`}\\
+				\vspace{0.7cm} % Space between the end of the title and the bottom of the grey box
+			}
+		}
+	}
+   \vfill % Space between the title box and author information
+	
+	%------------------------------------------------
+	%	Author name and information
+	%------------------------------------------------
+	\center
+	\includegraphics[width=330mm]{./NRM_figures/nrm-logo-staende-svensk-fullfarg}
+	\vspace{2cm}
+	%\parbox[t]{0.93\textwidth}{ % Box to inset this section slightly
+	%	\raggedleft % Right align the text
+	%	\large % Increase the font size
+	%	{\Large `r authorName`}\\[4pt] % Extra space after name
+	%	Centrum för genetisk identifiering\\
+	%	}
+
+\end{titlepage}
+
+Centrum för genetisk identifiering (CGI) vid Naturhistoriska riksmuseet är en
+uppdragsfinansierad verksamhet som erbjuder myndigheter och organisationer hjälp
+med genetiska analyser av biologiskt material.
+
+```{r}
+# Load and modify data:
+allResults <- readRDS("allResults.rds")
+groupData <- allResults$Clean
+groupSpecies <- cbind(groupData$Latin, groupData$Swedish)
+colnames(groupSpecies) <- c("Latin", "Svenska")
+
+# Assign variables:
+speciesNo <- nrow(groupSpecies) # Number of species found
+totalSeqs <- "NUMBER" # Total number of raw sequences
+minSeqs <- "NUMBER" # Number of sequences in the sample with fewest sequences
+maxSeqs <- "NUMBER" # Number of sequences in the sample with most sequences
+primerPercent <- "NUMBER" # Percentage of sequences that contained primers
+groupPercent <- "NUMBER" # Percentage of sequences belonging to target group
+commonNo <- "NUMBER" # How many species that stood for [commonPercent] of all sequences
+commonPercent <- "NUMBER" # A given large percentage, e.g. "75" or "90" etc.
+seqPlotFigures <- "2-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
+```
+
+## Uppdrag
+CGI har fått i uppdrag av klient att med hjälp av eDNA (environmental DNA) 
+detektera vilka arter av fisk som finns i `r samplesNo` vattenprover.
+
+## Material och metoder
+Prover togs av klient.
+
+### Molekylära metoder
+DNA-extraktion utfördes med en Kingfisher flex extraktionsrobot och ett "Omega
+MagBind Blood and Tissue" DNA-extraktionskit enligt beskrivning från
+tillverkaren. För analyserna amplifierades en kort bit av mitokondrien med 
+primers (se Tabell 1) beskrivna i en tidigare studie [@miya2015mifish] med 
+PCR-reaktioner som optimerats för flerartsanalys med sekvensering.
+
+```{r tab1, echo=FALSE}
+library(kableExtra)
+library(readxl)
+
+primerInfo <- read_excel("primer_data.xlsx")
+primerInfo[2,1] <- paste0(primerInfo[2,1], footnote_marker_symbol(1))
+kable(primerInfo[2,c(1:3,5)], "latex", 
+      caption = "Sekvenser för de primers som använts för detektion av eDNA. Temperatur är annealingtemperatur i PCR-reaktionerna.", 
+      booktabs = T, escape = F)%>%
+  kable_styling(latex_options = "hold_position", font_size = 8)%>%
+footnote(symbol = c("Miya et al. 2015"))
+```
+
+### Bioinformatiska analysmetoder
+Från rådata trimmades primersekvenser bort med hjälp av programmet cutadapt 
+[@martin2011cutadapt] och kvarvarande data analyserades med R-paketet dada2 
+[@callahan2016dada2]. Dada2 använder sekvensdata från prover för att identifiera
+unika sekvenser av biologiskt ursprung och hur många gånger dessa hittas i 
+vardera prov. Kvarvarande sekvensvarianter spårades till art genom att med hjälp
+av verktyget BLAST (Basic Local Alignment Search Tool)  [@altschul1990basic] 
+jämföra sekvenserna mot NCBIs öppna nukleotiddatabas (Nucleotide collection).
+Vår sökning utfördes `r blastDate`. Träffar med en identifikation på lägre än
+95% exkluderades direkt. Dessutom exkluderades träffar från varje prov där
+träffen utgjorde mindre än `r sampleCutoff`% av det totala antalet sekvenser inom det provet
+för att minska risken för falskt positiva träffar.
+
+## Resultat
+PCR-reaktioner genererade rena amplifieringar av förväntad storlek i alla tre
+replikat för alla prover och bedömdes därmed lämpliga för att skapa
+sekvenseringsbibliotek. Biblioteken skapades av CGI och sekvenserades av
+Novogene på ett NovaSeq-instrument (PE150).
+
+### Fauna
+Det totala antalet sekvenser efter sekvensering av proverna var `r totalSeqs` miljoner,
+enskilda prov hade mellan `r minSeqs` och `r maxSeqs` sekvenser. Omkring `r primerPercent`% av sekvenserna
+innehöll förväntade primers och var av tillräckligt god kvalitet för att
+bibehållas i analysen. Av dessa tillhörde ~`r groupPercent`% av sekvenserna fisk. Fiskarna
+tillhörde `r speciesNo` olika arter (se tabell 2 samt se figur 1 och `r seqPlotFigures` för
+relativa andelar sekvenser från varje art i varje prov) där de vanligaste `r commonNo`
+arterna stod för över `r commonPercent`% av fisksekvenserna (se figur 1). Övriga sekvenser var
+av låg kvalitet eller var spår av andra organismer.
+
+```{r tab2, echo=FALSE}
+library(MetaBAnalysis)
+
+fixedCaption <- paste("Tabell över latinska och svenska namn på de arter av fisk som identifierats i proverna. Om sekvenser ej kunde bestämmas till exakt art anges i dessa fall ", "sp.", " eller vilka två arter det kan handla om.", sep = "'")
+
+kable(groupSpecies, "latex",
+      caption = fixedCaption, 
+      booktabs = T, escape = F)%>%
+      kable_styling(latex_options = "hold_position")%>%
+      column_spec(1, italic = TRUE)
+```
+
+```{r fig1, fig.height=14, fig.width=11, echo=FALSE, fig.cap="Fördelning i procent av antal sekvenser från olika arter av fisk i proverna. Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover."}
+library(MetaBAnalysis)
+
+FractionPlot2 <- function(data, species, col) {
+  par(mar=c(4.1, 9.1, 4.1, 12.1), xpd=TRUE, las = 1, srt = 0, cex = 1.2)
+  props <- prop.table(as.matrix(data), margin=2) * 100
+  barplot(props, col = col, horiz = T)
+  legend("topright", legend = species, bty ="n", fill = col, inset=c(-0.25,.01))
+}
+
+groupCounts <- groupData[,3:ncol(groupData)]
+groupCounts <- cbind(groupCounts, Totalt = rowSums(groupCounts))
+figureSpecies <- data.frame(groupSpecies)$Svenska
+
+FractionPlot2(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25)
+```
+
+```{r include=FALSE}
+library(gridExtra)
+
+groupDataFrame <- as.data.frame(groupData)
+names(groupDataFrame) <- make.names(names(groupDataFrame))
+
+seqPlot2 <- function(data, sample, title, arter) {
+    Fs <- data[data[,sample]>0,]
+    P1 <- ggplot(Fs) + 
+    geom_point(aes_string(y = sample, x = forcats::fct_reorder(as.factor(Fs[,arter]), Fs[,sample]) )) + 
+    xlab("") + ylab("") + 
+    scale_y_log10() + 
+    theme_bw() + 
+    coord_flip() + 
+    labs(title = title)
+    P1
+}
+
+options(scipen = 5)
+
+groupDataFrame$Latin <- str_pad(groupDataFrame$Latin, side = "left", pad = " ", width = max(nchar(groupDataFrame$Latin)))
+
+indplots <- list()
+for(i in names(groupDataFrame[3:ncol(groupDataFrame)])) {
+   indplots[[i]] <- seqPlot2(data = groupDataFrame, sample = i, title = i, arter = "Swedish")
+}
+```
+
+\newpage
+
+## Sammanfattning
+Undersökning med eDNA på `r samplesNo` vattenprover har identifierat sekvenser
+från `r speciesNo` olika arter av fisk. Vi bedömer att indikationen visar på att
+de detekterade arterna med stor sannolikhet finns närvarande i proverna, men
+vill styrka att ett negativt resultat (alltså arter som inte detekterades) inte
+nödvändigtvis garanterar att dessa arter är frånvarande.
+
+```{r echo=FALSE, fig.height=13, fig.width=9, fig.cap="Antal sekvenser från varje art av fisk i enskilda prover."}
+# options(scipen = 5)
+grid.arrange(grobs = indplots[1:6], ncol = 1)
+```
+
+## Projektinformation
+Analysdata och resultat lagras tills vidare hos NRM. Vid eventuella
+framtida frågor i detta ärende kontakta NRM på antingen cgi@nrm.se
+eller registrator@nrm.se och ange diarienummer i mailets
+ämnesrad. Artbestämning av DNA-sekvenser sker genom jämförelse med
+databaser. Vi använder den internationellt största och mest kompletta
+databasen i våra försök att spåra ursprung till de sekvenser vi
+rapporterar, men det finns både luckor och felaktigheter i
+databasen. Arterna i denna rapport är den bästa informationen som
+finns att tillgå vid söktillfället, men om databasen uppdateras kan
+kopplingen mellan sekvens och art komma att ändras.
+
+\newpage
+
+## Referenser 

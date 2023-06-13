@@ -94,7 +94,25 @@ uppdragsfinansierad verksamhet som erbjuder myndigheter och organisationer hjäl
 med genetiska analyser av biologiskt material.
 
 ```{r}
+FixMillion <- function(inNumber) {
+  smallNumber <- inNumber / 1000000
+  roundNumber <- round(smallNumber, 1)
+  outNumber <- gsub("\\.", ",", roundNumber)
+  return(outNumber)
+}
+
+FixPercent <- function(inNumber) {
+  bigNumber <- inNumber * 100
+  roundNumber <- round(bigNumber, 0)
+  outNumber <- gsub("\\.", ",", roundNumber)
+  return(outNumber)
+}
+
 # Load and modify data:
+sampleMetaData <- readRDS("sampleMetaData.rds")
+rawSeqs <- sampleMetaData$rawSeqs
+primerSeqs <- sampleMetaData$primerSeqs
+groupSeqs <- sampleMetaData$groupSeqs
 allResults <- readRDS("allResults.rds")
 groupData <- allResults$Clean
 groupSpecies <- cbind(groupData$Latin, groupData$Swedish)
@@ -102,11 +120,11 @@ colnames(groupSpecies) <- c("Latin", "Svenska")
 
 # Assign variables:
 speciesNo <- nrow(groupSpecies) # Number of species found
-totalSeqs <- "NUMBER" # Total number of raw sequences
-minSeqs <- "NUMBER" # Number of sequences in the sample with fewest sequences
-maxSeqs <- "NUMBER" # Number of sequences in the sample with most sequences
-primerPercent <- "NUMBER" # Percentage of sequences that contained primers
-groupPercent <- "NUMBER" # Percentage of sequences belonging to target group
+totalSeqs <- FixMillion(sum(rawSeqs)) # Total number of raw sequences
+minSeqs <- FixMillion(min(rawSeqs)) # Number of sequences in the sample with fewest sequences
+maxSeqs <- FixMillion(max(rawSeqs)) # Number of sequences in the sample with most sequences
+primerPercent <- FixPercent(primerSeqs / sum(rawSeqs)) # Percentage of sequences that contained primers
+groupPercent <- FixPercent(groupSeqs / primerSeqs) # Percentage of sequences belonging to target group
 commonNo <- "NUMBER" # How many species that stood for [commonPercent] of all sequences
 commonPercent <- "NUMBER" # A given large percentage, e.g. "75" or "90" etc.
 seqPlotFigures <- "2-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
@@ -160,7 +178,7 @@ Novogene på ett NovaSeq-instrument (PE150).
 
 ### Fauna
 Det totala antalet sekvenser efter sekvensering av proverna var `r totalSeqs` miljoner,
-enskilda prov hade mellan `r minSeqs` och `r maxSeqs` sekvenser. Omkring `r primerPercent`% av sekvenserna
+där enskilda prov hade mellan `r minSeqs` miljoner och `r maxSeqs` miljoner sekvenser. Omkring `r primerPercent`% av sekvenserna
 innehöll förväntade primers och var av tillräckligt god kvalitet för att
 bibehållas i analysen. Av dessa tillhörde ~`r groupPercent`% av sekvenserna fisk. Fiskarna
 tillhörde `r speciesNo` olika arter (se tabell 2 samt se figur 1 och `r seqPlotFigures` för

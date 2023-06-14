@@ -2,7 +2,7 @@
 % Please edit documentation in R/dada2analysis.R
 \name{DadaAnalysis}
 \alias{DadaAnalysis}
-\title{Convience function to run dada2}
+\title{Convenience function to run dada2}
 \usage{
 DadaAnalysis(forward, reverse, muThread = TRUE, justConcatenate = FALSE)
 }
@@ -17,7 +17,7 @@ DadaAnalysis(forward, reverse, muThread = TRUE, justConcatenate = FALSE)
 a matrix with count for all inferred sequence variants
 }
 \description{
-This largely run several of the standard steps in a dada2 analysis
+This largely runs several of the standard steps in a dada2 analysis
 with default parameters.
 }
 \examples{

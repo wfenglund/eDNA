@@ -135,11 +135,9 @@ CombineSpecies <- function(species1, species2, dataFrame) {
 #' @return a vector of species percentages.
 #' @export
 SpeciesPercent <- function(dataFrame) {
-  percentVector <- c()
-  for(row in 1:nrow(dataFrame)) {
-    ratio <- sum(dataFrame[row,2:ncol(dataFrame)]) / sum(dataFrame[,2:ncol(dataFrame)])
-    percent <- ratio * 100
-    percentVector <- c(percentVector, round(percent, 5))
-  }
-  return(percentVector)
+  countData <- dataFrame[,-1]
+  countRatios <- rowSums(countData)/sum(countData)
+  countPercentages <- round(countRatios * 100, 5)
+  return(countPercentages)
 }
+

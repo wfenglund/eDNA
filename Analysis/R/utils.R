@@ -130,14 +130,25 @@ CombineSpecies <- function(species1, species2, dataFrame) {
 #' 
 #' Takes a dataframe of species counts and returns a vector with the percentage of counts per species.
 #' 
-#' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
+#' @param dataFrame a dataframe where the first column contains
+#' species names and the rest of the dataframe contains integers >= 0
 #' 
 #' @return a vector of species percentages.
+#'
 #' @export
+#'
+#' @examples
+#' testdata <- data.frame(Species = c("Esox lucius",
+#'                                    "Perca fluviatilis",
+#'                                    "Tinca tinca"),
+#'                        Sample1 = c(1001, 3921, 109),
+#'                        Sample2 = c(99, 544, 130))
+#' SpeciesPercent(testdata)
+
 SpeciesPercent <- function(dataFrame) {
-  countData <- dataFrame[,-1]
-  countRatios <- rowSums(countData)/sum(countData)
-  countPercentages <- round(countRatios * 100, 5)
-  return(countPercentages)
+    countData <- dataFrame[,-1]
+    countRatios <- rowSums(countData)/sum(countData)
+    countPercentages <- round(countRatios * 100, 5)
+    return(countPercentages)
 }
 

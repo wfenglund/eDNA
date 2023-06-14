@@ -7,11 +7,20 @@
 SpeciesPercent(dataFrame)
 }
 \arguments{
-\item{dataFrame}{a dataframe containing counts of species with the species names in the first column to the left.}
+\item{dataFrame}{a dataframe where the first column contains
+species names and the rest of the dataframe contains integers >= 0}
 }
 \value{
 a vector of species percentages.
 }
 \description{
 Takes a dataframe of species counts and returns a vector with the percentage of counts per species.
+}
+\examples{
+testdata <- data.frame(Species = c("Esox lucius",
+                                   "Perca fluviatilis",
+                                   "Tinca tinca"),
+                       Sample1 = c(1001, 3921, 109),
+                       Sample2 = c(99, 544, 130))
+SpeciesPercent(testdata)
 }

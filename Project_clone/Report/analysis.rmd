@@ -295,13 +295,6 @@ CombineSpecies <- function(species1, species2, dataFrame) {
   return(dataFrame)
 }
 
-SpeciesPercent <- function(dataFrame) {
-  countData <- dataFrame[,-1]
-  countRatios <- rowSums(countData)/sum(countData)
-  countPercentages <- round(countRatios * 100, 5)
-  return(countPercentages)
-}
-
 QSeqGetter <- function(species_name) {
   species_seq <- paste0(">", blastResY[grepl(species_name, blastResY$species),1], "\n", blastResY[grepl(species_name, blastResY$species),2])
   writeLines(species_seq, "current_sequence.txt")

@@ -384,4 +384,7 @@ primerSeqs / sum(rawSeqs) # ratio of sequences left after primer trimming and fi
 
 groupSeqs <- sum(groupClean[, -c(1, 2)])
 groupSeqs / primerSeqs # ratio of filtered sequences belonging to target group
+
+sampleMetaData <- list(rawSeqs = rawSeqs, primerSeqs = primerSeqs, groupSeqs = groupSeqs)
+saveRDS(sampleMetaData, "sampleMetaData.rds")
 ```

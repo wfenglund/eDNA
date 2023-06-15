@@ -25,7 +25,8 @@ Imports:
     forcats,
     ggplot2,
     gtools,
-    taxize
+    taxize,
+    rvest
 Suggests: 
     rmarkdown,
     knitr

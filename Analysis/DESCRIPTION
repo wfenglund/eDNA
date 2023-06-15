@@ -25,8 +25,12 @@ Imports:
     forcats,
     ggplot2,
     gtools,
+<<<<<<< HEAD
     taxize,
     rvest
+=======
+    taxize
+>>>>>>> 1003caa61e0a6a45db97d17dedfba076ca27bc03
 Suggests: 
     rmarkdown,
     knitr

@@ -1,13 +1,16 @@
 #' Parse blast output
 #'
-#' This function will create a dataframe with sequence names,
-#' sequences similarity from blast analysis together with taxonomic
-#' information from NCBI. It needs the blast analysis to be locally
-#' available. Check the example file test.out included with the
+#' This function will create a dataframe with sequence names, sequence
+#' similarity from blast analysis together with taxonomic information
+#' from NCBI. It needs the blast analysis result file locally
+#' available. This needs to contain the content specified below in the
+#' parameter blastRes. Check the example file test.out included with the
 #' package to see the requirements of the input file.
 #'
 #' Needs an active internet connection that can reach NCBI to work.
 #' NB! for optimal performance make sure to get a token from NCBI.
+#' This function is not needed if you have version 1.0 of the
+#' MetaBAnalysis package.
 #'
 #' @param dgeList count data in the form of DGEList
 #' @param blastRes file with blast results assumes blastoutput option
@@ -86,12 +89,10 @@ BlastParse <- function(dgeList, blastRes) {
 
 #' Blast a given nucleotide sequence at NCBI
 #' 
-#' This facilitate the submission of a nucleotide sequence to NCBIs
+#' This facilitate the submission of queries of a nucleotide sequence to NCBIs
 #' blast database. Will fetch blast hits and return these hits as
 #' a dataframe. This function largely replaces the need to have a
-#' local blast database to compare to. If you have an active internet
-#' access this method is strongly preferred to any approach relying on
-#' local databases.
+#' local blast database to compare to.
 #' 
 #' NB! The function needs internet access to work.
 #'
@@ -159,8 +160,9 @@ OnlineBlaster <- function(nucleotide) {
 #'
 #' Parsing every sequence entry in a fasta file and use the
 #' OnlineBlaster function to blast individual sequences directly on
-#' NCBI.
-#' Needs an active internet connection that can reach NCBI to work.
+#' NCBI. This function works with any number of sequences, but is
+#' perhaps most suitable with less than 150 sequences. Consider using
+#' local blast database for larger datasets. 
 #'
 #' @param fastaFile file with fasta sequences
 #' @param seqNumber number of sequences from fasta to analys if set to
@@ -177,7 +179,7 @@ OnlineBlaster <- function(nucleotide) {
 #' fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
 #' MultiBlaster(fastaFile = fastafile)
 
-MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice = "") { # Function that blasts all sequences in a fasta-file
+MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice = "") {
   fastaString <- paste(readLines(fastaFile), collapse = "\n")
   fastaList <- strsplit(fastaString, split = ">")
   fastaList <- fastaList[[1]][fastaList[[1]] != ""]
@@ -207,7 +209,48 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
       viewResults <- rbind(viewResults, blastOut[, -c(2)], c("", "", "", "", "", "", "", "", "", "", "", ""))
       View(viewResults)
     }
-    Sys.sleep(2)
+    Sys.sleep(2) # avoid spamming NCBI
   }
   return(blastResults)
+}
+
+#' Fetch sequences based on species name and open it
+#'
+#' This function assumes that there is an object names blastResY in
+#' the current workspace. From this object the column with species
+#' information is queried and written to a file named
+#' current_sequence.txt that is opened to be edit with the functiont
+#' file.edit.
+#'
+#' NB! this will overwrite any file named "current_sequence.txt" in
+#' your current working directory.
+#'
+#' @param speciesName string with species name
+#' @param blastResults dataframe with output from blastparse function 
+#'
+#' @return an open fasta file with sequence data
+
+QSeqGetter <- function(speciesName, blastResults = blastResY) {
+  species_seq <- paste0(">", blastResults[grepl(speciesName, blastResults$species),1], "\n", blastResults[grepl(speciesName, blastResults$species),2])
+  writeLines(species_seq, "current_sequence.txt")
+  file.edit("current_sequence.txt")
+}
+
+#' Extract sequence using species name and blast at NCBI
+#'
+#' Assumes that there is an object named blastResY in the current
+#' workspace. Use QseqGetter to fetch sequences from this object based
+#' on species name and then use Multiblaster to blast the sequences
+#' at NCBI.
+#'
+#' @param searchName string with species name
+#' @param seqNumber number of sequences from searchName to retain
+#' @return a dataframe with blast results
+
+
+QSBLAST <- function(searchName, seqNumber = 3) {
+  QSeqGetter(searchName)
+  blastOut <- MultiBlaster("current_sequence.txt", seqNumber,
+                           resultNumber = 10, viewChoice = "yes")
+  return(blastOut)
 }

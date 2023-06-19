@@ -8,8 +8,12 @@
 #' as the appear in the data
 #' @param col of colors to use in legend and plot.
 #' @param inset inset values for legend plot
+#'
+#' @return a barplot
 #' @export
 #'
+
+#' 
 #' @examples
 #' data <- data.frame(A = 1:3, B = c(1,4,0), C = c(2, 3, 7))
 #' species <- c("Abramis brama", "Salmo trutta", "Salmo salar")
@@ -19,7 +23,7 @@
 
 FractionPlot <- function(data, species, col, inset = c(-0.3, 0.01)) {
     par(mar=c(4.1, 9.1, 4.1, 12.1),
-        xpd=TRUE, las = 1, srt = 0)
+        xpd=TRUE, las = 1, srt = 0, cex = 1.2)
     props <- prop.table(as.matrix(data),
                         margin=2) * 100
     barplot(props, col = col, horiz = T)
@@ -33,6 +37,8 @@ FractionPlot <- function(data, species, col, inset = c(-0.3, 0.01)) {
 #' @param sample name of sample to be plotted
 #' @param title title to be put on the plot
 #' @param species colname in data that holds species names
+#' @returns a ggplot2 barplot
+#'
 #' @import forcats ggplot2 
 #' @export 
 #' 
@@ -40,14 +46,28 @@ FractionPlot <- function(data, species, col, inset = c(-0.3, 0.01)) {
 SeqPlot <- function(data, sample, title, species) {
     Fs <- data[data[,sample]>0,]
     speciesFactors <- forcats::fct_reorder(as.factor(Fs[,species]))
-    P1 <- ggplot(Fs) + 
+
+    sequencePlot <- ggplot(Fs) + 
         geom_point(aes_string(y = sample,
                               x = speciesFactors,
                               Fs[,sample])) +
-        xlab("") + ylab("") + 
+        xlab("") +
+        ylab("") + 
         scale_y_log10() + 
         theme_bw() + 
         coord_flip() + 
         labs(title = title)
+    sequencePlot
+}
+
+seqPlot2 <- function(data, sample, title, arter) {
+    Fs <- data[data[,sample]>0,]
+    P1 <- ggplot(Fs) + 
+    geom_point(aes_string(y = sample, x = forcats::fct_reorder(as.factor(Fs[,arter]), Fs[,sample]) )) + 
+    xlab("") + ylab("") + 
+    scale_y_log10() + 
+    theme_bw() + 
+    coord_flip() + 
+    labs(title = title)
     P1
 }

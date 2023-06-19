@@ -23,8 +23,9 @@ blast results for sequences in a dataframe
 \description{
 Parsing every sequence entry in a fasta file and use the
 OnlineBlaster function to blast individual sequences directly on
-NCBI.
-Needs an active internet connection that can reach NCBI to work.
+NCBI. This function works with any number of sequences, but is
+perhaps most suitable with less than 150 sequences. Consider using
+local blast database for larger datasets.
 }
 \examples{
 fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")

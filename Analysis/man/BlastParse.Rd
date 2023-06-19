@@ -23,10 +23,11 @@ seqTax a dataframe with annotation of results from sequence
 comparisons using blast.
 }
 \description{
-This function will create a dataframe with sequence names,
-sequences similarity from blast analysis together with taxonomic
-information from NCBI. It needs the blast analysis to be locally
-available. Check the example file test.out included with the
+This function will create a dataframe with sequence names, sequence
+similarity from blast analysis together with taxonomic information
+from NCBI. It needs the blast analysis result file locally
+available. This needs to contain the content specified below in the
+parameter blastRes. Check the example file test.out included with the
 package to see the requirements of the input file.
 
 This function will create a dataframe with sequence names,
@@ -36,6 +37,8 @@ information from NCBI.
 \details{
 Needs an active internet connection that can reach NCBI to work.
 NB! for optimal performance make sure to get a token from NCBI.
+This function is not needed if you have version 1.0 of the
+MetaBAnalysis package.
 
 NB! for optimal performance make sure to get a token from NCBI as
 the function relies on a online query to the NCBI taxonomic

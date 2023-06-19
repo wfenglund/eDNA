@@ -16,12 +16,10 @@ the sequence is not similar to any known sequence at NCBI this will be
 reported and an dataframe with NA values will be returned.
 }
 \description{
-This facilitate the submission of a nucleotide sequence to NCBIs
+This facilitate the submission of queries of a nucleotide sequence to NCBIs
 blast database. Will fetch blast hits and return these hits as
 a dataframe. This function largely replaces the need to have a
-local blast database to compare to. If you have an active internet
-access this method is strongly preferred to any approach relying on
-local databases.
+local blast database to compare to.
 }
 \details{
 NB! The function needs internet access to work.

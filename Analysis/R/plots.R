@@ -60,14 +60,3 @@ SeqPlot <- function(data, sample, title, species) {
     sequencePlot
 }
 
-seqPlot2 <- function(data, sample, title, arter) {
-    Fs <- data[data[,sample]>0,]
-    P1 <- ggplot(Fs) + 
-    geom_point(aes_string(y = sample, x = forcats::fct_reorder(as.factor(Fs[,arter]), Fs[,sample]) )) + 
-    xlab("") + ylab("") + 
-    scale_y_log10() + 
-    theme_bw() + 
-    coord_flip() + 
-    labs(title = title)
-    P1
-}

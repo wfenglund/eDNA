@@ -208,8 +208,6 @@ BlastResWriter <- function(inputDF, outName) { # Functios that manipulates the o
 # 5. $ awk -F\t '{gsub(/[^[:alnum:]]/," ", $3); print $1 "\t" $3 "\t" $5}' nodes.dmp > compact_nodes.csv
 # 6. $ rm *.dmp *.prt *.txt *.zip
 
-library(gtools)
-
 compactNameDump <- read.table("../../Suppl_data/compact_names.csv", sep = "\t")
 compactNodeDump <- read.table("../../Suppl_data/compact_nodes.csv", sep = "\t")
 
@@ -258,8 +256,7 @@ BlastParse <- function(DGEList, blastRes.out, threshold = 95) {
   blastTax <- blastTax[, c(2,3,4,12, 1, 16:21)]
   colnames(blastTax) <- c("id", "besthit", "identity", "e-value", "species", "family", "order", "class", "phylum", "kingdom", "superkingdom")
   seqTax <- merge(sequences, blastTax, by.x = "id", by.y = "id", all.x = TRUE)
-  seqTax$id <- as.character(seqTax$id)
-  seqTax <- seqTax[mixedorder(seqTax$id),]
+  seqTax <- seqTax[order(gsub("[^0-9]+", "", seqTax$id)),]
   seqTax$family <- factor(seqTax$family)
   seqTax$order <- factor(seqTax$order)
   seqTax$class <- factor(seqTax$class)

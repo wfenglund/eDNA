@@ -7,7 +7,7 @@ project_name = "proj_test"
 primer_f = "AAACTCGTGCCAGCCACC" # Forward primer (default = MiFish)
 primer_r = "GGGTATCTAATCCCAGTTTG" # Reverse primer (default = MiFish)
 ###
-f_format = "novo" #scilife or novo
+f_format = "novo" #scilife, novo or bmk
 anchored_flag = "yes" #yes or no
 reverse_flag = "yes" #yes or no
 reads_folder = "../Raw_data" # Location of raw fastq-file
@@ -35,7 +35,7 @@ if f_format == "scilife":
     repl_from = "R1"
     repl_to = "R2"
     test2 = 1
-elif f_format == "novo":
+elif f_format == "novo" or f_format == "bmk":
     file_end = "_1.fq.gz"
     repl_from = "_1.fq"
     repl_to = "_2.fq"

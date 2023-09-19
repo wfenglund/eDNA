@@ -78,7 +78,7 @@ MakeDGEList <- function(dataset, samples, forwardSamples) { # Function that comb
   return(yAll)
 }
 
-yAll <- MakeDGEList(dfForward, allSamples, forwardC)
+yAll <- MakeDGEList(forwardCounts2, allSamples, forwardC)
 saveRDS(yAll, file = "yAll.rds")
 ```
 

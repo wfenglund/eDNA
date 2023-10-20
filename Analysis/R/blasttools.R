@@ -156,13 +156,13 @@ OnlineBlaster <- function(nucleotide) {
   return(result_output)
 }
 
-#' Facilitate blast analysis of all sequences i fasta-file
+#' Facilitate blast analysis of all sequences in fasta-file
 #'
 #' Parsing every sequence entry in a fasta file and use the
 #' OnlineBlaster function to blast individual sequences directly on
 #' NCBI. This function works with any number of sequences, but is
 #' perhaps most suitable with less than 150 sequences. Consider using
-#' local blast database for larger datasets. 
+#' local blast database for larger datasets.
 #'
 #' @param fastaFile file with fasta sequences
 #' @param seqNumber number of sequences from fasta to analys if set to
@@ -176,7 +176,7 @@ OnlineBlaster <- function(nucleotide) {
 #' @export
 #'
 #' @examples
-#' fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
+#' Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
 #' MultiBlaster(fastaFile = fastafile)
 
 MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice = "") {
@@ -216,9 +216,7 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
 
 #' Fetch sequences based on species name and open it
 #'
-#' This function assumes that there is an object names blastResY in
-#' the current workspace. From this object the column with species
-#' information is queried and written to a file named
+#' This function extracts sequences based on species names and writes to a file named
 #' current_sequence.txt that is opened to be edit with the functiont
 #' file.edit.
 #'
@@ -247,10 +245,34 @@ QSeqGetter <- function(speciesName, blastResults = blastResY) {
 #' @param seqNumber number of sequences from searchName to retain
 #' @return a dataframe with blast results
 
-
 QSBLAST <- function(searchName, seqNumber = 3) {
-  QSeqGetter(searchName)
-  blastOut <- MultiBlaster("current_sequence.txt", seqNumber,
-                           resultNumber = 10, viewChoice = "yes")
-  return(blastOut)
+        QSeqGetter(searchName)
+        blastOut <- MultiBlaster("current_sequence.txt", seqNumber,
+                resultNumber = 10, viewChoice = "yes"
+        )
+        return(blastOut)
+}
+
+
+#' Save MultiBlaster result as suitable for BlastParse analysis
+#'
+#' Writes at tab delimited file to current working directory with all
+#' information needed to parse the file using the BlastParse
+#' function.
+#'
+#' @param inputDF dataframe created with MultiBlaster
+#' @param outName name of file to write to
+#' @return NULL saves a file in current workning directory
+#'
+#' @examples
+#' Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
+#' inputDF <- MultiBlaster(fastaFile = fastafile)
+#' BlastResWriter(inputDF = inputDF, outName = "MetaBanalysisTest.out")
+
+BlastResWriter <- function(inputDF, outName) {
+  inputDF <- inputDF[!grepl("NA", row.names(inputDF)), ]
+  inputDF$Per..Ident <- gsub("%", "", inputDF$Per..Ident)
+  inputDF <- cbind(inputDF[1], inputDF[13], inputDF[11], NA, NA, NA, NA, NA, NA, NA, inputDF[10], inputDF[8], inputDF[6], inputDF[4], inputDF[5])
+  inputDF[is.na(inputDF)] <- "0"
+  write.table(x = inputDF, file = outName, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 }

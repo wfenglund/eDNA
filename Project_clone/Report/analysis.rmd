@@ -347,7 +347,7 @@ saveRDS(allResults, "allResults.rds") # save the clean object to be used in the 
 ```{r}
 library(rvest)
 
-getRawSeqs <- function(searchFolder = "../Pre_analysis", searchPattern = "_fastqc.html") { # Function that extracts raw reads from fastqc reports
+getRawSeqs <- function(searchFolder = "../Pre_analysis", searchPattern = "1_fastqc.html") { # Function that extracts raw forward reads from fastqc reports
   rawPaths <- list.files(path = searchFolder, pattern = searchPattern, full.names = TRUE)
   rawFiles <- lapply(rawPaths, rvest::read_html)
   getRawTable <- function(inFile) {

@@ -4,16 +4,19 @@
 \alias{DropSpecies}
 \title{DropSpecies}
 \usage{
-DropSpecies(name, dataFrame)
+DropSpecies(species, dataFrame)
 }
 \arguments{
-\item{dataFrame}{a dataframe containing counts of species with the species names in the first column to the left.}
-
 \item{species}{a string containing the name of the species to be removed.}
+
+\item{dataFrame}{a dataframe containing counts of species with the species
+names in the first column to the left.}
 }
 \value{
-the given dataframe without the species specified when calling the function.
+the given dataframe without the species specified when calling the
+function.
 }
 \description{
-Takes the name of a species and a dataframe of counts and returns the dataframe without the given species.
+Takes the name of a species and a dataframe of counts and returns the
+dataframe without the given species.
 }

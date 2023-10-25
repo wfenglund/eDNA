@@ -53,7 +53,8 @@ package = "MetaBAnalysis")
 parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 dfForward <- as.data.frame(t(parseTest))
 yForward <- edgeR::DGEList(dfForward)
-BlastParse(dgeList = yForward, blastRes = system.file("extdata", "test.out", package = "MetaBAnalysis"))
+exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
+BlastParse(dgeList = yForward, blastRes = exOut)
 fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
 package = "MetaBAnalysis")
 fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",

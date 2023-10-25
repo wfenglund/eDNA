@@ -2,7 +2,7 @@
 % Please edit documentation in R/blasttools.R
 \name{MultiBlaster}
 \alias{MultiBlaster}
-\title{Facilitate blast analysis of all sequences i fasta-file}
+\title{Facilitate blast analysis of all sequences in fasta-file}
 \usage{
 MultiBlaster(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice = "")
 }
@@ -28,6 +28,6 @@ perhaps most suitable with less than 150 sequences. Consider using
 local blast database for larger datasets.
 }
 \examples{
-fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
-MultiBlaster(fastaFile = fastafile)
+Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
+MultiBlaster(fastaFile = Fastafile)
 }

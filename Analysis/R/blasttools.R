@@ -17,8 +17,10 @@
 #' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
 #' sstart send evalue bitscore staxids sscinames scomnames"
 #'
+#' @import utils
 #' @importFrom taxize tax_name
 #' @importFrom gtools mixedorder
+#'
 #'
 #' @return seqTax a dataframe with annotation of results from sequence
 #' comparisons using blast.
@@ -33,7 +35,8 @@
 #' parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 #' dfForward <- as.data.frame(t(parseTest))
 #' yForward <- edgeR::DGEList(dfForward)
-#' BlastParse(dgeList = yForward, blastRes = system.file("extdata", "test.out", package = "MetaBAnalysis"))
+#' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
+#' BlastParse(dgeList = yForward, blastRes = exOut)
 
 BlastParse <- function(dgeList, blastRes) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(dgeList)), sep = "_"),
@@ -88,12 +91,12 @@ BlastParse <- function(dgeList, blastRes) {
 }
 
 #' Blast a given nucleotide sequence at NCBI
-#' 
+#'
 #' This facilitate the submission of queries of a nucleotide sequence to NCBIs
 #' blast database. Will fetch blast hits and return these hits as
 #' a dataframe. This function largely replaces the need to have a
 #' local blast database to compare to.
-#' 
+#'
 #' NB! The function needs internet access to work.
 #'
 #' @param nucleotide string of DNA sequence that should be submitted to
@@ -102,7 +105,7 @@ BlastParse <- function(dgeList, blastRes) {
 #' @return dataframe of blast hits for @param nucleotide. If
 #' the sequence is not similar to any known sequence at NCBI this will be
 #' reported and an dataframe with NA values will be returned.
-#' 
+#'
 #' @import rvest
 #'
 #' @export
@@ -118,7 +121,7 @@ OnlineBlaster <- function(nucleotide) {
   blast_session <- rvest::session(blast_url)
   blast_form <- rvest::html_form(blast_session)
   blast_settings <- rvest::html_form_set(blast_form[[1]], QUERY = nucleotide)
-  
+
   for(i in 1:length(blast_settings$fields)) {
     if(names(blast_settings$fields)[[i]] == "") {
       blast_settings$fields[[i]]$name <- "filler_name"
@@ -131,7 +134,7 @@ OnlineBlaster <- function(nucleotide) {
   blast_RID <- blast_table[1, 2] # get the request ID from the blast search
   print("- Sequence is submitted to BLAST.")
   print(paste("Request ID:", blast_RID))
-  
+
   result_session <- rvest::html_session(result_url)
   result_form <- rvest::html_form(result_session)
   result_settings <- rvest::html_form_set(result_form[[1]], RID = blast_RID)
@@ -144,9 +147,9 @@ OnlineBlaster <- function(nucleotide) {
     read_result <- rvest::read_html(result_submit)
     result_output <- as.data.frame(rvest::html_table(read_result, fill = TRUE)[5])
     if(length(html_elements(read_result, "#noRes")) > 0) {
-      result_output <- data.frame(Select.for.downloading.or.viewing.reports = "no_hit", Description = "no_hit", Scientific.Name = "no_hit", 
-                                  Common.Name = "no_hit", Taxid = "no_hit", Max.Score = NA, 
-                                  Total.Score = NA, Query.Cover = NA, E.value = NA, 
+      result_output <- data.frame(Select.for.downloading.or.viewing.reports = "no_hit", Description = "no_hit", Scientific.Name = "no_hit",
+                                  Common.Name = "no_hit", Taxid = "no_hit", Max.Score = NA,
+                                  Total.Score = NA, Query.Cover = NA, E.value = NA,
                                   Per..Ident = NA, Acc..Len = NA, Accession = "no_hit")
       result_output <- rbind(result_output, result_output, result_output, result_output, result_output)
       print("- No hits found for sequence.")
@@ -170,14 +173,14 @@ OnlineBlaster <- function(nucleotide) {
 #' @param resultNumber the number of blast hits per sequence to retain
 #' @param viewChoice if set to yes/Yes/YES a view of the dataframe with blast
 #' results will be shown using the function View.
-#' 
+#'
 #' @return blast results for sequences in a dataframe
 #'
 #' @export
 #'
 #' @examples
 #' Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
-#' MultiBlaster(fastaFile = fastafile)
+#' MultiBlaster(fastaFile = Fastafile)
 
 MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice = "") {
   fastaString <- paste(readLines(fastaFile), collapse = "\n")
@@ -204,7 +207,7 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
     }
     blastOut <- cbind(Sequence = c(seq[1], seq[1], seq[1], seq[1], seq[1]), blastOut)
     blastResults <- rbind(blastResults, blastOut)
-    
+
     if(toupper(viewChoice) == "YES") {
       viewResults <- rbind(viewResults, blastOut[, -c(2)], c("", "", "", "", "", "", "", "", "", "", "", ""))
       View(viewResults)
@@ -224,7 +227,7 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
 #' your current working directory.
 #'
 #' @param speciesName string with species name
-#' @param blastResults dataframe with output from blastparse function 
+#' @param blastResults dataframe with output from blastparse function
 #'
 #' @return an open fasta file with sequence data
 
@@ -244,6 +247,7 @@ QSeqGetter <- function(speciesName, blastResults = blastResY) {
 #' @param searchName string with species name
 #' @param seqNumber number of sequences from searchName to retain
 #' @return a dataframe with blast results
+#' @export
 
 QSBLAST <- function(searchName, seqNumber = 3) {
         QSeqGetter(searchName)
@@ -263,10 +267,11 @@ QSBLAST <- function(searchName, seqNumber = 3) {
 #' @param inputDF dataframe created with MultiBlaster
 #' @param outName name of file to write to
 #' @return NULL saves a file in current workning directory
+#' @export
 #'
 #' @examples
 #' Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
-#' inputDF <- MultiBlaster(fastaFile = fastafile)
+#' inputDF <- MultiBlaster(fastaFile = Fastafile)
 #' BlastResWriter(inputDF = inputDF, outName = "MetaBanalysisTest.out")
 
 BlastResWriter <- function(inputDF, outName) {

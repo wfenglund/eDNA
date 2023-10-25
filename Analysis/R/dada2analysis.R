@@ -4,7 +4,8 @@
 #' with default parameters.
 #' @param forward vector with file names for filtered forward reads
 #' @param reverse vector with file names for filtered reverse reads
-#' @param muthread Should the analysis use multithreads for analysis
+#' @param muThread Should the analysis use multithreads for analysis
+#' @param justConcatenate If reads pairs do not overlap set to TRUE
 #'
 #' @return a matrix with count for all inferred sequence variants
 #' @import dada2
@@ -134,6 +135,7 @@ BlastParse <- function(dgeList, blastRes) {
 #' by a simple selection at class level. Check the fish implementation
 #' in the code of the function.
 #'
+#' @importFrom stats aggregate
 #' @param blastRes dataframe created with the blastParse function
 #' @param counts dataframe with count data
 #' @param taxGroup name for taxonomic group to be extracted from the

@@ -7,10 +7,9 @@ awsinfo=(`awk '{print $4}' input.txt`)
 credentials_file=~/.aws/credentials
 
 # Save current credentials to backup if present:
-if test -f "$credentials_file"; then
-    cat ~/.aws/credentials >> ~/.aws/credentials.bak
+touch $credentials_file
+cat $credentials_file >> ~/.aws/credentials.bak
     #echo "vimrules"
-fi
 
 # Write new credentials:
 echo "# "${awsinfo[0]} > $credentials_file

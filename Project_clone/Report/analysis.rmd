@@ -272,7 +272,7 @@ saveRDS(blastResY, file = "blastResY.rds")
 
 ### Create Summaryfiles from the BLAST-results:
 ```{r}
-allResults <- SumRes(blastRes = blastResY, counts = yAll$counts, taxgroup = "Fish") # Summarize a list of result objects
+allResults <- SumRes(blastRes = blastResY, counts = yAll$counts, taxGroup = "Fish") # Summarize a list of result objects
 ```
 
 ### Functions:

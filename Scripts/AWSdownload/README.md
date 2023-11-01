@@ -1,5 +1,50 @@
 ## Download and check files from BMK
-We get the sequence files delivered in Amazon S3 buckets. The easiest way to download data is to use [aws cli](https://aws.amazon.com/cli/).
+We get the sequence files delivered in Amazon S3 buckets and these
+needs to be installed using
+[aws-cli](https://aws.amazon.com/cli/). This tool is a bit cumbersome
+to use and here we supply a shell script that automate downloading the
+data and run checksums to make sure alle files are intact after download.
 
-In order to use the script downloadscript available here you need to have aws cli installed and available in your path. In addition you need to be on an operative system that have `md5sum` available (most unix based system do have this tool, but on bsd systems, including Mac os X, the tool is called `md5`.
+The script assumes that aws-cli is installed and available in your
+executable path. In addition you need to be on an operative system
+that have `md5sum` available (most unix based system do have this
+tool, but on bsd systems, including Mac os X, the tool is called `md5`
+and the functionality might differ slightly).
+
+## Howto use
+
+1. Create .aws folder in your your home folder
+   `mkdir .aws`
+2. Create a credentials file to the this folder
+   `touch ~/.aws/credentials`
+3. Clone this directory including the scripts and the input.txt file
+   to your local machine.
+4. Copy the Index, access key id, and secret access key from the BMK
+   delivery mail and save these three rows in the input.txt file.
+   After this you should have a input.txt file looking as follows.
+   
+   ```
+   Index in AWS: bmkdatarelease-5/delivery_xxxxxxxxxxxxxxxxx
+                                            
+   Access key ID: XXXXXXXXXXXXXXXXXXXX
+                   
+   Secret Access key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+5. With the awsdownload.sh script and the input.txt in folder where
+   you want data to be saved. Run the script like this:
+   
+   `bash awsdownload.sh`
+   
+6. Once the data has been downloaded you should see a list of files
+   followed by ": OK" if everything is okay.
+   ```
+   Unknown_v1BMK230919-BP392-ZX01-060001-01_good_1.fq.gz: OK
+   Unknown_v1BMK230919-BP392-ZX01-060001-01_good_2.fq.gz: OK
+   Unknown_v2BMK230919-BP392-ZX01-060001-01_good_1.fq.gz: OK
+   Unknown_v2BMK230919-BP392-ZX01-060001-01_good_2.fq.gz: OK
+   ```
+
+Any other type of outcome indicates issues with the download so make
+sure to check downloaded files if you do not get an OK at the end.
+
 

@@ -7,7 +7,8 @@
 #' @return a vector that contains Swedish vernacular names corresponding to the input vector of scientific latin name
 #' @export
 TranslateTaxa <- function(nameVector) {
-  return(all_names$Swedish[match(nameVector, all_names$Latin)])
+  return(MetaBAnalysis::all_names$Swedish[match(nameVector,
+                                                MetaBAnalysis::all_names$Latin)])
 }
 
 #' Export DNA sequence as fasta file
@@ -23,6 +24,7 @@ TranslateTaxa <- function(nameVector) {
 #' @examples
 #' countData <- data.frame(A = 1:3, B = 4:6, C = 7:9, row.names = c("ACTG", "TTAG", "GGCA"))
 #' ExportFasta(countData, fileName = "junk.fa")
+
 ExportFasta <- function(countData, fileName) {
   seqs <- row.names(countData)
   names(seqs) <- paste("Seq", 1:length(seqs), sep = "_")
@@ -90,7 +92,7 @@ ImportMeta <- function(file) {
 #'   function.
 #' @export
 DropSpecies <- function(species, dataFrame) {
-  dataFrame <- dataFrame[!grepl(name, dataFrame[,1]),]
+  dataFrame <- dataFrame[!grepl(species, dataFrame[,1]),]
   return(dataFrame)
 }
 
@@ -155,3 +157,76 @@ SpeciesPercent <- function(dataFrame) {
     return(countPercentages)
 }
 
+#' Remove species with counts below a given threshold
+#'
+#' Filter data below a certain threshold
+#'
+#' @param dataFrame a dataframe where the first column contains
+#' species names and the rest of the dataframe contains integers >= 0
+#' @param threshold cut-off value in percent
+#' @return dataframe with filtered data removed.
+#'
+#' @export
+#'
+#' @examples
+#' testdata <- data.frame(Species = c("Esox lucius",
+#'                                    "Perca fluviatilis",
+#'                                    "Tinca tinca"),
+#'                        Random1 = LETTERS[1:3],
+#'                        Random2 = LETTERS[1:3],
+#'                        Random3 = LETTERS[1:3],
+#'                        Sample1 = c(10010, 3921, 2),
+#'                        Sample2 = c(9900, 5, 1301))
+#' RemoveLowFreqsSeqs(dataset = testdata,
+#'                    threshold = 0.1,
+#'                    subValue = 0)
+
+RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
+  output <- data.frame(dataset[, 1:4])
+  for(column in 5:ncol(dataset)){
+    ratio <- dataset[, column] / sum(dataset[, column]) * 100
+    dataset[ratio < threshold, column] <- subValue
+    output <- cbind(output, dataset[, column])
+  }
+  colnames(output) <- colnames(dataset)
+  return(output)
+}
+
+#' Get taxonomic information from NCBI
+#'
+#' Takes a species name and extract taxonomic information from compactNameDump
+#' and compactNodeDump available in the MetaBAnalysis package.
+#'
+#' @param searchName string of species name to extract taxonomic information about
+#' @param nameDump dataframe with names and node information
+#' @param nodeDump dataframe with names and node information
+#'
+#' @return vector with taxonomic information
+#'
+#' @export
+#'
+#' @examples
+#'
+#' GetTaxonomy(searchName = "Esox lucius",
+#'             nameDump = compactNameDump,
+#'             nodeDump = compactNodeDump)
+
+GetTaxonomy <- function(searchName, nameDump, nodeDump) {
+  if(grepl("\\.|'", searchName) || length(strsplit(searchName, split = " ")[[1]]) > 2) { # Look out for species with "sp.", quotations or more than two names
+    searchName <- strsplit(searchName, split = " ")[[1]][1]
+  }
+  taxList <- c("unknown", "unknown", "unknown", "unknown", "unknown", "unknown")
+  taxId <- nameDump[searchName == nameDump$V2, 1]
+  if(length(taxId) == 0) { # If searchName does not hit anything
+    return(taxList)
+  }
+  taxId <- taxId[1]
+  while(taxId > 2) {
+    taxId  <- nodeDump[taxId == nodeDump$V1, 2]
+    taxGroup <- nodeDump[taxId == nodeDump$V1, 3]
+    if(taxGroup %in% c("family", "order", "class", "phylum", "kingdom", "superkingdom")) {
+      taxList[match(taxGroup, c("family", "order", "class", "phylum", "kingdom", "superkingdom"))] <- nameDump[match(taxId, nameDump$V1), 2]
+    }
+  }
+  return(taxList)
+}

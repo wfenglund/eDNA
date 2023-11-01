@@ -38,7 +38,7 @@
 #' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
 #' BlastParse(dgeList = yForward, blastRes = exOut)
 
-BlastParse <- function(dgeList, blastRes) {
+BlastParseNCBI <- function(dgeList, blastRes) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(dgeList)), sep = "_"),
                           seq = row.names(dgeList))
   blastRes <- read.table(blastRes, sep = "\t", quote = "'", stringsAsFactors = FALSE)
@@ -89,6 +89,83 @@ BlastParse <- function(dgeList, blastRes) {
   seqTax$family <- factor(seqTax$family)
   return(seqTax)
 }
+
+#' Parse blast output
+#'
+#' This function will create a dataframe with sequence names, sequence
+#' similarity from blast analysis together with taxonomic information
+#' from NCBI. It needs the blast analysis result file locally
+#' available. This needs to contain the content specified below in the
+#' parameter blastRes. Check the example file test.out included with the
+#' package to see the requirements of the input file.
+#'
+#' Needs an active internet connection that can reach NCBI to work.
+#' NB! for optimal performance make sure to get a token from NCBI.
+#' This function is not needed if you have version 1.0 of the
+#' MetaBAnalysis package.
+#'
+#' @param DGEList count data in the form of DGEList
+#' @param blastRes file with blast results assumes blastoutput option
+#' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
+#' sstart send evalue bitscore staxids sscinames scomnames"
+#' @param threshold if identity is below this value no hit will be reported
+#'
+#' @import utils
+#'
+#' @return seqTax a dataframe with annotation of results from sequence
+#' comparisons using blast.
+#'
+#' @export
+#'
+#' @examples
+#' fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
+#' package = "MetaBAnalysis")
+#' fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
+#' package = "MetaBAnalysis")
+#' parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+#' dfForward <- as.data.frame(t(parseTest))
+#' yForward <- edgeR::DGEList(dfForward)
+#' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
+#' BlastParse(dgeList = yForward, blastRes = exOut)
+
+BlastParse <- function(DGEList, blastRes = "blastRes.out", threshold = 90) {
+  sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
+  blastResult <- read.table(blastRes, sep = "\t", quote = "€", stringsAsFactors = FALSE)
+  blastResult$V3 <- as.numeric(blastResult$V3)
+  blastResult$V3[is.na(blastResult$V3)] <- 0 # If the input file contained empty values, assign them to 0
+  blastResult <- blastResult[blastResult$V3 > threshold,]
+  names(blastResult) <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "staxids", "sscinames", "scomnames")
+  blastResultUn <- blastResult[!duplicated(blastResult$qseqid),] # Retain only best hits
+  GetFirstItem <- function(name) { # Function that returns the first of items separated by semicolons
+    return(strsplit(as.character(name), split = ";")[[1]][1])
+  }
+  blastResultUn$staxids <- unlist(lapply(blastResultUn$staxids, GetFirstItem))
+  blastResultUn$sscinames <- unlist(lapply(blastResultUn$sscinames, GetFirstItem))
+  blastResultUn$scomnames <- unlist(lapply(blastResultUn$scomnames, GetFirstItem))
+  taxonomy <- list()
+  for(i in unique(blastResultUn$sscinames)) { # Get taxonomy locally
+    print(i) # Print current taxa
+    taxonomy[[i]] <- GetTaxonomy(i,
+                                 nameDump = MetaBAnalysis::compactNameDump,
+                                 nodeDump = MetaBAnalysis::compactNodeDump)
+  }
+  taxonomy <- do.call("rbind", taxonomy)
+  taxonomy <- cbind(rownames(taxonomy), taxonomy)
+  blastTax <- merge(blastResultUn, taxonomy, by.x = "sscinames", by.y = "V1", all.x = TRUE)
+  blastTax <- blastTax[, c(2,3,4,12, 1, 16:21)]
+  colnames(blastTax) <- c("id", "besthit", "identity", "e-value", "species", "family", "order", "class", "phylum", "kingdom", "superkingdom")
+  seqTax <- merge(sequences, blastTax, by.x = "id", by.y = "id", all.x = TRUE)
+  seqTax <- seqTax[order(as.numeric(gsub("[^0-9]+", "", seqTax$id))),]
+  seqTax$family <- factor(seqTax$family)
+  seqTax$order <- factor(seqTax$order)
+  seqTax$class <- factor(seqTax$class)
+  seqTax$phylum <- factor(seqTax$phylum)
+  seqTax$kingdom <- factor(seqTax$kingdom)
+  seqTax$superkingdom <- factor(seqTax$superkingdom)
+  return(seqTax)
+}
+
+
 
 #' Blast a given nucleotide sequence at NCBI
 #'
@@ -220,19 +297,24 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
 #' Fetch sequences based on species name and open it
 #'
 #' This function extracts sequences based on species names and writes to a file named
-#' current_sequence.txt that is opened to be edit with the functiont
+#' current_sequence.txt that is opened to be edit with the function
 #' file.edit.
 #'
 #' NB! this will overwrite any file named "current_sequence.txt" in
 #' your current working directory.
 #'
 #' @param speciesName string with species name
-#' @param blastResults dataframe with output from blastparse function
+#' @param blastResults dataframe with output from BlastParse function
 #'
 #' @return an open fasta file with sequence data
+#'
+#' @export
 
-QSeqGetter <- function(speciesName, blastResults = blastResY) {
-  species_seq <- paste0(">", blastResults[grepl(speciesName, blastResults$species),1], "\n", blastResults[grepl(speciesName, blastResults$species),2])
+QSeqGetter <- function(speciesName, blastResults) {
+  species_seq <- paste0(">",
+                        blastResults[grepl(speciesName, blastResults$species),1],
+                        "\n",
+                        blastResults[grepl(speciesName, blastResults$species),2])
   writeLines(species_seq, "current_sequence.txt")
   file.edit("current_sequence.txt")
 }
@@ -246,15 +328,16 @@ QSeqGetter <- function(speciesName, blastResults = blastResY) {
 #'
 #' @param searchName string with species name
 #' @param seqNumber number of sequences from searchName to retain
+#' @param blastResults dataframe with output from BlastParse function
 #' @return a dataframe with blast results
 #' @export
 
-QSBLAST <- function(searchName, seqNumber = 3) {
-        QSeqGetter(searchName)
-        blastOut <- MultiBlaster("current_sequence.txt", seqNumber,
-                resultNumber = 10, viewChoice = "yes"
-        )
-        return(blastOut)
+QSBLAST <- function(searchName, seqNumber = 3, blastResults, ...) {
+  QSeqGetter(searchName, blastResults)
+  blastOut <- MultiBlaster("current_sequence.txt",
+                           seqNumber,
+                           resultNumber = 10)
+  return(blastOut)
 }
 
 

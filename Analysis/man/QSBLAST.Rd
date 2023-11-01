@@ -4,12 +4,14 @@
 \alias{QSBLAST}
 \title{Extract sequence using species name and blast at NCBI}
 \usage{
-QSBLAST(searchName, seqNumber = 3)
+QSBLAST(searchName, seqNumber = 3, blastResults, ...)
 }
 \arguments{
 \item{searchName}{string with species name}
 
 \item{seqNumber}{number of sequences from searchName to retain}
+
+\item{blastResults}{dataframe with output from BlastParse function}
 }
 \value{
 a dataframe with blast results

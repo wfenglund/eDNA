@@ -14,7 +14,7 @@ and the functionality might differ slightly).
 ## Howto use
 Note: if you use this script several times, make sure to execute it
 in different folders, otherwise the script will mix the md5sums from
-both your current and previous download(s) (this would impact step 5).
+both your current and previous download(s) (this would impact step 4).
 
 1. Clone this directory including the scripts and the input.txt file
    to your local machine.
@@ -36,7 +36,7 @@ both your current and previous download(s) (this would impact step 5).
    
    `bash awsdownload.sh`
    
-5. Once the data has been downloaded you should see a list of files
+4. Once the data has been downloaded you should see a list of files
    followed by ": OK" if everything is okay.
    ```
    Unknown_v1BMK230919-BP392-ZX01-060001-01_good_1.fq.gz: OK

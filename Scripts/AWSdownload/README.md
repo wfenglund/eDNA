@@ -3,7 +3,7 @@ We get the sequence files delivered in Amazon S3 buckets and these
 needs to be installed using
 [aws-cli](https://aws.amazon.com/cli/). This tool is a bit cumbersome
 to use and here we supply a shell script that automate downloading the
-data and run checksums to make sure alle files are intact after download.
+data and run checksums to make sure all files are intact after download.
 
 The script assumes that aws-cli is installed and available in your
 executable path. In addition you need to be on an operative system
@@ -12,14 +12,13 @@ tool, but on bsd systems, including Mac os X, the tool is called `md5`
 and the functionality might differ slightly).
 
 ## Howto use
+Note: if you use this script several times, make sure to execute it
+in different folders, otherwise the script will mix the md5sums from
+both your current and previous download(s) (this would impact step 5).
 
-1. Create .aws folder in your your home folder
-   `mkdir .aws`
-2. Create a credentials file to the this folder
-   `touch ~/.aws/credentials`
-3. Clone this directory including the scripts and the input.txt file
+1. Clone this directory including the scripts and the input.txt file
    to your local machine.
-4. Copy the Index, access key id, and secret access key from the BMK
+2. Copy the Index, access key id, and secret access key from the BMK
    delivery mail and save these three rows in the input.txt file.
    After this you should have a input.txt file looking as follows.
    
@@ -30,12 +29,14 @@ and the functionality might differ slightly).
                    
    Secret Access key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```
-5. With the awsdownload.sh script and the input.txt in folder where
-   you want data to be saved. Run the script like this:
+3. With the awsdownload.sh script and the input.txt in folder where
+   you want data to be saved. Run the script like this (note that this
+   will create a folder named "~/.aws" on your system containing your
+   aws credentials):
    
    `bash awsdownload.sh`
    
-6. Once the data has been downloaded you should see a list of files
+5. Once the data has been downloaded you should see a list of files
    followed by ": OK" if everything is okay.
    ```
    Unknown_v1BMK230919-BP392-ZX01-060001-01_good_1.fq.gz: OK

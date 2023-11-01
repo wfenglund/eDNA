@@ -36,7 +36,7 @@ and the functionality might differ slightly).
    `bash awsdownload.sh`
    
 6. Once the data has been downloaded you should see a list of files
-   followed by : OK if everything is okay.;=
+   followed by ": OK" if everything is okay.
    ```
    Unknown_v1BMK230919-BP392-ZX01-060001-01_good_1.fq.gz: OK
    Unknown_v1BMK230919-BP392-ZX01-060001-01_good_2.fq.gz: OK

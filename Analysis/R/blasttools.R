@@ -132,15 +132,15 @@ OnlineBlaster <- function(nucleotide) {
   print("- Sequence is submitted to BLAST.")
   print(paste("Request ID:", blast_RID))
   
-  result_session <- rvest::html_session(result_url)
+  result_session <- rvest::session(result_url)
   result_form <- rvest::html_form(result_session)
   result_settings <- rvest::html_form_set(result_form[[1]], RID = blast_RID)
-  result_submit <- rvest::submit_form(session = result_session, form = result_settings) # submit a search for the results using the request ID
+  result_submit <- rvest::session_submit(x = result_session, form = result_settings) # submit a search for the results using the request ID
   read_result <- rvest::read_html(result_submit)
   result_output <- as.data.frame(rvest::html_table(read_result, fill = TRUE)[5])
   print("Waiting for results from BLAST...")
   while(ncol(result_output) == 0) { # try to retrieve the results until blast is done
-    result_submit <- rvest::submit_form(session = result_session, form = result_settings)
+    result_submit <- rvest::session_submit(x = result_session, form = result_settings)
     read_result <- rvest::read_html(result_submit)
     result_output <- as.data.frame(rvest::html_table(read_result, fill = TRUE)[5])
     if(length(html_elements(read_result, "#noRes")) > 0) {

@@ -377,4 +377,12 @@ groupSeqs / primerSeqs # ratio of filtered sequences belonging to target group
 
 sampleMetaData <- list(rawSeqs = rawSeqs, primerSeqs = primerSeqs, groupSeqs = groupSeqs)
 saveRDS(sampleMetaData, "sampleMetaData.rds")
+
+sum(groupClean[1:4, -c(1, 2)]) / sum(groupClean[, -c(1, 2)]) # see what percentage of counts the top four species accounts for
+```
+
+### Generate excel-sheet with counts from "groupClean":
+```{r}
+library(writexl)
+write_xlsx(groupClean, "projekt_xyz_sekvensantal.xlsx")
 ```

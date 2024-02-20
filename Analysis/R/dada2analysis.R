@@ -159,15 +159,23 @@ SumRes <- function(blastRes, counts, taxGroup) {
     sumAll <- aggregate(genesCounts[,13:colStart],
                         by = list(genesCounts$species),
                         FUN = sum)
-    sumAll <- sumAll[order(rowSums(sumAll[,-1]), decreasing = TRUE),]
+    if(ncol(sumAll) > 2) {
+      sumAll <- sumAll[order(rowSums(sumAll[,-1]), decreasing = TRUE),]
+    } else {
+      sumAll <- sumAll[order(sumAll[, -1], decreasing = TRUE), ]
+    }
     names(sumAll) <- c("Species", names(sumAll)[-1])
     genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
 
     sumFilt <- aggregate(genesCountsFilt[,13:colStart],
                          by = list(genesCountsFilt$species),
                          FUN = sum)
-    sumFilt <- sumFilt[order(rowSums(sumFilt[,-1]), decreasing =
+    if(ncol(sumFilt) > 2) {
+      sumFilt <- sumFilt[order(rowSums(sumFilt[,-1]), decreasing =
                                                         TRUE),]
+      } else {
+      sumFilt <- sumFilt[order(sumFilt[, -1], decreasing = TRUE), ]
+    }
     names(sumFilt) <- c("Species", names(sumFilt)[-1])
     resCount <- list(sumAll = sumAll, sumFilt = sumFilt)
     names(resCount) <- c("AllSpecies", "TargetGroup")

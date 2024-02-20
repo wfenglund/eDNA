@@ -332,6 +332,7 @@ library(MetaBAnalysis)
   # groupNotes <- groupNotes[!grepl("drop", groupNotes$Notes),] # Drop all species that has the word "drop" in their notes
   # groupNotes <- RemoveLowFreqSeqs(groupNotes, 0.5) # remove species within samples below a threshold
   # groupNotes <- groupNotes[groupNotes$Percent_all >= 0.5,] # remove species from all samples below a threshold
+  # groupNotes <- groupNotes[rowSums(groupNotes[, -c(1, 2, 3, 4)]) > 0,] # remove all species with zero counts in all samples
   groupClean <- groupNotes[,-c(1, 3)]
   columnNames <- colnames(groupClean)
   columnNames[grepl("Species", columnNames)] <- "Latin"
@@ -377,4 +378,12 @@ groupSeqs / primerSeqs # ratio of filtered sequences belonging to target group
 
 sampleMetaData <- list(rawSeqs = rawSeqs, primerSeqs = primerSeqs, groupSeqs = groupSeqs)
 saveRDS(sampleMetaData, "sampleMetaData.rds")
+
+sum(groupClean[1:4, -c(1, 2)]) / sum(groupClean[, -c(1, 2)]) # see what percentage of counts the top four species accounts for
+```
+
+### Generate excel-sheet with counts from "groupClean":
+```{r}
+library(writexl)
+write_xlsx(groupClean, "projekt_xyz_sekvensantal.xlsx")
 ```

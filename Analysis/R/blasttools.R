@@ -309,7 +309,7 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
 #'
 #' @export
 
-QSeqGetter <- function(speciesName, blastResults) {
+QSeqGetter <- function(speciesName, blastResults = blastResY) {
   species_seq <- paste0(">",
                         blastResults[grepl(speciesName, blastResults$species),1],
                         "\n",
@@ -331,7 +331,7 @@ QSeqGetter <- function(speciesName, blastResults) {
 #' @return a dataframe with blast results
 #' @export
 
-QSBLAST <- function(searchName, seqNumber = 3, blastResults, ...) {
+QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
   QSeqGetter(searchName, blastResults)
   blastOut <- MultiBlaster("current_sequence.txt",
                            seqNumber,

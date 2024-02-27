@@ -4,7 +4,7 @@
 \alias{SeqPlot}
 \title{Create a simple plot showing count data from individual samples}
 \usage{
-SeqPlot(data, sample, title, species)
+SeqPlot(data, sample, title, species, log10 = TRUE)
 }
 \arguments{
 \item{data}{dataframe with count data}
@@ -14,6 +14,11 @@ SeqPlot(data, sample, title, species)
 \item{title}{title to be put on the plot}
 
 \item{species}{colname in data that holds species names}
+
+\item{log10}{should axis with counts be displayed in log scale}
+}
+\value{
+a ggplot2 barplot
 }
 \description{
 Create a simple plot showing count data from individual samples

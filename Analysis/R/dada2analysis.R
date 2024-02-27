@@ -4,7 +4,8 @@
 #' with default parameters.
 #' @param forward vector with file names for filtered forward reads
 #' @param reverse vector with file names for filtered reverse reads
-#' @param muthread Should the analysis use multithreads for analysis
+#' @param muThread Should the analysis use multithreads for analysis
+#' @param justConcatenate If reads pairs do not overlap set to TRUE
 #'
 #' @return a matrix with count for all inferred sequence variants
 #' @import dada2
@@ -36,94 +37,6 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
   return(seqtabNochim)
 }
 
-#' Parse blast output
-#'
-#' This function will create a dataframe with sequence names,
-#' sequences similarity from blast analysis together with taxonomic
-#' information from NCBI.
-#'
-#' NB! for optimal performance make sure to get a token from NCBI as
-#' the function relies on a online query to the NCBI taxonomic
-#' database. It hence also needs an active internet connection to
-#' work.
-#'
-#'
-#' @param dgeList count data in the form of DGEList
-#' @param blastRes file with blast results assumes blastoutput option
-#' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
-#' sstart send evalue bitscore staxids sscinames scomnames"
-#'
-#' @importFrom taxize tax_name
-#' @importFrom gtools mixedorder
-#'
-#' @return seqTax a dataframe with annotation of results from sequence
-#' comparisons using blast.
-#'
-#' @export
-#'
-#' @examples
-#' fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
-#' package = "MetaBAnalysis")
-#' fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
-#' package = "MetaBAnalysis")
-#' parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
-#' dfForward <- as.data.frame(t(parseTest))
-#' yForward <- edgeR::DGEList(dfForward)
-#' BlastParse(dgeList = yForward, blastRes = system.file("extdata", "test.out", package = "MetaBAnalysis"))
-
-BlastParse <- function(dgeList, blastRes) {
-  sequences <- data.frame(id = paste("Seq", 1:length(rownames(dgeList)), sep = "_"),
-                          seq = row.names(dgeList))
-  blastRes <- read.table(blastRes, sep = "\t", quote = "'", stringsAsFactors = FALSE)
-  names(blastRes) <- c("qseqid",
-                        "sseqid",
-                        "pident",
-                        "length",
-                        "mismatch",
-                        "gapopen",
-                        "qstart",
-                        "qend",
-                        "sstart",
-                        "send",
-                        "evalue",
-                        "bitscore",
-                        "staxids",
-                        "sscinames",
-                        "scomnames")
-  blastResUn <- blastRes[!duplicated(blastRes$qseqid),] # Retain only
-                                                        # best hits check manually
-  taxonomy <- taxize::tax_name(sci = levels(factor(blastResUn$sscinames)),
-                               get = c("superkingdom",
-                                       "phylum",
-                                       "order",
-                                       "class",
-                                       "family"),
-                               db = "ncbi")
-
-  blastTax <- merge(blastResUn, taxonomy, by.x = "sscinames", by.y = "query", all.x = TRUE)
-  blastTax <- blastTax[,c(2,3,4,12, 1, 17:21)]
-  names(blastTax) <- c("id",
-                        "besthit",
-                        "identity",
-                        "e-value",
-                        "species",
-                        "superkingdom",
-                        "phylum",
-                        "order",
-                        "class",
-                        "family")
-  seqTax <- merge(sequences, blastTax, by.x = "id", by.y = "id", all.x = TRUE)
-  seqTax$id <- as.character(seqTax$id)
-  seqTax <- seqTax[gtools::mixedorder(seqTax$id),]
-  seqTax$superkingdom <- factor(seqTax$superkingdom)
-  seqTax$phylum <- factor(seqTax$phylum)
-  seqTax$order <- factor(seqTax$order)
-  seqTax$class <- factor(seqTax$class)
-  seqTax$family <- factor(seqTax$family)
-  return(seqTax)
-}
-
-
 #' Create dataframe with sequences, counts and species
 #'
 #' This functions merge annotation of sequences with count matrix and
@@ -134,12 +47,14 @@ BlastParse <- function(dgeList, blastRes) {
 #' by a simple selection at class level. Check the fish implementation
 #' in the code of the function.
 #'
+#' @importFrom stats aggregate
 #' @param blastRes dataframe created with the blastParse function
 #' @param counts dataframe with count data
 #' @param taxGroup name for taxonomic group to be extracted from the
 #' total data
 #' @return resCount dataframe with sequence, taxonomy and counts
 #'
+#' @export
 
 SumRes <- function(blastRes, counts, taxGroup) {
     taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia",

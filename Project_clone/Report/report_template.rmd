@@ -187,8 +187,6 @@ arterna stod för över `r commonPercent`% av fisksekvenserna (se figur 1). Övr
 av låg kvalitet eller var spår av andra organismer.
 
 ```{r tab2, echo=FALSE}
-library(MetaBAnalysis)
-
 fixedCaption <- paste("Tabell över latinska och svenska namn på de arter av fisk som identifierats i proverna. Om sekvenser ej kunde bestämmas till exakt art anges i dessa fall ", "sp.", " eller vilka två arter det kan handla om.", sep = "'")
 
 kable(groupSpecies, "latex",
@@ -201,37 +199,16 @@ kable(groupSpecies, "latex",
 ```{r fig1, fig.height=14, fig.width=11, echo=FALSE, fig.cap="Fördelning i procent av antal sekvenser från olika arter av fisk i proverna. Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover."}
 library(MetaBAnalysis)
 
-FractionPlot2 <- function(data, species, col) {
-  par(mar=c(4.1, 9.1, 4.1, 12.1), xpd=TRUE, las = 1, srt = 0, cex = 1.2)
-  props <- prop.table(as.matrix(data), margin=2) * 100
-  barplot(props, col = col, horiz = T)
-  legend("topright", legend = species, bty ="n", fill = col, inset=c(-0.25,.01))
-}
-
 groupCounts <- groupData[,3:ncol(groupData)]
 groupCounts <- cbind(groupCounts, Totalt = rowSums(groupCounts))
 figureSpecies <- data.frame(groupSpecies)$Svenska
 
-FractionPlot2(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25)
+FractionPlot(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25)
 ```
 
 ```{r include=FALSE}
-library(gridExtra)
-
 groupDataFrame <- as.data.frame(groupData)
 names(groupDataFrame) <- make.names(names(groupDataFrame))
-
-seqPlot2 <- function(data, sample, title, arter) {
-    Fs <- data[data[,sample]>0,]
-    P1 <- ggplot(Fs) + 
-    geom_point(aes_string(y = sample, x = forcats::fct_reorder(as.factor(Fs[,arter]), Fs[,sample]) )) + 
-    xlab("") + ylab("") + 
-    scale_y_log10() + 
-    theme_bw() + 
-    coord_flip() + 
-    labs(title = title)
-    P1
-}
 
 options(scipen = 5)
 
@@ -239,7 +216,7 @@ groupDataFrame$Latin <- str_pad(groupDataFrame$Latin, side = "left", pad = " ", 
 
 indplots <- list()
 for(i in names(groupDataFrame[3:ncol(groupDataFrame)])) {
-   indplots[[i]] <- seqPlot2(data = groupDataFrame, sample = i, title = i, arter = "Swedish")
+   indplots[[i]] <- seqPlot(data = groupDataFrame, sample = i, title = i, arter = "Swedish")
 }
 ```
 

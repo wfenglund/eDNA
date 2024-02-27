@@ -16,6 +16,9 @@ as the appear in the data}
 
 \item{inset}{inset values for legend plot}
 }
+\value{
+a barplot
+}
 \description{
 Creates a simple horizontal barplot showing the fraction of the
 total from each species.

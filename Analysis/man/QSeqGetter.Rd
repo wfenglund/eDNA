@@ -4,21 +4,19 @@
 \alias{QSeqGetter}
 \title{Fetch sequences based on species name and open it}
 \usage{
-QSeqGetter(speciesName, blastResults = blastResY)
+QSeqGetter(speciesName, blastResults)
 }
 \arguments{
 \item{speciesName}{string with species name}
 
-\item{blastResults}{dataframe with output from blastparse function}
+\item{blastResults}{dataframe with output from BlastParse function}
 }
 \value{
 an open fasta file with sequence data
 }
 \description{
-This function assumes that there is an object names blastResY in
-the current workspace. From this object the column with species
-information is queried and written to a file named
-current_sequence.txt that is opened to be edit with the functiont
+This function extracts sequences based on species names and writes to a file named
+current_sequence.txt that is opened to be edit with the function
 file.edit.
 }
 \details{

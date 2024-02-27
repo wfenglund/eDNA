@@ -3,6 +3,8 @@
 #' Creates a simple horizontal barplot showing the fraction of the
 #' total from each species.
 #'
+#' @import graphics
+#'
 #' @param data a dataframe with count data from each species on rows
 #' @param species a vector with names of the species in the same order
 #' as the appear in the data
@@ -12,8 +14,6 @@
 #' @return a barplot
 #' @export
 #'
-
-#' 
 #' @examples
 #' data <- data.frame(A = 1:3, B = c(1,4,0), C = c(2, 3, 7))
 #' species <- c("Abramis brama", "Salmo trutta", "Salmo salar")
@@ -37,26 +37,42 @@ FractionPlot <- function(data, species, col, inset = c(-0.3, 0.01)) {
 #' @param sample name of sample to be plotted
 #' @param title title to be put on the plot
 #' @param species colname in data that holds species names
+#' @param log10 should axis with counts be displayed in log scale
 #' @returns a ggplot2 barplot
 #'
-#' @import forcats ggplot2 
-#' @export 
-#' 
+#' @import forcats ggplot2
+#' @export
+#'
 
-SeqPlot <- function(data, sample, title, species) {
+SeqPlot <- function(data, sample, title, species, log10 = TRUE) {
     Fs <- data[data[,sample]>0,]
     speciesFactors <- forcats::fct_reorder(as.factor(Fs[,species]))
-
-    sequencePlot <- ggplot(Fs) + 
-        geom_point(aes_string(y = sample,
-                              x = speciesFactors,
-                              Fs[,sample])) +
-        xlab("") +
-        ylab("") + 
-        scale_y_log10() + 
-        theme_bw() + 
-        coord_flip() + 
-        labs(title = title)
+    if (log10) {
+            sequencePlot <- ggplot(Fs) +
+                    geom_point(aes_string(
+                            y = sample,
+                            x = speciesFactors,
+                            Fs[, sample]
+                    )) +
+                    xlab("") +
+                    ylab("") +
+                    scale_y_log10() +
+                    theme_bw() +
+                    coord_flip() +
+                    labs(title = title)
+    } else {
+            sequencePlot <- ggplot(Fs) +
+                    geom_point(aes_string(
+                            y = sample,
+                            x = speciesFactors,
+                            Fs[, sample]
+                    )) +
+                    xlab("") +
+                    ylab("") +
+                    theme_bw() +
+                    coord_flip() +
+                    labs(title = title)
+    }
     sequencePlot
 }
 

@@ -177,8 +177,8 @@ sekvenseringsbibliotek. Biblioteken skapades av CGI och sekvenserades av
 Novogene på ett NovaSeq-instrument (PE150).
 
 ### Fauna
-Det totala antalet sekvenser efter sekvensering av proverna var `r totalSeqs` miljoner,
-där enskilda prov hade mellan `r minSeqs` miljoner och `r maxSeqs` miljoner sekvenser. Omkring `r primerPercent`% av sekvenserna
+Det totala antalet fragment efter sekvensering av proverna var `r totalSeqs` miljoner,
+där enskilda prov hade mellan `r minSeqs` miljoner och `r maxSeqs` miljoner fragment. Omkring `r primerPercent`% av sekvenserna
 innehöll förväntade primers och var av tillräckligt god kvalitet för att
 bibehållas i analysen. Av dessa tillhörde ~`r groupPercent`% av sekvenserna fisk. Fiskarna
 tillhörde `r speciesNo` olika arter (se tabell 2 samt se figur 1 och `r seqPlotFigures` för
@@ -227,7 +227,10 @@ Undersökning med eDNA på `r samplesNo` vattenprover har identifierat sekvenser
 från `r speciesNo` olika arter av fisk. Vi bedömer att indikationen visar på att
 de detekterade arterna med stor sannolikhet finns närvarande i proverna, men
 vill styrka att ett negativt resultat (alltså arter som inte detekterades) inte
-nödvändigtvis garanterar att dessa arter är frånvarande.
+nödvändigtvis garanterar att dessa arter är frånvarande. Vi vill även påpeka att
+DNA rör sig med vatten och att en eventuell lokal uppströms kan påverka vilka
+arter som detekteras vid en lokal nedströms. Detta kan vara värt att ha i åtanke
+vid tolkning av inventeringsresultat från eDNA.
 
 ```{r echo=FALSE, fig.height=13, fig.width=9, fig.cap="Antal sekvenser från varje art av fisk i enskilda prover."}
 # options(scipen = 5)

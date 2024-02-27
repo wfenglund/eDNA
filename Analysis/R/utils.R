@@ -230,3 +230,30 @@ GetTaxonomy <- function(searchName, nameDump, nodeDump) {
   }
   return(taxList)
 }
+
+#' Collect sample names and paths
+#'
+#' @param directory path to directory with filtered data
+#'
+#' @return list with sample paths and sample names
+#'
+#' @export
+#'
+
+CollectData <- function(directory = "../Filtered_data") {
+  forward <- list.files(directory, pattern = "_1.fastq.gz", full.names = TRUE)
+  reverse <- list.files(directory, pattern = "_2.fastq.gz", full.names = TRUE)
+  forwardC <- list.files(directory, pattern = "_1.fastq.gz", full.names = FALSE)
+  reverseC <- list.files(directory, pattern = "_2.fastq.gz", full.names = FALSE)
+  filtFs <- file.path(directory, "filtered", forwardC)
+  filtRs <- file.path(directory, "filtered", reverseC)
+  allSamples <- unique(gsub("_outFwd_1.fastq.gz|_outRev_1.fastq.gz", "", forwardC))
+  output <- list(Forward = forward,
+                 Reverse = reverse,
+                 ForwardC = forwardC,
+                 ReverseC = reverseC,
+                 FiltFs = filtFs,
+                 FiltRs = filtRs,
+                 Samples = allSamples)
+  return(output)
+}

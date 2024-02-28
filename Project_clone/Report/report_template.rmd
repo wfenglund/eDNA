@@ -33,7 +33,6 @@ options(knitr.kable.NA = '')
 ```{r setup2, include=FALSE}
 library(tidyverse)
 library(ggplot2)
-library(gridExtra)
 library(cowplot)
 library(kableExtra)
 library(readxl)
@@ -234,7 +233,7 @@ vid tolkning av inventeringsresultat från eDNA.
 
 ```{r echo=FALSE, fig.height=13, fig.width=9, fig.cap="Antal sekvenser från varje art av fisk i enskilda prover."}
 # options(scipen = 5)
-grid.arrange(grobs = indplots[1:6], ncol = 1)
+plot_grid(plotlist = indplots[1:5], align = "v", axis = "l", ncol = 1)
 ```
 
 ## Projektinformation

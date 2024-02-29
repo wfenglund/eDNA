@@ -11,8 +11,7 @@ header-includes:
    - \pagestyle{fancy}
    - \fancyhf{}
    - \lhead{\includegraphics[height=1cm]{./NRM_figures/naturhistoriska-riksmuseet2.png}}
-   - \rhead{Diarienummer 4.1-XXX-20XX}
-   - \chead{Månad 20XX}
+   - \rhead{Centrum för Genetisk Identifiering}
    - \lfoot{}
    - \usepackage{xcolor}
    - \definecolor{forest}{RGB}{60, 122, 94}
@@ -24,10 +23,13 @@ biblio-style: unsrt
 ---
 ```{r setup, include=FALSE, cache = FALSE}
 require("knitr")
-## setting working directory
-#opts_knit$set(root.dir = "~/Desktop/InsectGenome")
 knitr::opts_chunk$set(eval = TRUE, echo = FALSE, warning = FALSE)
 options(knitr.kable.NA = '')
+
+# To place figure where they are declared in the source file:
+#knitr::opts_chunk$set(fig.pos = "h", out.extra = "") # try
+#knitr::opts_chunk$set(fig.pos = "H", out.extra = "") # force
+
 ```
 
 ```{r setup2, include=FALSE}
@@ -43,12 +45,13 @@ library(MetaBAnalysis)
 ```{r}
 # User set variables:
 projectTitle <- "eDNA-detektering av fisk" # The title of this report
-projectId <- "4.1-XXX-20XX" # Diarienummer assigned to this project
+projectId <- "XXX-20XX" # Diarienummer assigned to this project
 authorName <- "FIRST LAST" # Name of the author of this report
 
 samplesNo <- "NUMBER" # Number of samples analysed
 blastDate <- "MONTH 20XX" # Which month the blast search was performed
 sampleCutoff <- "0,X" # Within sample cutoff
+
 ```
 
 \begin{titlepage}

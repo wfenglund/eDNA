@@ -46,7 +46,7 @@ FractionPlot <- function(data, species, col, inset = c(-0.3, 0.01)) {
 
 SeqPlot <- function(data, sample, title, species, log10 = TRUE) {
     Fs <- data[data[,sample]>0,]
-    speciesFactors <- forcats::fct_reorder(as.factor(Fs[,species]))
+    speciesFactors <- forcats::fct_reorder(as.factor(Fs[, species]), Fs[, sample])
     if (log10) {
             sequencePlot <- ggplot(Fs) +
                     geom_point(aes_string(

@@ -203,7 +203,7 @@ groupCounts <- groupData[,3:ncol(groupData)]
 groupCounts <- cbind(groupCounts, Totalt = rowSums(groupCounts))
 figureSpecies <- data.frame(groupSpecies)$Svenska
 
-FractionPlot(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25)
+FractionPlot(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25, inset = c(-0.3, 0.01))
 ```
 
 ```{r include=FALSE}

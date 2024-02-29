@@ -164,7 +164,7 @@ BlastParse <- function(DGEList, blastRes.out, threshold = 90) {
   blastTax <- blastTax[, c(2,3,4,12, 1, 16:21)]
   colnames(blastTax) <- c("id", "besthit", "identity", "e-value", "species", "family", "order", "class", "phylum", "kingdom", "superkingdom")
   seqTax <- merge(sequences, blastTax, by.x = "id", by.y = "id", all.x = TRUE)
-  seqTax <- seqTax[order(gsub("[^0-9]+", "", seqTax$id)),]
+  seqTax <- seqTax[order(as.numeric(gsub("[^0-9]+", "", seqTax$id))),]
   seqTax$family <- factor(seqTax$family)
   seqTax$order <- factor(seqTax$order)
   seqTax$class <- factor(seqTax$class)

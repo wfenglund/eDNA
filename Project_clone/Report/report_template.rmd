@@ -29,7 +29,6 @@ options(knitr.kable.NA = '')
 # To place figure where they are declared in the source file:
 #knitr::opts_chunk$set(fig.pos = "h", out.extra = "") # try
 #knitr::opts_chunk$set(fig.pos = "H", out.extra = "") # force
-
 ```
 
 ```{r setup2, include=FALSE}
@@ -51,7 +50,6 @@ authorName <- "FIRST LAST" # Name of the author of this report
 samplesNo <- "NUMBER" # Number of samples analysed
 blastDate <- "MONTH 20XX" # Which month the blast search was performed
 sampleCutoff <- "0,X" # Within sample cutoff
-
 ```
 
 \begin{titlepage}
@@ -205,7 +203,7 @@ groupCounts <- groupData[,3:ncol(groupData)]
 groupCounts <- cbind(groupCounts, Totalt = rowSums(groupCounts))
 figureSpecies <- data.frame(groupSpecies)$Svenska
 
-FractionPlot(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25)
+FractionPlot(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25, inset = c(-0.3, 0.01))
 ```
 
 ```{r include=FALSE}
@@ -214,11 +212,11 @@ names(groupDataFrame) <- make.names(names(groupDataFrame))
 
 options(scipen = 5)
 
-groupDataFrame$Latin <- str_pad(groupDataFrame$Latin, side = "left", pad = " ", width = max(nchar(groupDataFrame$Latin)))
+groupDataFrame$Swedish <- str_pad(groupDataFrame$Swedish, side = "left", pad = " ", width = max(nchar(groupDataFrame$Swedish)))
 
 indplots <- list()
 for(i in names(groupDataFrame[3:ncol(groupDataFrame)])) {
-   indplots[[i]] <- seqPlot(data = groupDataFrame, sample = i, title = i, arter = "Swedish")
+   indplots[[i]] <- SeqPlot(data = groupDataFrame, sample = i, title = i, species = "Swedish", log10 = FALSE)
 }
 ```
 

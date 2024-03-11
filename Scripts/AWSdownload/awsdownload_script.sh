@@ -18,7 +18,11 @@ echo "aws_access_key_id = "${awsinfo[1]} >> $credentials_file
 echo "aws_secret_access_key = "${awsinfo[2]} >> $credentials_file
 
 # Download data from amazon S3:
-aws s3 cp s3://${awsinfo[0]} . --recursive
+#aws s3 cp s3://${awsinfo[0]} . --recursive
 
+# Get location of the md5 sums reported by BMK
+md5file=$(find . -iname '*md5*' -type f)
+
+datapath=$(dirname $md5file)
 # Check md5sums:
-(cd */*/Data/; md5sum --check data_md5.txt)
+(cd $datapath; md5sum --check data_md5.txt)

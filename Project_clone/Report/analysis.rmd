@@ -200,12 +200,6 @@ CombineSpecies <- function(species1, species2, dataFrame) {
   return(dataFrame)
 }
 
-QSeqGetter <- function(species_name) {
-  species_seq <- paste0(">", blastResY[grepl(species_name, blastResY$species),1], "\n", blastResY[grepl(species_name, blastResY$species),2])
-  writeLines(species_seq, "current_sequence.txt")
-  file.edit("current_sequence.txt")
-}
-
 RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
   output <- data.frame(dataset[, 1:4])
   for(column in 5:ncol(dataset)){
@@ -215,6 +209,33 @@ RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
   }
   colnames(output) <- colnames(dataset)
   return(output)
+}
+```
+
+# Rstudio functions:
+```{r}
+# These functions are intended to aid the curation step by allowing the user to
+# quickly write the sequences related to a species name to a file (QSeqGetter)
+# or blast the top three sequences related to a species and View the results in
+# Rstudio (QSBLAST).
+library(MetaBAnalysis)
+
+QSeqGetter <- function(speciesName, blastResults = blastResY) {
+  species_seq <- paste0(">",
+                        blastResults[grepl(speciesName, blastResults$species),1],
+                        "\n",
+                        blastResults[grepl(speciesName, blastResults$species),2])
+  writeLines(species_seq, "current_sequence.txt")
+  file.edit("current_sequence.txt")
+}
+
+QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
+  QSeqGetter(searchName, blastResults)
+  blastOut <- MultiBlaster("current_sequence.txt",
+                           seqNumber,
+                           resultNumber = 10,
+                           viewChoice = "YES")
+  View(blastOut)
 }
 ```
 

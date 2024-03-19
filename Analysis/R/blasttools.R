@@ -289,7 +289,7 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
     }
     Sys.sleep(2) # avoid spamming NCBI
   }
-    if(toupper(viewChoice) == "YES") { # if View-formatted output is requested
+  if(toupper(viewChoice) == "YES") { # if View-formatted output is requested
     return(viewResults)
   } else {
     return(blastResults)

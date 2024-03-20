@@ -286,11 +286,14 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
 
     if(toupper(viewChoice) == "YES") {
       viewResults <- rbind(viewResults, blastOut[, -c(2)], c("", "", "", "", "", "", "", "", "", "", "", ""))
-      View(viewResults)
     }
     Sys.sleep(2) # avoid spamming NCBI
   }
-  return(blastResults)
+  if(toupper(viewChoice) == "YES") { # if View-formatted output is requested
+    return(viewResults)
+  } else {
+    return(blastResults)
+  }
 }
 
 #' Fetch sequences based on species name and open it
@@ -335,8 +338,9 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
   QSeqGetter(searchName, blastResults)
   blastOut <- MultiBlaster("current_sequence.txt",
                            seqNumber,
-                           resultNumber = 10)
-  return(blastOut)
+                           resultNumber = 10,
+                           viewChoice = "YES")
+  View(blastOut)
 }
 
 

@@ -59,9 +59,9 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
 SumRes <- function(blastRes, counts, taxGroup) {
     taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia",
                              "Insecta", "Mammalia", "Arachnida",
-                             "Gastropoda")
+                             "Gastropoda", "Archaea|Bacteria")
     names(taxGroupConv) <- c("Fish", "Birds", "Mussels", "Insects",
-                             "Mammals", "Spiders", "Snails")
+                             "Mammals", "Spiders", "Snails", "Prokaryota")
 
     if(!taxGroup %in% names(taxGroupConv)) {
         cat("This taxonomic group is not supported.\n
@@ -80,8 +80,11 @@ SumRes <- function(blastRes, counts, taxGroup) {
       sumAll <- sumAll[order(sumAll[, -1], decreasing = TRUE), ]
     }
     names(sumAll) <- c("Species", names(sumAll)[-1])
-    genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
-
+    if(taxGroup == "Prokaryota") {
+      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$superkingdom), ]
+    } else {
+      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
+    }
     sumFilt <- aggregate(genesCountsFilt[,13:colStart],
                          by = list(genesCountsFilt$species),
                          FUN = sum)

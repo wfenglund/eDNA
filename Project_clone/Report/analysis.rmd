@@ -96,7 +96,7 @@ saveRDS(yAll, file = "yAll.rds")
 
 ### Export fasta-file:
 ```{r}
-ExportFasta(yAll, "y_test.fa")
+ExportFasta(yAll, "y_test.fa", minLength = 50)
 ```
 
 ### BLAST-tools (Experimental):

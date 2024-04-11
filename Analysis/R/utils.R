@@ -15,6 +15,7 @@ TranslateTaxa <- function(nameVector) {
 #'
 #' @param countData a dataframe with DNA sequences as row names
 #' @param fileName the name of the file to write data to
+#' @param minLength a minimum length criteria for sequences to pass through
 #'
 #' @return the number of sequences written to the file as well as the actual file on disk
 #' @import Biostrings
@@ -25,9 +26,10 @@ TranslateTaxa <- function(nameVector) {
 #' countData <- data.frame(A = 1:3, B = 4:6, C = 7:9, row.names = c("ACTG", "TTAG", "GGCA"))
 #' ExportFasta(countData, fileName = "junk.fa")
 
-ExportFasta <- function(countData, fileName) {
+ExportFasta <- function(countData, fileName, minLength = 50) {
   seqs <- row.names(countData)
   names(seqs) <- paste("Seq", 1:length(seqs), sep = "_")
+  seqs <- seqs[nchar(seqs) >= minLength]
   Biostrings::writeXStringSet(DNAStringSet(seqs, use.names = TRUE), fileName)
   sprintf("Wrote %s sequences to %s", length(seqs), fileName)
 }

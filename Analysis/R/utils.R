@@ -30,6 +30,7 @@ ExportFasta <- function(countData, fileName, minLength = 50, maxLength = 1000) {
   seqs <- row.names(countData)
   names(seqs) <- paste("Seq", 1:length(seqs), sep = "_")
   seqs <- seqs[nchar(seqs) >= minLength]
+  seqs <- seqs[nchar(seqs) <= maxLength]
   Biostrings::writeXStringSet(DNAStringSet(seqs, use.names = TRUE), fileName)
   sprintf("Wrote %s sequences to %s", length(seqs), fileName)
 }

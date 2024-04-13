@@ -26,7 +26,7 @@ TranslateTaxa <- function(nameVector) {
 #' countData <- data.frame(A = 1:3, B = 4:6, C = 7:9, row.names = c("ACTG", "TTAG", "GGCA"))
 #' ExportFasta(countData, fileName = "junk.fa")
 
-ExportFasta <- function(countData, fileName, minLength = 50) {
+ExportFasta <- function(countData, fileName, minLength = 50, maxLength = 1000) {
   seqs <- row.names(countData)
   names(seqs) <- paste("Seq", 1:length(seqs), sep = "_")
   seqs <- seqs[nchar(seqs) >= minLength]

@@ -16,6 +16,8 @@ TranslateTaxa <- function(nameVector) {
 #' @param countData a dataframe with DNA sequences as row names
 #' @param fileName the name of the file to write data to
 #' @param minLength a minimum length criteria for sequences to pass through
+#' @param maxLength a maximum length criteria for sequences to pass through
+
 #'
 #' @return the number of sequences written to the file as well as the actual file on disk
 #' @import Biostrings

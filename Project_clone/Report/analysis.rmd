@@ -242,6 +242,7 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
 ### Curate the results:
 ```{r}
 library(MetaBAnalysis)
+library(rvest)
 {
   groupNotes <- allResults$TargetGroup
   # groupNotes <- RenameSpecies("old latin name", "new latin name", groupNotes)

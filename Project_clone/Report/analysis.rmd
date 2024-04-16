@@ -96,7 +96,7 @@ saveRDS(yAll, file = "yAll.rds")
 
 ### Export fasta-file:
 ```{r}
-ExportFasta(yAll, "y_test.fa")
+ExportFasta(yAll, "y_test.fa", minLength = 50, maxLength = 1000)
 ```
 
 ### BLAST-tools (Experimental):
@@ -242,6 +242,7 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
 ### Curate the results:
 ```{r}
 library(MetaBAnalysis)
+library(rvest)
 {
   groupNotes <- allResults$TargetGroup
   # groupNotes <- RenameSpecies("old latin name", "new latin name", groupNotes)

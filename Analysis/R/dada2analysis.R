@@ -6,6 +6,7 @@
 #' @param reverse vector with file names for filtered reverse reads
 #' @param muThread Should the analysis use multithreads for analysis
 #' @param justConcatenate If reads pairs do not overlap set to TRUE
+#' @param minOverlap minimum overlap between reads when merging pairs
 #'
 #' @return a matrix with count for all inferred sequence variants
 #' @import dada2
@@ -20,7 +21,7 @@
 #' package = "MetaBAnalysis")
 #' DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 DadaAnalysis <- function(forward, reverse, muThread = TRUE,
-  justConcatenate = FALSE) {
+  justConcatenate = FALSE, minOverlap = 5) {
   errF <- dada2::learnErrors(forward, multithread = muThread)
   errR <- dada2::learnErrors(reverse, multithread = muThread)
   derepsF <- dada2::derepFastq(forward)
@@ -28,7 +29,8 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
   dadaF <- dada2::dada(derepsF, err = errF, multithread = muThread)
   dadaR <- dada2::dada(derepsR, err = errR, multithread = muThread)
   mergers <- dada2::mergePairs(dadaF, derepsF, dadaR, derepsR,
-                               verbose = TRUE, justConcatenate = justConcatenate)
+                               verbose = TRUE, justConcatenate = justConcatenate,
+                               minOverlap = minOverlap)
   seqTab <- dada2::makeSequenceTable(mergers)
   seqtabNochim <- dada2::removeBimeraDenovo(seqTab,
                                              method = "consensus",

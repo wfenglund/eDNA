@@ -59,7 +59,7 @@ saveRDS(out, file = "out.rds")
 
 #outCombined <- OutCombine(out, primer1$Samples) # Summarize forward and reverse for every sample
 
-forwardCounts2 <- DadaAnalysis(primer1$FiltFs, primer1$FiltRs, justConcatenate = TRUE)
+forwardCounts2 <- DadaAnalysis(primer1$FiltFs, primer1$FiltRs, justConcatenate = TRUE, minOverlap = 5)
 ```
 
 ### Convert and modify  matrix "forwardCounts2" to DGEList "yAll":

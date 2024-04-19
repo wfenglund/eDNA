@@ -4,7 +4,7 @@
 \alias{QSBLAST}
 \title{Extract sequence using species name and blast at NCBI}
 \usage{
-QSBLAST(searchName, seqNumber = 3, blastResults, ...)
+QSBLAST(searchName, seqNumber = 3, blastResults = blastResY)
 }
 \arguments{
 \item{searchName}{string with species name}

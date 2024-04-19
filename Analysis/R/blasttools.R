@@ -334,8 +334,8 @@ QSeqGetter <- function(speciesName, blastResults = blastResY) {
 #' @return a dataframe with blast results
 #' @export
 
-QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
-  QSeqGetter(searchName, blastResults)
+QSBLAST <- function(searchName, seqNumber = 3) {
+  QSeqGetter(searchName)
   blastOut <- MultiBlaster("current_sequence.txt",
                            seqNumber,
                            resultNumber = 10,

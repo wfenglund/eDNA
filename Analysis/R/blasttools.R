@@ -12,7 +12,7 @@
 #' This function is not needed if you have version 1.0 of the
 #' MetaBAnalysis package.
 #'
-#' @param dgeList count data in the form of DGEList
+#' @param DGEList count data in the form of DGEList
 #' @param blastRes file with blast results assumes blastoutput option
 #' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
 #' sstart send evalue bitscore staxids sscinames scomnames"
@@ -36,11 +36,11 @@
 #' dfForward <- as.data.frame(t(parseTest))
 #' yForward <- edgeR::DGEList(dfForward)
 #' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
-#' BlastParse(dgeList = yForward, blastRes = exOut)
+#' BlastParseNCBI(DGEList = yForward, blastRes = exOut)
 
-BlastParseNCBI <- function(dgeList, blastRes) {
-  sequences <- data.frame(id = paste("Seq", 1:length(rownames(dgeList)), sep = "_"),
-                          seq = row.names(dgeList))
+BlastParseNCBI <- function(DGEList, blastRes) {
+  sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"),
+                          seq = row.names(DGEList))
   blastRes <- read.table(blastRes, sep = "\t", quote = "'", stringsAsFactors = FALSE)
   names(blastRes) <- c("qseqid",
                         "sseqid",
@@ -126,7 +126,7 @@ BlastParseNCBI <- function(dgeList, blastRes) {
 #' dfForward <- as.data.frame(t(parseTest))
 #' yForward <- edgeR::DGEList(dfForward)
 #' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
-#' BlastParse(dgeList = yForward, blastRes = exOut)
+#' BlastParse(DGEList = yForward, blastRes = exOut)
 
 BlastParse <- function(DGEList, blastRes = "blastRes.out", threshold = 90) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
@@ -164,8 +164,6 @@ BlastParse <- function(DGEList, blastRes = "blastRes.out", threshold = 90) {
   seqTax$superkingdom <- factor(seqTax$superkingdom)
   return(seqTax)
 }
-
-
 
 #' Blast a given nucleotide sequence at NCBI
 #'
@@ -313,36 +311,37 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
 #' @export
 
 QSeqGetter <- function(speciesName, blastResults = blastResY) {
-  species_seq <- paste0(">",
-                        blastResults[grepl(speciesName, blastResults$species),1],
-                        "\n",
-                        blastResults[grepl(speciesName, blastResults$species),2])
-  writeLines(species_seq, "current_sequence.txt")
-  file.edit("current_sequence.txt")
+        species_seq <- paste0(
+                ">",
+                blastResults[grepl(speciesName, blastResults$species), 1],
+                "\n",
+                blastResults[grepl(speciesName, blastResults$species), 2]
+        )
+        writeLines(species_seq, "current_sequence.txt")
+        file.edit("current_sequence.txt")
 }
 
 #' Extract sequence using species name and blast at NCBI
 #'
-#' Assumes that there is an object named blastResY in the current
-#' workspace. Use QseqGetter to fetch sequences from this object based
-#' on species name and then use Multiblaster to blast the sequences
-#' at NCBI.
+#' Assumes that there is a dataframe that have been created by the
+#' BlastParse function saved in the current workspace. Use QseqGetter
+#' to fetch sequences from this object based on species name and then
+#' use Multiblaster to blast the sequences at NCBI.
 #'
 #' @param searchName string with species name
 #' @param seqNumber number of sequences from searchName to retain
-#' @param blastResults dataframe with output from BlastParse function
+#' @param ... additional arguments parsed to QSeqGetter
 #' @return a dataframe with blast results
 #' @export
 
-QSBLAST <- function(searchName, seqNumber = 3) {
-  QSeqGetter(searchName)
+QSBLAST <- function(searchName, seqNumber = 3, ...) {
+  QSeqGetter(searchName, ...)
   blastOut <- MultiBlaster("current_sequence.txt",
                            seqNumber,
                            resultNumber = 10,
                            viewChoice = "YES")
   View(blastOut)
 }
-
 
 #' Save MultiBlaster result as suitable for BlastParse analysis
 #'

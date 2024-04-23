@@ -4,10 +4,10 @@
 \alias{BlastParseNCBI}
 \title{Parse blast output}
 \usage{
-BlastParseNCBI(dgeList, blastRes)
+BlastParseNCBI(DGEList, blastRes)
 }
 \arguments{
-\item{dgeList}{count data in the form of DGEList}
+\item{DGEList}{count data in the form of DGEList}
 
 \item{blastRes}{file with blast results assumes blastoutput option
 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
@@ -40,5 +40,5 @@ parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 dfForward <- as.data.frame(t(parseTest))
 yForward <- edgeR::DGEList(dfForward)
 exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
-BlastParse(dgeList = yForward, blastRes = exOut)
+BlastParseNCBI(DGEList = yForward, blastRes = exOut)
 }

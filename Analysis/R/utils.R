@@ -166,9 +166,10 @@ SpeciesPercent <- function(dataFrame) {
 #'
 #' Filter data below a certain threshold
 #'
-#' @param dataFrame a dataframe where the first column contains
+#' @param dataset a dataframe where the first column contains
 #' species names and the rest of the dataframe contains integers >= 0
 #' @param threshold cut-off value in percent
+#' @param subValue value to replace data below threshold with
 #' @return dataframe with filtered data removed.
 #'
 #' @export
@@ -182,7 +183,7 @@ SpeciesPercent <- function(dataFrame) {
 #'                        Random3 = LETTERS[1:3],
 #'                        Sample1 = c(10010, 3921, 2),
 #'                        Sample2 = c(9900, 5, 1301))
-#' RemoveLowFreqsSeqs(dataset = testdata,
+#' RemoveLowFreqSeqs(dataset = testdata,
 #'                    threshold = 0.1,
 #'                    subValue = 0)
 

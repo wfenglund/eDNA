@@ -4,7 +4,13 @@
 \alias{DadaAnalysis}
 \title{Convenience function to run dada2}
 \usage{
-DadaAnalysis(forward, reverse, muThread = TRUE, justConcatenate = FALSE)
+DadaAnalysis(
+  forward,
+  reverse,
+  muThread = TRUE,
+  justConcatenate = FALSE,
+  minOverlap = 5
+)
 }
 \arguments{
 \item{forward}{vector with file names for filtered forward reads}
@@ -14,6 +20,8 @@ DadaAnalysis(forward, reverse, muThread = TRUE, justConcatenate = FALSE)
 \item{muThread}{Should the analysis use multithreads for analysis}
 
 \item{justConcatenate}{If reads pairs do not overlap set to TRUE}
+
+\item{minOverlap}{minimum overlap between reads when merging pairs}
 }
 \value{
 a matrix with count for all inferred sequence variants

@@ -4,7 +4,7 @@
 \alias{QSBLAST}
 \title{Extract sequence using species name and blast at NCBI}
 \usage{
-QSBLAST(searchName, seqNumber = 3, blastResults, ...)
+QSBLAST(searchName, seqNumber = 3, blastResults = blastResY)
 }
 \arguments{
 \item{searchName}{string with species name}
@@ -13,12 +13,9 @@ QSBLAST(searchName, seqNumber = 3, blastResults, ...)
 
 \item{blastResults}{dataframe with output from BlastParse function}
 }
-\value{
-a dataframe with blast results
-}
 \description{
-Assumes that there is an object named blastResY in the current
-workspace. Use QseqGetter to fetch sequences from this object based
-on species name and then use Multiblaster to blast the sequences
-at NCBI.
+Assumes that there is a dataframe that have been created by the
+BlastParse function saved in the current workspace. Use QseqGetter
+to fetch sequences from this object based on species name and then
+use Multiblaster to blast the sequences at NCBI.
 }

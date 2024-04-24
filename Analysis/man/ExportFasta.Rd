@@ -4,12 +4,16 @@
 \alias{ExportFasta}
 \title{Export DNA sequence as fasta file}
 \usage{
-ExportFasta(countData, fileName)
+ExportFasta(countData, fileName, minLength = 50, maxLength = 1000)
 }
 \arguments{
 \item{countData}{a dataframe with DNA sequences as row names}
 
 \item{fileName}{the name of the file to write data to}
+
+\item{minLength}{a minimum length criteria for sequences to pass through}
+
+\item{maxLength}{a maximum length criteria for sequences to pass through}
 }
 \value{
 the number of sequences written to the file as well as the actual file on disk

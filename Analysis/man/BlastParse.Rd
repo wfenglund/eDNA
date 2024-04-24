@@ -42,5 +42,5 @@ parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 dfForward <- as.data.frame(t(parseTest))
 yForward <- edgeR::DGEList(dfForward)
 exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
-BlastParse(dgeList = yForward, blastRes = exOut)
+BlastParse(DGEList = yForward, blastRes = exOut)
 }

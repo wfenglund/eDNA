@@ -4,7 +4,7 @@
 \alias{QSeqGetter}
 \title{Fetch sequences based on species name and open it}
 \usage{
-QSeqGetter(speciesName, blastResults)
+QSeqGetter(speciesName, blastResults = blastResY)
 }
 \arguments{
 \item{speciesName}{string with species name}

@@ -7,10 +7,12 @@
 RemoveLowFreqSeqs(dataset, threshold, subValue = 0)
 }
 \arguments{
+\item{dataset}{a dataframe where the first column contains
+species names and the rest of the dataframe contains integers >= 0}
+
 \item{threshold}{cut-off value in percent}
 
-\item{dataFrame}{a dataframe where the first column contains
-species names and the rest of the dataframe contains integers >= 0}
+\item{subValue}{value to replace data below threshold with}
 }
 \value{
 dataframe with filtered data removed.
@@ -27,7 +29,7 @@ testdata <- data.frame(Species = c("Esox lucius",
                        Random3 = LETTERS[1:3],
                        Sample1 = c(10010, 3921, 2),
                        Sample2 = c(9900, 5, 1301))
-RemoveLowFreqsSeqs(dataset = testdata,
+RemoveLowFreqSeqs(dataset = testdata,
                    threshold = 0.1,
                    subValue = 0)
 }

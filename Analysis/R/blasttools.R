@@ -330,12 +330,11 @@ QSeqGetter <- function(speciesName, blastResults = blastResY) {
 #'
 #' @param searchName string with species name
 #' @param seqNumber number of sequences from searchName to retain
-#' @param ... additional arguments parsed to QSeqGetter
-#' @return a dataframe with blast results
+#' @param blastResults dataframe with output from BlastParse function
 #' @export
 
-QSBLAST <- function(searchName, seqNumber = 3, ...) {
-  QSeqGetter(searchName, ...)
+QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
+  QSeqGetter(searchName, blastResults)
   blastOut <- MultiBlaster("current_sequence.txt",
                            seqNumber,
                            resultNumber = 10,

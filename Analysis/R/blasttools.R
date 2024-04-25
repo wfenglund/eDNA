@@ -294,54 +294,6 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
   }
 }
 
-#' Fetch sequences based on species name and open it
-#'
-#' This function extracts sequences based on species names and writes to a file named
-#' current_sequence.txt that is opened to be edit with the function
-#' file.edit.
-#'
-#' NB! this will overwrite any file named "current_sequence.txt" in
-#' your current working directory.
-#'
-#' @param speciesName string with species name
-#' @param blastResults dataframe with output from BlastParse function
-#'
-#' @return an open fasta file with sequence data
-#'
-#' @export
-
-QSeqGetter <- function(speciesName, blastResults = blastResY) {
-        species_seq <- paste0(
-                ">",
-                blastResults[grepl(speciesName, blastResults$species), 1],
-                "\n",
-                blastResults[grepl(speciesName, blastResults$species), 2]
-        )
-        writeLines(species_seq, "current_sequence.txt")
-        file.edit("current_sequence.txt")
-}
-
-#' Extract sequence using species name and blast at NCBI
-#'
-#' Assumes that there is a dataframe that have been created by the
-#' BlastParse function saved in the current workspace. Use QseqGetter
-#' to fetch sequences from this object based on species name and then
-#' use Multiblaster to blast the sequences at NCBI.
-#'
-#' @param searchName string with species name
-#' @param seqNumber number of sequences from searchName to retain
-#' @param blastResults dataframe with output from BlastParse function
-#' @export
-
-QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
-  QSeqGetter(searchName, blastResults)
-  blastOut <- MultiBlaster("current_sequence.txt",
-                           seqNumber,
-                           resultNumber = 10,
-                           viewChoice = "YES")
-  View(blastOut)
-}
-
 #' Save MultiBlaster result as suitable for BlastParse analysis
 #'
 #' Writes at tab delimited file to current working directory with all

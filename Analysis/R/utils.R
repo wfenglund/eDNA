@@ -20,7 +20,7 @@ TranslateTaxa <- function(nameVector) {
 
 #'
 #' @return the number of sequences written to the file as well as the actual file on disk
-#' @import Biostrings
+#' @importFrom Biostrings DNAStringSet writeXStringSet
 #'
 #' @export
 #'
@@ -262,4 +262,97 @@ CollectData <- function(directory = "../Filtered_data") {
                  FiltRs = filtRs,
                  Samples = allSamples)
   return(output)
+}
+
+#' Summarize rows of forward and reverse counts in "out"-object
+#'
+#' The samples argument can be generated with the function [CollectData].
+#'
+#' .
+#' @param dataset "out" object from the filtering step of the dada2 analysis
+#' @param samples vector with sample names
+#' @return dataframe with the number of reads per sample before and after filter
+#'
+#' @export
+#'
+
+OutCombine <- function(dataset, samples) {
+  counter <- 0
+  for(i in samples) {
+    if (counter == 0) {
+      output <- data.frame()
+      counter <- counter + 1
+    }
+    output <- rbind(output, S2 = colSums(dataset[grepl(x = rownames(dataset), pattern = i),]))
+    rownames(output)[rownames(output) == "1"] <- i
+    rownames(output)[rownames(output) == "S2"] <- i
+  }
+  names(output) <- c("reads.in", "reads.out")
+  return(output)
+}
+
+#' Combine forward and reverse runs if reverse runs are present
+#'
+#' @param dataset path to directory with filtered data
+#' @param samples vector with sample names
+#' @return dataframe with the number reads in every sample
+#'
+
+DFCombine <- function(dataset, samples) {
+  counter <- 0
+  for(i in samples) {
+    if (counter == 0) {
+      output <- data.frame(S2 = rowSums(dataset[, grepl(x = names(dataset), pattern = i)]))
+      counter <- counter + 1
+      names(output)[names(output) == "S2"] <- i
+      next
+    }
+    output <- cbind(output, S2 = rowSums(dataset[, grepl(x = names(dataset), pattern = i)]))
+    names(output)[names(output) == "S2"] <- i
+  }
+  return(output)
+}
+
+#' Create DGEList
+#'
+#' @param dataset matrix with count data. Samples on rows and variants over columns
+#' @param samples vector of sample names
+#' @param forwardSamples vector of forward read files
+#' @return DGEList
+#'
+#' @export
+#'
+
+MakeDGEList <- function(dataset, samples, forwardSamples) { # Function that combines forward and reverse runs if reverse runs are present
+  datasetDF <- as.data.frame(t(dataset))
+  if(any(grepl("outRev", forwardSamples))) {
+    dfAll <- DFCombine(datasetDF, samples)
+    yAll <- edgeR::DGEList(dfAll)
+  } else {
+    yAll <- edgeR::DGEList(datasetDF)
+  }
+  return(yAll)
+}
+
+#' Collect raw fragment counts from FastQC output
+#'
+#' @param searchFolder path to folder with FastQC output files
+#' @param searchPattern file ending for forward reads
+#' @return dataframe with fragment counts
+#'
+#' @export
+#'
+
+getRawSeqs <- function(searchFolder = "../Pre_analysis", searchPattern = "1_fastqc.html") { # Function that extracts raw forward reads from fastqc reports
+  rawPaths <- list.files(path = searchFolder, pattern = searchPattern, full.names = TRUE)
+  rawFiles <- lapply(rawPaths, rvest::read_html)
+  getRawTable <- function(inFile) {
+    inTable <- as.data.frame(rvest::html_table(inFile, fill = TRUE)[1]) # select first table in report
+    outTable <- data.frame(filename = inTable[inTable$Measure == "Filename", 2], nreads = inTable[inTable$Measure == "Total Sequences", 2])
+    return(outTable)
+  }
+  rawTables <- lapply(rawFiles, getRawTable)
+  allTable <- do.call("rbind", rawTables)
+  allTable$nreads <- as.numeric(allTable$nreads)
+  return(allTable)
 }

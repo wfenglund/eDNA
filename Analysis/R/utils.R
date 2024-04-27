@@ -6,6 +6,7 @@
 #'
 #' @return a vector that contains Swedish vernacular names corresponding to the input vector of scientific latin name
 #' @export
+#'
 TranslateTaxa <- function(nameVector) {
   return(MetaBAnalysis::all_names$Swedish[match(nameVector,
                                                 MetaBAnalysis::all_names$Latin)])
@@ -17,7 +18,6 @@ TranslateTaxa <- function(nameVector) {
 #' @param fileName the name of the file to write data to
 #' @param minLength a minimum length criteria for sequences to pass through
 #' @param maxLength a maximum length criteria for sequences to pass through
-
 #'
 #' @return the number of sequences written to the file as well as the actual file on disk
 #' @importFrom Biostrings DNAStringSet writeXStringSet
@@ -27,7 +27,7 @@ TranslateTaxa <- function(nameVector) {
 #' @examples
 #' countData <- data.frame(A = 1:3, B = 4:6, C = 7:9, row.names = c("ACTG", "TTAG", "GGCA"))
 #' ExportFasta(countData, fileName = "junk.fa")
-
+#'
 ExportFasta <- function(countData, fileName, minLength = 50, maxLength = 1000) {
   seqs <- row.names(countData)
   names(seqs) <- paste("Seq", 1:length(seqs), sep = "_")
@@ -59,6 +59,7 @@ ExportFasta <- function(countData, fileName, minLength = 50, maxLength = 1000) {
 #' @import readxl
 #'
 #' @export
+#'
 ImportMeta <- function(file) {
     proj1 <- read_excel(file, n_max = 2)
     proj1 <- as.data.frame(proj1)
@@ -81,7 +82,6 @@ ImportMeta <- function(file) {
                 ReadLength = proj4[2],
                 PairEnd    = proj4[3],
                 Samples    = proj5))
-
 }
 
 #' DropSpecies
@@ -96,6 +96,7 @@ ImportMeta <- function(file) {
 #' @return the given dataframe without the species specified when calling the
 #'   function.
 #' @export
+#'
 DropSpecies <- function(species, dataFrame) {
   dataFrame <- dataFrame[!grepl(species, dataFrame[,1]),]
   return(dataFrame)
@@ -111,6 +112,7 @@ DropSpecies <- function(species, dataFrame) {
 #'
 #' @return the given dataframe with the specified species renamed from the old name to the new name.
 #' @export
+#'
 RenameSpecies <- function(oldName, newName, dataFrame) {
   dataFrame[grepl(oldName, dataFrame[,1]),1] <- newName
   return(dataFrame)
@@ -126,6 +128,7 @@ RenameSpecies <- function(oldName, newName, dataFrame) {
 #'
 #' @return the given dataframe with the two species counts combined under the first name given.
 #' @export
+#'
 CombineSpecies <- function(species1, species2, dataFrame) {
   speciesSum <- dataFrame[grepl(species1, dataFrame[,4]),5:ncol(dataFrame)] + dataFrame[grepl(species2, dataFrame[,4]),5:ncol(dataFrame)]
   speciesSum <- cbind(dataFrame[grepl(species1, dataFrame[,4]),1:4], speciesSum)
@@ -154,7 +157,7 @@ CombineSpecies <- function(species1, species2, dataFrame) {
 #'                        Sample1 = c(1001, 3921, 109),
 #'                        Sample2 = c(99, 544, 130))
 #' SpeciesPercent(testdata)
-
+#'
 SpeciesPercent <- function(dataFrame) {
     countData <- dataFrame[,-1]
     countRatios <- rowSums(countData)/sum(countData)
@@ -186,7 +189,7 @@ SpeciesPercent <- function(dataFrame) {
 #' RemoveLowFreqSeqs(dataset = testdata,
 #'                    threshold = 0.1,
 #'                    subValue = 0)
-
+#'
 RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
   output <- data.frame(dataset[, 1:4])
   for(column in 5:ncol(dataset)){
@@ -212,11 +215,10 @@ RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
 #' @export
 #'
 #' @examples
-#'
 #' GetTaxonomy(searchName = "Esox lucius",
 #'             nameDump = compactNameDump,
 #'             nodeDump = compactNodeDump)
-
+#'
 GetTaxonomy <- function(searchName, nameDump, nodeDump) {
   if(grepl("\\.|'", searchName) || length(strsplit(searchName, split = " ")[[1]]) > 2) { # Look out for species with "sp.", quotations or more than two names
     searchName <- strsplit(searchName, split = " ")[[1]][1]
@@ -245,7 +247,6 @@ GetTaxonomy <- function(searchName, nameDump, nodeDump) {
 #'
 #' @export
 #'
-
 CollectData <- function(directory = "../Filtered_data") {
   forward <- list.files(directory, pattern = "_1.fastq.gz", full.names = TRUE)
   reverse <- list.files(directory, pattern = "_2.fastq.gz", full.names = TRUE)
@@ -268,14 +269,12 @@ CollectData <- function(directory = "../Filtered_data") {
 #'
 #' The samples argument can be generated with the function [CollectData].
 #'
-#' .
 #' @param dataset "out" object from the filtering step of the dada2 analysis
 #' @param samples vector with sample names
 #' @return dataframe with the number of reads per sample before and after filter
 #'
 #' @export
 #'
-
 OutCombine <- function(dataset, samples) {
   counter <- 0
   for(i in samples) {
@@ -297,7 +296,6 @@ OutCombine <- function(dataset, samples) {
 #' @param samples vector with sample names
 #' @return dataframe with the number reads in every sample
 #'
-
 DFCombine <- function(dataset, samples) {
   counter <- 0
   for(i in samples) {
@@ -322,7 +320,6 @@ DFCombine <- function(dataset, samples) {
 #'
 #' @export
 #'
-
 MakeDGEList <- function(dataset, samples, forwardSamples) { # Function that combines forward and reverse runs if reverse runs are present
   datasetDF <- as.data.frame(t(dataset))
   if(any(grepl("outRev", forwardSamples))) {
@@ -342,7 +339,6 @@ MakeDGEList <- function(dataset, samples, forwardSamples) { # Function that comb
 #'
 #' @export
 #'
-
 getRawSeqs <- function(searchFolder = "../Pre_analysis", searchPattern = "1_fastqc.html") { # Function that extracts raw forward reads from fastqc reports
   rawPaths <- list.files(path = searchFolder, pattern = searchPattern, full.names = TRUE)
   rawFiles <- lapply(rawPaths, rvest::read_html)

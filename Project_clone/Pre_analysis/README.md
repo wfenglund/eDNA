@@ -11,7 +11,7 @@ To generate a QC-report based on fastq-files in the "../Raw_data"-folder.
 ###### Trimming
 Run:
 ```
-$ python cutadapt_adapter.py
+$ python cutadapt_adapter.py | tee cutadapt_adapter.log
 ```
-To trim reads in fastq-files in the "../Data"-folder. Edit script in a text-editor to specify settings (primers, file format, etc.).
+To trim reads in fastq-files in the "../Data"-folder. Edit script in a text-editor to specify settings (primers, file format, etc.). Sending it via tee prints the output to standard out at the same time as it is all written to the cutadapt_adapter.log
 **Requirements:** Cutadapt.

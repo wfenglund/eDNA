@@ -136,10 +136,11 @@ CGI har fått i uppdrag av `r clientName` att med hjälp av eDNA (environmental 
 detektera vilka arter av fisk som finns i `r samplesNo` vattenprover.
 
 ## Material och metoder
-Prover togs av `r clientName`.
+Prover togs av `r clientName` med provtagningsmaterial från CGI. DNA från vatten fångades med ett Sylphium filter med porstorlek 0.8 µm.
+Efter filtrering tillsattes ATL-buffer och prover skickades till Naturhistoriska för fortsatt analys.
 
 ### Molekylära metoder
-DNA-extraktion utfördes med en Kingfisher flex extraktionsrobot och ett "Omega
+Proteinas K tillsattes till filter med ATL-buffer och prover inkuberades vid 56° i minst 4 timmar. DNA-extraktion utfördes därefter med en Kingfisher extraktionsrobot (model Duo prime eller Flex) och ett "Omega
 MagBind Blood and Tissue" DNA-extraktionskit enligt beskrivning från
 tillverkaren. För analyserna amplifierades en kort bit av mitokondrien med 
 primers (se Tabell 1) beskrivna i en tidigare studie [@miya2015mifish] med 
@@ -175,7 +176,7 @@ för att minska risken för falskt positiva träffar.
 PCR-reaktioner genererade rena amplifieringar av förväntad storlek i alla tre
 replikat för alla prover och bedömdes därmed lämpliga för att skapa
 sekvenseringsbibliotek. Biblioteken skapades av CGI och sekvenserades av
-Novogene på ett NovaSeq-instrument (PE150).
+BMKGene på ett NovaSeq-instrument (PE150).
 
 ### Fauna
 Det totala antalet fragment efter sekvensering av proverna var `r totalSeqs` miljoner,
@@ -225,10 +226,9 @@ for(i in names(groupDataFrame[3:ncol(groupDataFrame)])) {
 
 ## Sammanfattning
 Undersökning med eDNA på `r samplesNo` vattenprover har identifierat sekvenser
-från `r speciesNo` olika arter av fisk. Vi bedömer att indikationen visar på att
-de detekterade arterna med stor sannolikhet finns närvarande i proverna, men
-vill styrka att ett negativt resultat (alltså arter som inte detekterades) inte
-nödvändigtvis garanterar att dessa arter är frånvarande. Vi vill även påpeka att
+från `r speciesNo` olika arter av fisk. Vår bedömning är att
+de detekterade arterna med stor sannolikhet finns närvarande i proverna, men eDNA är indirekta spår vilket innebär att spår inte nödvändigtvis kommer från individer som lever på provtagen lokal. Vidare innebär avsaknad av arter (alltså arter som inte detekterades) inte
+nödvändigtvis innebär att dessa arter är frånvarande. Vi vill även påpeka att
 DNA rör sig med vatten och att en eventuell lokal uppströms kan påverka vilka
 arter som detekteras vid en lokal nedströms. Detta kan vara värt att ha i åtanke
 vid tolkning av inventeringsresultat från eDNA.

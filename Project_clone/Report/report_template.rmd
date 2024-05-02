@@ -47,6 +47,7 @@ projectTitle <- "eDNA-detektering av fisk" # The title of this report
 projectId <- "XXX-20XX" # Diarienummer assigned to this project
 authorName <- "FIRST LAST" # Name of the author of this report
 
+clientName <- "klient" # The name of the client
 samplesNo <- "NUMBER" # Number of samples analysed
 blastDate <- "MONTH 20XX" # Which month the blast search was performed
 sampleCutoff <- "0,X" # Within sample cutoff
@@ -131,11 +132,11 @@ seqPlotFigures <- "2-X" # Which figure numbers belong to the SeqPlots? e.G. "2" 
 ```
 
 ## Uppdrag
-CGI har fått i uppdrag av klient att med hjälp av eDNA (environmental DNA) 
+CGI har fått i uppdrag av `r clientName` att med hjälp av eDNA (environmental DNA) 
 detektera vilka arter av fisk som finns i `r samplesNo` vattenprover.
 
 ## Material och metoder
-Prover togs av klient.
+Prover togs av `r clientName`.
 
 ### Molekylära metoder
 DNA-extraktion utfördes med en Kingfisher flex extraktionsrobot och ett "Omega

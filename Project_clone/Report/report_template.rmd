@@ -228,7 +228,7 @@ for(i in names(groupDataFrame[3:ncol(groupDataFrame)])) {
 Undersökning med eDNA på `r samplesNo` vattenprover har identifierat sekvenser
 från `r speciesNo` olika arter av fisk. Vår bedömning är att
 de detekterade arterna med stor sannolikhet finns närvarande i proverna, men eDNA är indirekta spår vilket innebär att spår inte nödvändigtvis kommer från individer som lever på provtagen lokal. Vidare innebär avsaknad av arter (alltså arter som inte detekterades) inte
-nödvändigtvis innebär att dessa arter är frånvarande. Vi vill även påpeka att
+nödvändigtvis att dessa arter är frånvarande. Vi vill även påpeka att
 DNA rör sig med vatten och att en eventuell lokal uppströms kan påverka vilka
 arter som detekteras vid en lokal nedströms. Detta kan vara värt att ha i åtanke
 vid tolkning av inventeringsresultat från eDNA.

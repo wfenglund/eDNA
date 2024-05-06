@@ -21,7 +21,6 @@
 #' @importFrom taxize tax_name
 #' @importFrom gtools mixedorder
 #'
-#'
 #' @return seqTax a dataframe with annotation of results from sequence
 #' comparisons using blast.
 #'
@@ -37,7 +36,7 @@
 #' yForward <- edgeR::DGEList(dfForward)
 #' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
 #' BlastParseNCBI(DGEList = yForward, blastRes = exOut)
-
+#'
 BlastParseNCBI <- function(DGEList, blastRes) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"),
                           seq = row.names(DGEList))
@@ -127,7 +126,7 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' yForward <- edgeR::DGEList(dfForward)
 #' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
 #' BlastParse(DGEList = yForward, blastRes = exOut)
-
+#'
 BlastParse <- function(DGEList, blastRes = "blastRes.out", threshold = 90) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
   blastResult <- read.table(blastRes, sep = "\t", quote = "€", stringsAsFactors = FALSE)
@@ -189,7 +188,7 @@ BlastParse <- function(DGEList, blastRes = "blastRes.out", threshold = 90) {
 #' ntExample <- sample(LETTERS[c(1, 3, 7, 20)], size = 100, replace = TRUE)
 #' ntExample <- paste(ntExample, sep = "", collapse = "")
 #' OnlineBlaster(ntExample)
-
+#'
 OnlineBlaster <- function(nucleotide) {
   blast_url <- "https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome"
   result_url <- "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=GetSaved&RECENT_RESULTS=on"
@@ -255,7 +254,7 @@ OnlineBlaster <- function(nucleotide) {
 #' @examples
 #' Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
 #' MultiBlaster(fastaFile = Fastafile)
-
+#'
 MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice = "") {
   fastaString <- paste(readLines(fastaFile), collapse = "\n")
   fastaList <- strsplit(fastaString, split = ">")
@@ -309,7 +308,7 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
 #' Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
 #' inputDF <- MultiBlaster(fastaFile = Fastafile)
 #' BlastResWriter(inputDF = inputDF, outName = "MetaBanalysisTest.out")
-
+#'
 BlastResWriter <- function(inputDF, outName) {
   inputDF <- inputDF[!grepl("NA", row.names(inputDF)), ]
   inputDF$Per..Ident <- gsub("%", "", inputDF$Per..Ident)

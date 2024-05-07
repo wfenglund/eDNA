@@ -11,6 +11,7 @@
 #'   \item{Swedish}{Swedish name of species}
 #' }
 #' @source <https://namnochslaktskap.artfakta.se/>
+#'
 "all_names"
 
 #' Taxonomic names from NCBI
@@ -25,6 +26,7 @@
 #'   \item{V2}{Taxonomic name}
 #' }
 #' @source <https://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip>
+#'
 "compactNameDump"
 
 #' Taxonomic ranks related to nodes in the compactNameDump
@@ -39,6 +41,5 @@
 #'   \item{V3}{Taxonomic levels}
 #' }
 #' @source <https://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip>
+#'
 "compactNodeDump"
-
-

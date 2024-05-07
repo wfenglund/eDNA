@@ -20,6 +20,7 @@
 #' fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
 #' package = "MetaBAnalysis")
 #' DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+#'
 DadaAnalysis <- function(forward, reverse, muThread = TRUE,
   justConcatenate = FALSE, minOverlap = 5) {
   errF <- dada2::learnErrors(forward, multithread = muThread)
@@ -57,7 +58,7 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
 #' @return resCount dataframe with sequence, taxonomy and counts
 #'
 #' @export
-
+#'
 SumRes <- function(blastRes, counts, taxGroup) {
     taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia",
                              "Insecta", "Mammalia", "Arachnida",
@@ -102,4 +103,3 @@ SumRes <- function(blastRes, counts, taxGroup) {
     return(resCount)
     }
 }
-

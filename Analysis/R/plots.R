@@ -12,6 +12,7 @@
 #' @param inset inset values for legend plot
 #'
 #' @return a barplot
+#'
 #' @export
 #'
 #' @examples
@@ -20,7 +21,7 @@
 #' col <- c("blue", "orange", "grey")
 #' inset <- c(-0.3, 0.01)
 #' FractionPlot(data = data, species = species, col = col, inset = inset)
-
+#'
 FractionPlot <- function(data, species, col, inset = c(-0.3, 0.01)) {
     par(mar=c(4.1, 9.1, 4.1, 12.1),
         xpd=TRUE, las = 1, srt = 0, cex = 1.2)
@@ -41,9 +42,9 @@ FractionPlot <- function(data, species, col, inset = c(-0.3, 0.01)) {
 #' @returns a ggplot2 barplot
 #'
 #' @import forcats ggplot2
+#'
 #' @export
 #'
-
 SeqPlot <- function(data, sample, title, species, log10 = TRUE) {
     Fs <- data[data[,sample]>0,]
     speciesFactors <- forcats::fct_reorder(as.factor(Fs[, species]), Fs[, sample])

@@ -29,4 +29,5 @@ species <- c("Abramis brama", "Salmo trutta", "Salmo salar")
 col <- c("blue", "orange", "grey")
 inset <- c(-0.3, 0.01)
 FractionPlot(data = data, species = species, col = col, inset = inset)
+
 }

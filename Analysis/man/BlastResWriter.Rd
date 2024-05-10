@@ -23,4 +23,5 @@ function.
 Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
 inputDF <- MultiBlaster(fastaFile = Fastafile)
 BlastResWriter(inputDF = inputDF, outName = "MetaBanalysisTest.out")
+
 }

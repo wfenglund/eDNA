@@ -30,4 +30,5 @@ local blast database for larger datasets.
 \examples{
 Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
 MultiBlaster(fastaFile = Fastafile)
+
 }

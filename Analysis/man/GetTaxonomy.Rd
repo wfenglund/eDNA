@@ -21,8 +21,8 @@ Takes a species name and extract taxonomic information from compactNameDump
 and compactNodeDump available in the MetaBAnalysis package.
 }
 \examples{
-
 GetTaxonomy(searchName = "Esox lucius",
             nameDump = compactNameDump,
             nodeDump = compactNodeDump)
+
 }

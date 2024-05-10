@@ -17,6 +17,3 @@ dataframe with the number of reads per sample before and after filter
 \description{
 The samples argument can be generated with the function \link{CollectData}.
 }
-\details{
-.
-}

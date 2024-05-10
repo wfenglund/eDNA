@@ -24,4 +24,5 @@ Export DNA sequence as fasta file
 \examples{
 countData <- data.frame(A = 1:3, B = 4:6, C = 7:9, row.names = c("ACTG", "TTAG", "GGCA"))
 ExportFasta(countData, fileName = "junk.fa")
+
 }

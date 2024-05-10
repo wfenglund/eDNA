@@ -23,4 +23,5 @@ testdata <- data.frame(Species = c("Esox lucius",
                        Sample1 = c(1001, 3921, 109),
                        Sample2 = c(99, 544, 130))
 SpeciesPercent(testdata)
+
 }

@@ -32,4 +32,5 @@ testdata <- data.frame(Species = c("Esox lucius",
 RemoveLowFreqSeqs(dataset = testdata,
                    threshold = 0.1,
                    subValue = 0)
+
 }

@@ -43,4 +43,5 @@ dfForward <- as.data.frame(t(parseTest))
 yForward <- edgeR::DGEList(dfForward)
 exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
 BlastParse(DGEList = yForward, blastRes = exOut)
+
 }

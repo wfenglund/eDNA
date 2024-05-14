@@ -1,17 +1,45 @@
 import cgianpy
 import os
 import subprocess
+import argparse
+
+parser = argparse.ArgumentParser(prog = "cutadapt_adapter", description='Filter sequence reads using cutadapt')
+
+parser.add_argument('-p', '--project_name',
+                    default = 'proj_test',
+                    help = "Usually the journal number (diarienummer)")
+parser.add_argument('-f', '--primer_f',
+                    default = 'AAACTCGTGCCAGCCACC',
+                    help = "Sequence of the forward primer used to create the amplicon")
+parser.add_argument('-r', '--primer_r',
+                    default = 'GGGTATCTAATCCCAGTTTG',
+                    help = "Sequence of the reverse primer used to create the amplicon")
+parser.add_argument('-s', '--sequenced_by',
+                    default = 'bmk', choices = ['novo', 'scilife'],
+                    help = "Sequence center that generated the data")
+parser.add_argument('-a', '--anchored',
+                    default = 'no', choices = ['yes', 'no'],
+                    help = "Is the amplicon shorter than the read length")
+parser.add_argument('-b', '--reverse_flag',
+                    default = 'no', choices = ['yes', 'no'],
+                    help = "Is the sequence library generated directional")
+parser.add_argument('-R', '--reads_folder',
+                    default = '../Raw_data', choices = ['../Raw_data', '../Unfiltered_data'],
+                    help = "Path with the read data to be filtered")
+parser.add_argument('-W', '--write_folder',
+                    default = '../Filtered_data',
+                    help = "Folder to write the filtered data to (must exist)")
+args = parser.parse_args()
 
 ###Inputs:
-project_name = "proj_test"
-primer_f = "AAACTCGTGCCAGCCACC" # Forward primer (default = MiFish)
-primer_r = "GGGTATCTAATCCCAGTTTG" # Reverse primer (default = MiFish)
-###
-f_format = "novo" #scilife, novo or bmk
-anchored_flag = "yes" #yes or no
-reverse_flag = "yes" #yes or no
-reads_folder = "../Raw_data" # Location of raw fastq-file
-write_folder = "../Filtered_data" # Location where trimmed reads will be written
+project_name = args.title
+primer_f = args.primer_f
+primer_r = args.primer_r
+f_format = args.sequenced_by
+anchored_flag = args.anchored
+reverse_flag = args.reverse_flag
+reads_folder = args.reads_folder
+write_folder = args.write_folder
 
 ###Main:
 

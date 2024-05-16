@@ -38,6 +38,7 @@ library(cowplot)
 library(kableExtra)
 library(readxl)
 library(wesanderson)
+library(vegan)
 library(MetaBAnalysis)
 ```
 

@@ -208,6 +208,43 @@ figureSpecies <- data.frame(groupSpecies)$Svenska
 FractionPlot(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25, inset = c(-0.3, 0.01))
 ```
 
+```{r fig2, fig.height=7, fig.width=14, echo=FALSE, fig.cap="Simpsons diversitetsindex för varje prov. Simpson (1 - D) ger sannolikheten att två slumpmässiga sekvenser dragna ur ett prov tillhör samma art. En högre siffra föreslår en högre diversitet inom det provet."}
+PlotAlphaDiv <- function(plotData, dataNames, plotCol) {
+  if(length(plotData) == 1 && !is.list(plotData)) {
+    dataList <- as.list(plotData)
+  } else {
+    dataList <- plotData
+  }
+  .addSize <- function(group) {
+    name <- paste0(group[1], "\nn=", length(group[[2]]))
+    return(name)
+  }
+  newNames <- apply(X = cbind(dataNames, plotData), MARGIN = 1, FUN = .addSize)
+  ylabel <- ""
+  if(length(newNames) == 1) {ylabel <- newNames}
+  par(mar = c(4.1, 9.1, 4.1, 12.1), xpd = TRUE, las = 1, srt = 0, cex = 1.2, bty = "n")
+  boxplot(dataList, horizontal = TRUE, names = newNames, col = plotCol, las = 1)
+  text(-0.05, 1, ylabel, adj = 1)
+}
+
+# Format data:
+countsMatrix <- as.matrix(t(allResults$Clean[,-c(1, 2)]))
+
+# Calculate Simpson:
+simpValues <- vegan::diversity(x = countsMatrix, index = "simpson")
+
+# Group samples (optional):
+#group1 <- split(simpValues, c('a', 'b'))$a
+#group2 <- split(simpValues, c('a', 'b'))$b
+
+# Prepare plot variables:
+plotInput <- list(simpValues) # add several if needed
+plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
+plotPalette <- wesanderson::wes_palette("Zissou1")#[c(3, 1)]
+
+PlotAlphaDiv(plotData = plotInput, dataNames = plotNames, plotCol = plotPalette)
+```
+
 ```{r include=FALSE}
 groupDataFrame <- as.data.frame(groupData)
 names(groupDataFrame) <- make.names(names(groupDataFrame))

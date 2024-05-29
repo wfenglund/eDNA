@@ -72,11 +72,12 @@ allResults <- MetaBAnalysis::SumRes(blastRes = blastResY, counts = yAll$counts, 
 # Rstudio functions:
 ```{r}
 # These functions are intended to aid the curation step by allowing the user to
-# quickly write the sequences related to a species name to a file (QSeqGetter)
-# or blast the top three sequences related to a species and View the results in
-# Rstudio (QSBLAST).
+# quickly write the sequences related to a species name to a file (QSeqGetter
+# and QSSplit) or blast the top three sequences related to a species and View the
+# results in Rstudio (QSBLAST).
 library(MetaBAnalysis)
 
+# Write sequences to file
 QSeqGetter <- function(speciesName, blastResults = blastResY) {
   species_seq <- paste0(">",
                         blastResults[grepl(speciesName, blastResults$species),1],
@@ -86,6 +87,23 @@ QSeqGetter <- function(speciesName, blastResults = blastResY) {
   file.edit("current_sequence.txt")
 }
 
+# Write sequences to file and split sequences that contains 'NNNNNNNNNN'
+QSSplit <- function(speciesName, blastResults = blastResY) {
+  seqName <- blastResults[grepl(speciesName, blastResults$species),1]
+  seqFull <- blastResults[grepl(speciesName, blastResults$species),2]
+  seq1 <- unlist(strsplit(seqFull, "NNNNNNNNNN"))[1]
+  seq2 <- unlist(strsplit(seqFull, "NNNNNNNNNN"))[2]
+  species_seq <- paste0(">", seqName,
+                        "\n", seqFull, "\n",
+                        ">", seqName, ".1",
+                        "\n", seq1, "\n",
+                        ">", seqName, ".2",
+                        "\n", seq2)
+  writeLines(species_seq, "current_sequence.txt")
+  file.edit("current_sequence.txt")
+}
+
+# Blast the top three sequences of a species
 QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
   QSeqGetter(searchName, blastResults)
   blastOut <- MultiBlaster("current_sequence.txt",

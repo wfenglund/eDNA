@@ -92,7 +92,7 @@ QSSplit <- function(speciesName, blastResults = blastResY) {
   seqName <- blastResults[grepl(speciesName, blastResults$species),1]
   seqFull <- blastResults[grepl(speciesName, blastResults$species),2]
   seq1 <- lapply(strsplit(seqFull, "NNNNNNNNNN"), "[[", 1)
-  seq2 <- unlist(strsplit(seqFull, "NNNNNNNNNN"))[2]
+  seq2 <- lapply(strsplit(seqFull, "NNNNNNNNNN"), "[[", 2)
   species_seq <- paste0(">", seqName,
                         "\n", seqFull, "\n",
                         ">", seqName, ".1",

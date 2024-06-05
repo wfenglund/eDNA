@@ -114,33 +114,87 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
 }
 ```
 
+### Functions:
+```{r}
+### To be added to package:
+MakeNotes <- function(countsObject) {
+  colnames(countsObject)[colnames(countsObject) == "Species"] <- "Latin"
+  outObject <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(countsObject$Latin),
+                     countsObject)
+  outObject <- cbind(outObject[, c(1, 2)],
+                     Percent_all = SpeciesPercent(countsObject),
+                     outObject[, -c(1, 2)])
+  outObject <- cbind(Notes = rep("", nrow(outObject)), outObject)
+  outObject <- cbind(Reference = paste0("hit", 1:nrow(outObject)), outObject)
+  return(outObject)
+}
+  
+AddNote <- function(note, reference, countsObject) {
+  countsObject$Notes[countsObject$Reference == reference] <- note
+  return(countsObject)
+}
+
+TrimCutoffs <- function(countsObject, total = 0, within = 0) {
+  outObject <- countsObject[countsObject$Percent_all >= total,]
+  outObject <- RemoveLowFreqSeqs(outObject, within)
+  outObject <- outObject[rowSums(outObject[, -c(1:5)]) > 0,] # remove empty rows
+  return(outObject)
+}
+
+### To be updated in package:
+RenameSpecies <- function (oldName, newName, dataFrame) {
+  dataFrame$Latin[grepl(oldName, dataFrame$Latin)] <- newName # one changed row
+  return(dataFrame)
+}
+
+CombineSpecies <- function(ref1, ref2, dataFrame) {
+  speciesSum <- dataFrame[ref1 == dataFrame$Reference, 5:ncol(dataFrame)] +
+    dataFrame[ref2 == dataFrame$Reference, 5:ncol(dataFrame)]
+  speciesSum <- cbind(dataFrame[ref1 == dataFrame$Reference, 1:4], speciesSum)
+  names(speciesSum)[1:4] <- names(dataFrame[1:4])
+  dataFrame <- dataFrame[ref1 != dataFrame$Reference,]
+  dataFrame <- dataFrame[ref2 != dataFrame$Reference,]
+  dataFrame <- rbind(dataFrame, speciesSum)
+  dataFrame <- dataFrame[order(rowSums(dataFrame[, -c(1:5)]), decreasing = TRUE),]
+  return(dataFrame)
+}
+
+RemoveLowFreqSeqs <- function (dataset, threshold, subValue = 0) {
+    output <- data.frame(dataset[, 1:5])
+    for (column in 6:ncol(dataset)) {
+        ratio <- dataset[, column]/sum(dataset[, column]) * 100
+        dataset[ratio < threshold, column] <- subValue
+        output <- cbind(output, dataset[, column])
+    }
+    colnames(output) <- colnames(dataset)
+    return(output)
+}
+```
+
 ### Curate the results:
 ```{r}
 library(MetaBAnalysis)
 library(rvest)
+
 {
-  groupNotes <- allResults$TargetGroup
+  ### Create object:
+  groupNotes <- MakeNotes(allResults$TargetGroup)
+  
+  ### Take notes:
+  groupNotes <- AddNote("note", "hitX", groupNotes)
+  
+  ### Curate:
   # groupNotes <- RenameSpecies("old latin name", "new latin name", groupNotes)
-  groupNotes <- groupNotes[order(rowSums(groupNotes[,-1]), decreasing = TRUE),]
-  groupNotes <- cbind(Percent_all = SpeciesPercent(groupNotes), groupNotes)
-  groupNotes <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(groupNotes$Species), groupNotes)
-  # groupNotes[grepl("latin name", groupNotes$Species),1] <- "new common name"
-  groupNotes <- cbind(Notes = c(
-                                # edit here to correspond to the number of species in the groupNotes-object
-                                "", "", "", "", "",
-                                "", "", "", "", "",
-                                "", "", "", "", "",
-                                "", "", "", "", ""
-                                ), groupNotes) # add notes for different species
-  # groupNotes <- CombineSpecies("species to be kept", "species to be absorbed", groupNotes)
-  groupNotes <- groupNotes[order(rowSums(groupNotes[,-c(1, 2, 3, 4)]), decreasing = TRUE),]
+  # groupNotes <- CombineSpecies("hit to be kept", "hit to be absorbed", groupNotes)
+  groupNotes[grepl("hitX", groupNotes$Reference), 1] <- "new common name"
+  
+  ### Filter:
   # groupNotes <- groupNotes[!grepl("drop", groupNotes$Notes),] # Drop all species that has the word "drop" in their notes
-  # groupNotes <- RemoveLowFreqSeqs(groupNotes, 0.5) # remove species within samples below a threshold
-  # groupNotes <- groupNotes[groupNotes$Percent_all >= 0.5,] # remove species from all samples below a threshold
-  # groupNotes <- groupNotes[rowSums(groupNotes[, -c(1, 2, 3, 4)]) > 0,] # remove all species with zero counts in all samples
-  groupClean <- groupNotes[,-c(1, 3)]
+  # groupNotes <- TrimCutoffs(total = 0.5, within = 0.5, groupNotes) # trim species based on percentage cutoffs
+  
+  ### Create outputs:
+  groupClean <- groupNotes[, -c(1, 2, 3)]
   columnNames <- colnames(groupClean)
-  columnNames[grepl("Species", columnNames)] <- "Latin"
   # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
   names(groupClean) <- columnNames
   allResults$Clean <- groupClean

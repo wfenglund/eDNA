@@ -159,15 +159,13 @@ CombineSpecies <- function(ref1, ref2, dataFrame) {
   return(dataFrame)
 }
 
-RemoveLowFreqSeqs <- function (dataset, threshold, subValue = 0) {
-    output <- data.frame(dataset[, 1:5])
-    for (column in 6:ncol(dataset)) {
-        ratio <- dataset[, column]/sum(dataset[, column]) * 100
-        dataset[ratio < threshold, column] <- subValue
-        output <- cbind(output, dataset[, column])
-    }
-    colnames(output) <- colnames(dataset)
-    return(output)
+RemoveLowFreqSeqs <- function(countsObject, threshold) {
+  DoCutoff <- function(column, cutoff) {
+    column[prop.table(column) < cutoff] <- 0
+    return(column)
+  }
+  counts <- apply(countsObject[, -c(1:5)], MARGIN = 2, DoCutoff, threshold)
+  return(cbind(countsObject[, c(1:5)], counts))
 }
 ```
 

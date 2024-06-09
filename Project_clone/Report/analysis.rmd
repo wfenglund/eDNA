@@ -188,6 +188,7 @@ library(rvest)
   
   ### Filter:
   # groupNotes <- groupNotes[!grepl("drop", groupNotes$Notes),] # Drop all species that has the word "drop" in their notes
+  # groupNotes <- groupNotes[rowSums(groupNotes[, -c(1:5)]) > 100,] # remove species with a sequence sum less than 100
   # groupNotes <- TrimCutoffs(total = 0.5, within = 0.5, groupNotes) # trim species based on percentage cutoffs
   
   ### Create outputs:

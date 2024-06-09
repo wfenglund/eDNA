@@ -160,6 +160,7 @@ CombineSpecies <- function(ref1, ref2, dataFrame) {
 }
 
 RemoveLowFreqSeqs <- function(countsObject, threshold) {
+  threshold = threshold / 100 # convert percentage into proportion
   DoCutoff <- function(column, cutoff) {
     column[prop.table(column) < cutoff] <- 0
     return(column)

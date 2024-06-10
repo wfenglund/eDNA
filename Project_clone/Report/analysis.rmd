@@ -142,8 +142,8 @@ TrimCutoffs <- function(countsObject, total = 0, within = 0) {
 }
 
 ### To be updated in package:
-RenameSpecies <- function (oldName, newName, dataFrame) {
-  dataFrame$Latin[grepl(oldName, dataFrame$Latin)] <- newName # one changed row
+RenameSpecies <- function (ref, newName, dataFrame) {
+  dataFrame$Latin[ref == dataFrame$Reference] <- newName
   return(dataFrame)
 }
 
@@ -183,14 +183,15 @@ library(rvest)
   groupNotes <- AddNote("note", "hitX", groupNotes)
   
   ### Curate:
-  # groupNotes <- RenameSpecies("old latin name", "new latin name", groupNotes)
+  # groupNotes <- RenameSpecies("hit reference", "new latin name", groupNotes)
   # groupNotes <- CombineSpecies("hit to be kept", "hit to be absorbed", groupNotes)
   groupNotes[grepl("hitX", groupNotes$Reference), 1] <- "new common name"
   
   ### Filter:
+  # groupNotes <- TrimCutoffs(total = 0.5, within = 0.5, groupNotes) # trim species based on percentage cutoffs
   # groupNotes <- groupNotes[!grepl("drop", groupNotes$Notes),] # Drop all species that has the word "drop" in their notes
   # groupNotes <- groupNotes[rowSums(groupNotes[, -c(1:5)]) > 100,] # remove species with a sequence sum less than 100
-  # groupNotes <- TrimCutoffs(total = 0.5, within = 0.5, groupNotes) # trim species based on percentage cutoffs
+
   
   ### Create outputs:
   groupClean <- groupNotes[, -c(1, 2, 3)]

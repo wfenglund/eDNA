@@ -32,7 +32,7 @@ parser.add_argument('-W', '--write_folder',
 args = parser.parse_args()
 
 ###Inputs:
-project_name = args.title
+project_name = args.project_name
 primer_f = args.primer_f
 primer_r = args.primer_r
 f_format = args.sequenced_by

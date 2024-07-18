@@ -60,7 +60,7 @@ ExportFasta(yAll, "y_test.fa", minLength = 50, maxLength = 1000)
 data(compactNameDump, package = "MetaBAnalysis")
 data(compactNodeDump, package = "MetaBAnalysis")
 
-blastResY <- MetaBAnalysis::BlastParse(yAll, "y_test.out")
+blastResY <- MetaBAnalysis::BlastParse(yAll, "y_test.out", threshold = 90)
 saveRDS(blastResY, file = "blastResY.rds")
 ```
 

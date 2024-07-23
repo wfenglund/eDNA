@@ -194,7 +194,7 @@ library(rvest)
 
   
   ### Create outputs:
-  groupClean <- groupNotes[, -c(1, 2, 3)]
+  groupClean <- groupNotes[, -c(1, 2, 5)]
   columnNames <- colnames(groupClean)
   # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
   names(groupClean) <- columnNames

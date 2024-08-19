@@ -1,4 +1,4 @@
-# A python script that filters out intact reads from a gzipped fastq files
+# A python script that filters out intact reads from gzipped fastq files
 import os
 import gzip
 

@@ -202,10 +202,15 @@ kable(groupSpecies, "latex",
 ```{r fig1, fig.height=14, fig.width=11, echo=FALSE, fig.cap="Fördelning i procent av antal sekvenser från olika arter av fisk i proverna. Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover."}
 library(MetaBAnalysis)
 
+# Prepare the count data:
 groupCounts <- groupData[,3:ncol(groupData)]
 groupCounts <- cbind(groupCounts, Totalt = rowSums(groupCounts))
 figureSpecies <- data.frame(groupSpecies)$Svenska
 
+# Sort samples numerically:
+groupCounts <- groupCounts[, order(as.numeric(gsub("[^0-9]+", "", colnames(groupCounts))))]
+
+# Plot:
 FractionPlot(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25, inset = c(-0.3, 0.01))
 ```
 

@@ -185,7 +185,7 @@ library(rvest)
   ### Curate:
   # groupNotes <- RenameSpecies("hit reference", "new latin name", groupNotes)
   # groupNotes <- CombineSpecies("hit to be kept", "hit to be absorbed", groupNotes)
-  groupNotes$Swedish[grepl("hitX", groupNotes$Reference)] <- "new common name"
+  groupNotes$Swedish[groupNotes$Reference %in% c("hitX")] <- "new common name"
   
   ### Filter:
   # groupNotes <- TrimCutoffs(total = 0.5, within = 0.5, groupNotes) # trim species based on percentage cutoffs

@@ -8,15 +8,16 @@ file_folder = './'
 # For every file in that folder:
 for file in os.listdir(file_folder):
     if file.endswith('1.fq.gz'): # if it is a fastq forward file
-        print(f'Running {file.replace('_1.fq.gz', '')} (forward and reverse).')
-        print(f'- Loading {file.replace('_1.fq.gz', '')}.')
+        file_name = file.replace('_1.fq.gz', '')
+        print(f'Running {file_name} (forward and reverse).')
+        print(f'- Loading {file_name}.')
         # Open input files:
         with gzip.open(file_folder + '/' + file) as forward_input:
             forward_text = forward_input.readlines()
         with gzip.open(file_folder + '/' + file.replace('1.fq.gz', '2.fq.gz')) as reverse_input:
             reverse_text = reverse_input.readlines()
         # Open output files:
-        print(f'- Filtering {file.replace('_1.fq.gz', '')}.')
+        print(f'- Filtering {file_name}.')
         with gzip.open(file.replace('1.fq.gz', 'filtered_1.fq.gz'), 'w') as forward_output:
             with gzip.open(file.replace('1.fq.gz', 'filtered_2.fq.gz'), 'w') as reverse_output:
                 # Go through every line in file:
@@ -40,5 +41,5 @@ for file in os.listdir(file_folder):
                         forward_output.write(forward_text[line_n])
                         counter = 1 # reset line counter
                     line_n = line_n + 1
-        print(f'- Done with {file.replace('_1.fq.gz', '')}.')
+        print(f'- Done with {file_name}.')
 print('Done with all files.')

@@ -15,7 +15,7 @@ parser.add_argument('-r', '--primer_r',
                     default = 'GGGTATCTAATCCCAGTTTG',
                     help = "Sequence of the reverse primer used to create the amplicon")
 parser.add_argument('-s', '--sequenced_by',
-                    default = 'bmk', choices = ['novo', 'scilife'],
+                    default = 'bmk', choices = ['bmk', 'novo', 'scilife', 'minion'],
                     help = "Sequence center that generated the data")
 parser.add_argument('-a', '--anchored',
                     default = 'no', choices = ['yes', 'no'],
@@ -62,11 +62,19 @@ if f_format == "scilife":
     file_end = "_R1_001.fastq.gz"
     repl_from = "R1"
     repl_to = "R2"
+    paired_flag = 'yes'
     test2 = 1
 elif f_format == "novo" or f_format == "bmk":
     file_end = "_1.fq.gz"
     repl_from = "_1.fq"
     repl_to = "_2.fq"
+    paired_flag = 'yes'
+    test2 = 1
+elif f_format == 'minion':
+    file_end = '.fastq.gz'
+    repl_from = ''
+    repl_to = ''
+    paired_flag = 'no'
     test2 = 1
 if test1 + test2 != 2:
     print("Please revisit your input variables. Program terminates.")
@@ -78,6 +86,10 @@ for file in os.listdir(reads_folder): #For every file in folder containing reads
         sample = file.replace(file_end, "") #Extract sample name
         current_list = list([write_folder + "/" + sample + "_outFwd_1.fastq.gz", write_folder + "/" + sample + "_outFwd_2.fastq.gz", write_folder + "/" + sample + "_outRev_1.fastq.gz", write_folder + "/" + sample + "_outRev_2.fastq.gz"]) #Create filtering names and store in a list
         
-        subprocess.run([f'cd {reads_folder} ; cutadapt -j 0 --max-n=0 --discard-untrimmed -g {regular_primer} -G {reverse_primer} -o {current_list[0]} -p {current_list[1]} {file} {file.replace(repl_from, repl_to)}'], shell=True) #Run cutadapt for regular direction
-        if reverse_flag == "yes":
-            subprocess.run([f'cd {reads_folder} ; cutadapt -j 0 --max-n=0 --discard-untrimmed -g {regular_primer} -G {reverse_primer} -o {current_list[2]} -p {current_list[3]} {file.replace(repl_from, repl_to)} {file}'], shell=True) #Run cutadapt in reverse direction
+        if paired_flag == "yes":
+            subprocess.run([f'cd {reads_folder} ; cutadapt -j 0 --max-n=0 --discard-untrimmed -g {regular_primer} -G {reverse_primer} -o {current_list[0]} -p {current_list[1]} {file} {file.replace(repl_from, repl_to)}'], shell=True) #Run cutadapt for regular direction
+            if reverse_flag == "yes":
+                subprocess.run([f'cd {reads_folder} ; cutadapt -j 0 --max-n=0 --discard-untrimmed -g {regular_primer} -G {reverse_primer} -o {current_list[2]} -p {current_list[3]} {file.replace(repl_from, repl_to)} {file}'], shell=True) #Run cutadapt in reverse direction
+        else: # if input is single ended
+            subprocess.run([f'cd {reads_folder} ; cutadapt -j 0 --max-n=0 --discard-untrimmed -g {regular_primer} -o {current_list[0]} {file}'], shell=True) #Run cutadapt single ended
+

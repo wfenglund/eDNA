@@ -5,8 +5,9 @@
 #' @param forward vector with file names for filtered forward reads
 #' @param reverse vector with file names for filtered reverse reads
 #' @param muThread Should the analysis use multithreads for analysis
-#' @param justConcatenate If reads pairs do not overlap set to TRUE
+#' @param justConcatenate if reads pairs do not overlap set to TRUE
 #' @param minOverlap minimum overlap between reads when merging pairs
+#' @param paired if reads are paired-ended set to TRUE
 #'
 #' @return a matrix with count for all inferred sequence variants
 #' @import dada2
@@ -22,21 +23,27 @@
 #' DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 #'
 DadaAnalysis <- function(forward, reverse, muThread = TRUE,
-  justConcatenate = FALSE, minOverlap = 5) {
+			 justConcatenate = FALSE, minOverlap = 5,
+			 paired = TRUE) {
   errF <- dada2::learnErrors(forward, multithread = muThread)
-  errR <- dada2::learnErrors(reverse, multithread = muThread)
   derepsF <- dada2::derepFastq(forward)
-  derepsR <- dada2::derepFastq(reverse)
   dadaF <- dada2::dada(derepsF, err = errF, multithread = muThread)
-  dadaR <- dada2::dada(derepsR, err = errR, multithread = muThread)
-  mergers <- dada2::mergePairs(dadaF, derepsF, dadaR, derepsR,
-                               verbose = TRUE, justConcatenate = justConcatenate,
-                               minOverlap = minOverlap)
-  seqTab <- dada2::makeSequenceTable(mergers)
+  if(paired == TRUE) {
+    errR <- dada2::learnErrors(reverse, multithread = muThread)
+    derepsR <- dada2::derepFastq(reverse)
+    dadaR <- dada2::dada(derepsR, err = errR, multithread = muThread)
+    mergers <- dada2::mergePairs(dadaF, derepsF, dadaR,
+				 derepsR, verbose = TRUE,
+				 justConcatenate = justConcatenate,
+				 minOverlap = minOverlap)
+    seqTab <- dada2::makeSequenceTable(mergers)
+  } else {
+    seqTab <- dada2::makeSequenceTable(dadaF)
+  }
   seqtabNochim <- dada2::removeBimeraDenovo(seqTab,
-                                             method = "consensus",
-                                             multithread = muThread,
-                                             verbose = TRUE)
+					    method = "consensus",
+					    multithread = muThread,
+					    verbose = TRUE)
   return(seqtabNochim)
 }
 

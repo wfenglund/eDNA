@@ -19,14 +19,15 @@ primer1 <- MetaBAnalysis::CollectData("../Filtered_data")
 
 # Filter reads and generate out object for later use:
 out <- dada2::filterAndTrim(primer1$Forward, primer1$FiltFs, 
-                            primer1$Reverse, primer1$FiltRs,
+                            primer1$Reverse, primer1$FiltRs, # comment out line if running single-ended
                             maxN=0, truncQ=2, rm.phix=TRUE,
                             compress=TRUE, multithread=TRUE)
 saveRDS(out, file = "out.rds")
 
 # Dereplicate and merge pairs with dada2:
 dada2Counts <- MetaBAnalysis::DadaAnalysis(primer1$FiltFs, primer1$FiltRs, 
-                                           justConcatenate = FALSE, minOverlap = 5)
+                                           justConcatenate = FALSE,
+					   minOverlap = 5, paired = TRUE)
 ```
 
 ### Convert and modify  matrix "dada2Counts" to DGEList "yAll":

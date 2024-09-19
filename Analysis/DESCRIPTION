@@ -1,6 +1,6 @@
 Package: MetaBAnalysis
 Title: Analysis of metabarcoding data
-Version: 0.0.1.0000
+Version: 0.0.2.0000
 Authors@R: c( 
     person(given = "Thomas",
            family = "Källman",

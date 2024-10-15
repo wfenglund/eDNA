@@ -91,5 +91,5 @@ for file in os.listdir(reads_folder): #For every file in folder containing reads
             if reverse_flag == "yes":
                 subprocess.run([f'cd {reads_folder} ; cutadapt -j 0 --max-n=0 --discard-untrimmed -g {regular_primer} -G {reverse_primer} -o {current_list[2]} -p {current_list[3]} {file.replace(repl_from, repl_to)} {file}'], shell=True) #Run cutadapt in reverse direction
         else: # if input is single ended
-            subprocess.run([f'cd {reads_folder} ; cutadapt -j 0 --max-n=0 --discard-untrimmed -g {regular_primer} -o {current_list[0]} {file}'], shell=True) #Run cutadapt single ended
+            subprocess.run([f'cd {reads_folder} ; cutadapt -j 0 --max-n=0 --revcomp --discard-untrimmed -g {regular_primer} -o {current_list[0]} {file}'], shell=True) #Run cutadapt single ended
 

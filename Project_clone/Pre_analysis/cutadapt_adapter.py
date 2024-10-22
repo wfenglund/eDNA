@@ -17,7 +17,7 @@ parser.add_argument('-r', '--primer_r',
 parser.add_argument('-s', '--sequenced_by',
                     default = 'bmk', choices = ['bmk', 'novo', 'scilife', 'minion'],
                     help = "Sequence center that generated the data")
-parser.add_argument('-a', '--anchored',
+parser.add_argument('-a', '--linked',
                     default = 'no', choices = ['yes', 'no'],
                     help = "Is the amplicon shorter than the read length")
 parser.add_argument('-b', '--reverse_flag',
@@ -36,7 +36,7 @@ project_name = args.project_name
 primer_f = args.primer_f
 primer_r = args.primer_r
 f_format = args.sequenced_by
-anchored_flag = args.anchored
+linked_flag = args.linked
 reverse_flag = args.reverse_flag
 reads_folder = args.reads_folder
 write_folder = args.write_folder
@@ -46,13 +46,13 @@ write_folder = args.write_folder
 # parameters are set
 test1 = 0
 test2 = 0
-if anchored_flag == "no":
+if linked_flag == "no":
     primer_f_rc = ""
     primer_r_rc = ""
     regular_primer = primer_f
     reverse_primer = primer_r
     test1 = 1
-elif anchored_flag == "yes":
+elif linked_flag == "yes":
     primer_f_rc = cgianpy.rev_comp(primer_f)
     primer_r_rc = cgianpy.rev_comp(primer_r)
     regular_primer = primer_f + "..." + primer_r_rc

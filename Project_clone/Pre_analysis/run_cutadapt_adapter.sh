@@ -1,2 +1,2 @@
 # if unsure about settings, run: python cutadapt_adapter.py --help
-python cutadapt_adapter.py --primer_f AAACTCGTGCCAGCCACC --primer_r GGGTATCTAATCCCAGTTTG --sequenced_by bmk --linked no --reverse_flag no
+python3 cutadapt_adapter.py --primer_f AAACTCGTGCCAGCCACC --primer_r GGGTATCTAATCCCAGTTTG --sequenced_by bmk --linked no --reverse_flag no

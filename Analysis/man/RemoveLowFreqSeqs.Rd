@@ -4,18 +4,16 @@
 \alias{RemoveLowFreqSeqs}
 \title{Remove species with counts below a given threshold}
 \usage{
-RemoveLowFreqSeqs(dataset, threshold, subValue = 0)
+RemoveLowFreqSeqs(countsObject, threshold)
 }
 \arguments{
-\item{dataset}{a dataframe where the first column contains
+\item{countsObject}{a dataframe where the first column contains
 species names and the rest of the dataframe contains integers >= 0}
 
 \item{threshold}{cut-off value in percent}
-
-\item{subValue}{value to replace data below threshold with}
 }
 \value{
-dataframe with filtered data removed.
+The countsObject dataframe with filtered data removed.
 }
 \description{
 Filter data below a certain threshold
@@ -29,8 +27,7 @@ testdata <- data.frame(Species = c("Esox lucius",
                        Random3 = LETTERS[1:3],
                        Sample1 = c(10010, 3921, 2),
                        Sample2 = c(9900, 5, 1301))
-RemoveLowFreqSeqs(dataset = testdata,
-                   threshold = 0.1,
-                   subValue = 0)
+RemoveLowFreqSeqs(countsObject = testdata,
+                   threshold = 0.1)
 
 }

@@ -172,11 +172,10 @@ SpeciesPercent <- function(dataFrame) {
 #'
 #' Filter data below a certain threshold
 #'
-#' @param dataset a dataframe where the first column contains
+#' @param countsObject a dataframe where the first column contains
 #' species names and the rest of the dataframe contains integers >= 0
 #' @param threshold cut-off value in percent
-#' @param subValue value to replace data below threshold with
-#' @return dataframe with filtered data removed.
+#' @return The countsObject dataframe with filtered data removed.
 #'
 #' @export
 #'
@@ -189,19 +188,17 @@ SpeciesPercent <- function(dataFrame) {
 #'                        Random3 = LETTERS[1:3],
 #'                        Sample1 = c(10010, 3921, 2),
 #'                        Sample2 = c(9900, 5, 1301))
-#' RemoveLowFreqSeqs(dataset = testdata,
-#'                    threshold = 0.1,
-#'                    subValue = 0)
+#' RemoveLowFreqSeqs(countsObject = testdata,
+#'                    threshold = 0.1)
 #'
-RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
-  output <- data.frame(dataset[, 1:4])
-  for(column in 5:ncol(dataset)){
-    ratio <- dataset[, column] / sum(dataset[, column]) * 100
-    dataset[ratio < threshold, column] <- subValue
-    output <- cbind(output, dataset[, column])
+RemoveLowFreqSeqs <- function(countsObject, threshold) {
+  threshold = threshold / 100 # convert percentage into proportion
+  DoCutoff <- function(column, cutoff) {
+    column[prop.table(column) < cutoff] <- 0
+    return(column)
   }
-  colnames(output) <- colnames(dataset)
-  return(output)
+  counts <- apply(countsObject[, -c(1:5)], MARGIN = 2, DoCutoff, threshold)
+  return(cbind(countsObject[, c(1:5)], counts))
 }
 
 #' Get taxonomic information from NCBI

@@ -9,7 +9,8 @@ DadaAnalysis(
   reverse,
   muThread = TRUE,
   justConcatenate = FALSE,
-  minOverlap = 5
+  minOverlap = 5,
+  paired = TRUE
 )
 }
 \arguments{
@@ -19,9 +20,11 @@ DadaAnalysis(
 
 \item{muThread}{Should the analysis use multithreads for analysis}
 
-\item{justConcatenate}{If reads pairs do not overlap set to TRUE}
+\item{justConcatenate}{if reads pairs do not overlap set to TRUE}
 
 \item{minOverlap}{minimum overlap between reads when merging pairs}
+
+\item{paired}{if reads are paired-ended set to TRUE}
 }
 \value{
 a matrix with count for all inferred sequence variants

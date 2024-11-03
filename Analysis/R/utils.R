@@ -106,15 +106,15 @@ DropSpecies <- function(species, dataFrame) {
 #'
 #' Renames a species in a dataframe containing counts of species.
 #'
-#' @param oldName a string containing the old name of the species to be renamed.
+#' @param ref a string containing the old name of the species to be renamed.
 #' @param newName a string containing the new name of the species to be renamed
 #' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
 #'
-#' @return the given dataframe with the specified species renamed from the old name to the new name.
+#' @return The original dataframe with the specified species renamed.
 #' @export
 #'
-RenameSpecies <- function(oldName, newName, dataFrame) {
-  dataFrame[grepl(oldName, dataFrame[,1]),1] <- newName
+RenameSpecies <- function(ref, newName, dataFrame) {
+  dataFrame$Latin[ref == dataFrame$Reference] <- newName
   return(dataFrame)
 }
 

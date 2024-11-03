@@ -122,20 +122,23 @@ RenameSpecies <- function(ref, newName, dataFrame) {
 #'
 #' Takes the names of two species and a dataframe of counts and returns the dataframe with the counts of the two species combined.
 #'
-#' @param species1 a string containing the name of the first species to be combined (this name will be kept).
-#' @param species2 a string containing the name of the second species to be combined.
+#' @param ref1 a string containing the name of the first species to be combined (this name will be kept).
+#' @param ref2 a string containing the name of the second species to be combined.
 #' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
 #'
-#' @return the given dataframe with the two species counts combined under the first name given.
+#' @return The input dataframe with the two species counts for ref1 and ref2 combined under the ref1 name.
 #' @export
 #'
-CombineSpecies <- function(species1, species2, dataFrame) {
-  speciesSum <- dataFrame[grepl(species1, dataFrame[,4]),5:ncol(dataFrame)] + dataFrame[grepl(species2, dataFrame[,4]),5:ncol(dataFrame)]
-  speciesSum <- cbind(dataFrame[grepl(species1, dataFrame[,4]),1:4], speciesSum)
+
+CombineSpecies <- function(ref1, ref2, dataFrame) {
+  speciesSum <- dataFrame[ref1 == dataFrame$Reference, 5:ncol(dataFrame)] +
+    dataFrame[ref2 == dataFrame$Reference, 5:ncol(dataFrame)]
+  speciesSum <- cbind(dataFrame[ref1 == dataFrame$Reference, 1:4], speciesSum)
   names(speciesSum)[1:4] <- names(dataFrame[1:4])
-  dataFrame <- dataFrame[!grepl(species1, dataFrame[,4]),]
-  dataFrame <- dataFrame[!grepl(species2, dataFrame[,4]),]
+  dataFrame <- dataFrame[ref1 != dataFrame$Reference,]
+  dataFrame <- dataFrame[ref2 != dataFrame$Reference,]
   dataFrame <- rbind(dataFrame, speciesSum)
+  dataFrame <- dataFrame[order(rowSums(dataFrame[, -c(1:5)]), decreasing = TRUE),]
   return(dataFrame)
 }
 

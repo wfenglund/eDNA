@@ -4,17 +4,17 @@
 \alias{CombineSpecies}
 \title{CombineSpecies}
 \usage{
-CombineSpecies(species1, species2, dataFrame)
+CombineSpecies(ref1, ref2, dataFrame)
 }
 \arguments{
-\item{species1}{a string containing the name of the first species to be combined (this name will be kept).}
+\item{ref1}{a string containing the name of the first species to be combined (this name will be kept).}
 
-\item{species2}{a string containing the name of the second species to be combined.}
+\item{ref2}{a string containing the name of the second species to be combined.}
 
 \item{dataFrame}{a dataframe containing counts of species with the species names in the first column to the left.}
 }
 \value{
-the given dataframe with the two species counts combined under the first name given.
+The input dataframe with the two species counts for ref1 and ref2 combined under the ref1 name.
 }
 \description{
 Takes the names of two species and a dataframe of counts and returns the dataframe with the counts of the two species combined.

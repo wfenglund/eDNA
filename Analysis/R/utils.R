@@ -106,15 +106,15 @@ DropSpecies <- function(species, dataFrame) {
 #'
 #' Renames a species in a dataframe containing counts of species.
 #'
-#' @param oldName a string containing the old name of the species to be renamed.
+#' @param ref a string containing the old name of the species to be renamed.
 #' @param newName a string containing the new name of the species to be renamed
 #' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
 #'
-#' @return the given dataframe with the specified species renamed from the old name to the new name.
+#' @return The original dataframe with the specified species renamed.
 #' @export
 #'
-RenameSpecies <- function(oldName, newName, dataFrame) {
-  dataFrame[grepl(oldName, dataFrame[,1]),1] <- newName
+RenameSpecies <- function(ref, newName, dataFrame) {
+  dataFrame$Latin[ref == dataFrame$Reference] <- newName
   return(dataFrame)
 }
 
@@ -122,20 +122,23 @@ RenameSpecies <- function(oldName, newName, dataFrame) {
 #'
 #' Takes the names of two species and a dataframe of counts and returns the dataframe with the counts of the two species combined.
 #'
-#' @param species1 a string containing the name of the first species to be combined (this name will be kept).
-#' @param species2 a string containing the name of the second species to be combined.
+#' @param ref1 a string containing the name of the first species to be combined (this name will be kept).
+#' @param ref2 a string containing the name of the second species to be combined.
 #' @param dataFrame a dataframe containing counts of species with the species names in the first column to the left.
 #'
-#' @return the given dataframe with the two species counts combined under the first name given.
+#' @return The input dataframe with the two species counts for ref1 and ref2 combined under the ref1 name.
 #' @export
 #'
-CombineSpecies <- function(species1, species2, dataFrame) {
-  speciesSum <- dataFrame[grepl(species1, dataFrame[,4]),5:ncol(dataFrame)] + dataFrame[grepl(species2, dataFrame[,4]),5:ncol(dataFrame)]
-  speciesSum <- cbind(dataFrame[grepl(species1, dataFrame[,4]),1:4], speciesSum)
+
+CombineSpecies <- function(ref1, ref2, dataFrame) {
+  speciesSum <- dataFrame[ref1 == dataFrame$Reference, 5:ncol(dataFrame)] +
+    dataFrame[ref2 == dataFrame$Reference, 5:ncol(dataFrame)]
+  speciesSum <- cbind(dataFrame[ref1 == dataFrame$Reference, 1:4], speciesSum)
   names(speciesSum)[1:4] <- names(dataFrame[1:4])
-  dataFrame <- dataFrame[!grepl(species1, dataFrame[,4]),]
-  dataFrame <- dataFrame[!grepl(species2, dataFrame[,4]),]
+  dataFrame <- dataFrame[ref1 != dataFrame$Reference,]
+  dataFrame <- dataFrame[ref2 != dataFrame$Reference,]
   dataFrame <- rbind(dataFrame, speciesSum)
+  dataFrame <- dataFrame[order(rowSums(dataFrame[, -c(1:5)]), decreasing = TRUE),]
   return(dataFrame)
 }
 
@@ -169,11 +172,10 @@ SpeciesPercent <- function(dataFrame) {
 #'
 #' Filter data below a certain threshold
 #'
-#' @param dataset a dataframe where the first column contains
+#' @param countsObject a dataframe where the first column contains
 #' species names and the rest of the dataframe contains integers >= 0
 #' @param threshold cut-off value in percent
-#' @param subValue value to replace data below threshold with
-#' @return dataframe with filtered data removed.
+#' @return The countsObject dataframe with filtered data removed.
 #'
 #' @export
 #'
@@ -186,19 +188,17 @@ SpeciesPercent <- function(dataFrame) {
 #'                        Random3 = LETTERS[1:3],
 #'                        Sample1 = c(10010, 3921, 2),
 #'                        Sample2 = c(9900, 5, 1301))
-#' RemoveLowFreqSeqs(dataset = testdata,
-#'                    threshold = 0.1,
-#'                    subValue = 0)
+#' RemoveLowFreqSeqs(countsObject = testdata,
+#'                    threshold = 0.1)
 #'
-RemoveLowFreqSeqs <- function(dataset, threshold, subValue = 0) {
-  output <- data.frame(dataset[, 1:4])
-  for(column in 5:ncol(dataset)){
-    ratio <- dataset[, column] / sum(dataset[, column]) * 100
-    dataset[ratio < threshold, column] <- subValue
-    output <- cbind(output, dataset[, column])
+RemoveLowFreqSeqs <- function(countsObject, threshold) {
+  threshold = threshold / 100 # convert percentage into proportion
+  DoCutoff <- function(column, cutoff) {
+    column[prop.table(column) < cutoff] <- 0
+    return(column)
   }
-  colnames(output) <- colnames(dataset)
-  return(output)
+  counts <- apply(countsObject[, -c(1:5)], MARGIN = 2, DoCutoff, threshold)
+  return(cbind(countsObject[, c(1:5)], counts))
 }
 
 #' Get taxonomic information from NCBI

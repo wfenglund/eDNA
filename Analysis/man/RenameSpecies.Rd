@@ -4,17 +4,17 @@
 \alias{RenameSpecies}
 \title{RenameSpecies}
 \usage{
-RenameSpecies(oldName, newName, dataFrame)
+RenameSpecies(ref, newName, dataFrame)
 }
 \arguments{
-\item{oldName}{a string containing the old name of the species to be renamed.}
+\item{ref}{a string containing the old name of the species to be renamed.}
 
 \item{newName}{a string containing the new name of the species to be renamed}
 
 \item{dataFrame}{a dataframe containing counts of species with the species names in the first column to the left.}
 }
 \value{
-the given dataframe with the specified species renamed from the old name to the new name.
+The original dataframe with the specified species renamed.
 }
 \description{
 Renames a species in a dataframe containing counts of species.

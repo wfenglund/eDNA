@@ -30,7 +30,7 @@ cgianpy.print_dict(unique_dict_forward, forward_primer) # a table with forward-s
 print()
 cgianpy.print_dict(unique_dict_reverse, forward_primer) # a table with reverse-sequences is printed
 
-if only_tables == False:
+if only_tables == False: # if only_tables flag has not been used
     # fastqc is run on every .gz (fastq) file in the Raw_data directory
     gz_files = [file for file in os.listdir('../Raw_data/') if file.endswith('.gz')]
     print(f'\nRunning FastQC on {len(gz_files)} files:')

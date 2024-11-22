@@ -46,18 +46,6 @@ write_folder = args.write_folder
 # parameters are set
 test1 = 0
 test2 = 0
-if linked_flag == "no":
-    primer_f_rc = ""
-    primer_r_rc = ""
-    regular_primer = primer_f
-    reverse_primer = primer_r
-    test1 = 1
-elif linked_flag == "yes":
-    primer_f_rc = cgianpy.rev_comp(primer_f)
-    primer_r_rc = cgianpy.rev_comp(primer_r)
-    regular_primer = primer_f + "..." + primer_r_rc
-    reverse_primer = primer_r + "..." + primer_f_rc
-    test1 = 1
 if f_format == "scilife":
     file_end = "_R1_001.fastq.gz"
     repl_from = "R1"
@@ -74,8 +62,21 @@ elif f_format == 'minion':
     file_end = '.fastq.gz'
     repl_from = ''
     repl_to = ''
+    linked_flag = 'yes' # since minion reads are always assumed to have both primers
     paired_flag = 'no'
     test2 = 1
+if linked_flag == "no":
+    primer_f_rc = ""
+    primer_r_rc = ""
+    regular_primer = primer_f
+    reverse_primer = primer_r
+    test1 = 1
+elif linked_flag == "yes":
+    primer_f_rc = cgianpy.rev_comp(primer_f)
+    primer_r_rc = cgianpy.rev_comp(primer_r)
+    regular_primer = primer_f + "..." + primer_r_rc
+    reverse_primer = primer_r + "..." + primer_f_rc
+    test1 = 1
 if test1 + test2 != 2:
     print("Please revisit your input variables. Program terminates.")
     quit()

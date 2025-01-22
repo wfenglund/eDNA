@@ -162,9 +162,14 @@ CombineSpecies <- function(ref1, ref2, dataFrame) {
 #' SpeciesPercent(testdata)
 #'
 SpeciesPercent <- function(dataFrame) {
-    countData <- dataFrame[,-1]
+  countData <- dataFrame[, -1]
+  if(ncol(dataFrame) > 2){ # if more than one sample
     countRatios <- rowSums(countData)/sum(countData)
     countPercentages <- round(countRatios * 100, 5)
+  } else { # if only one sample
+    countRatios <- countData/sum(countData)
+    countPercentages <- round(countRatios * 100, 5)
+  }
     return(countPercentages)
 }
 

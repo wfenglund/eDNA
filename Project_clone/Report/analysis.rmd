@@ -120,6 +120,7 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
 ### To be added to package:
 MakeNotes <- function(countsObject) {
   colnames(countsObject)[colnames(countsObject) == "Species"] <- "Latin"
+  columnNames <- colnames(countsObject) # save colnames
   outObject <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(countsObject$Latin),
                      countsObject)
   outObject <- cbind(outObject[, c(1, 2)],
@@ -127,6 +128,7 @@ MakeNotes <- function(countsObject) {
                      outObject[, -c(1, 2)])
   outObject <- cbind(Notes = rep("", nrow(outObject)), outObject)
   outObject <- cbind(Reference = paste0("hit", 1:nrow(outObject)), outObject)
+  colnames(outObject)[6:ncol(outObject)] <- columnNames[2:ncol(outObject)] # restore colnames
   return(outObject)
 }
   

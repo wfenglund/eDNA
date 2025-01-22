@@ -170,7 +170,7 @@ SpeciesPercent <- function(dataFrame) {
     countRatios <- countData/sum(countData)
     countPercentages <- round(countRatios * 100, 5)
   }
-    return(countPercentages)
+  return(countPercentages)
 }
 
 #' Remove species with counts below a given threshold

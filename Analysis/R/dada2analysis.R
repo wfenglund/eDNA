@@ -69,9 +69,9 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
 SumRes <- function(blastRes, counts, taxGroup) {
     taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia",
                              "Insecta", "Mammalia", "Arachnida",
-                             "Gastropoda", "Archaea|Bacteria")
+                             "Gastropoda", "Archaea|Bacteria", "Eukaryota", "Plantae|Viridiplantae", "Fungi")
     names(taxGroupConv) <- c("Fish", "Birds", "Mussels", "Insects",
-                             "Mammals", "Spiders", "Snails", "Prokaryota")
+                             "Mammals", "Spiders", "Snails", "Prokaryota", "Eukaryota", "Plants", "Fungi")
 
     if(!taxGroup %in% names(taxGroupConv)) {
         cat("This taxonomic group is not supported.\n
@@ -90,9 +90,11 @@ SumRes <- function(blastRes, counts, taxGroup) {
       sumAll <- sumAll[order(sumAll[, -1], decreasing = TRUE), ]
     }
     names(sumAll) <- c("Species", names(sumAll)[-1])
-    if(taxGroup == "Prokaryota") {
+    if(taxGroup == "Prokaryota" || taxgroup == "Eukaryota") { # if group is a superkingdom
       genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$superkingdom), ]
-    } else {
+    } else if(taxGroup == "Plants" || taxGroup == "Fungi") { # if group is a kingdom
+      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$kingdom),]
+    } else { # if group is a class
       genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
     }
     sumFilt <- aggregate(genesCountsFilt[,13:colStart],

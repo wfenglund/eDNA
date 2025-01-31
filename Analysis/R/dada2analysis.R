@@ -90,7 +90,7 @@ SumRes <- function(blastRes, counts, taxGroup) {
       sumAll <- sumAll[order(sumAll[, -1], decreasing = TRUE), ]
     }
     names(sumAll) <- c("Species", names(sumAll)[-1])
-    if(taxGroup == "Prokaryota" || taxgroup == "Eukaryota") { # if group is a superkingdom
+    if(taxGroup == "Prokaryota" || taxGroup == "Eukaryota") { # if group is a superkingdom
       genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$superkingdom), ]
     } else if(taxGroup == "Plants" || taxGroup == "Fungi") { # if group is a kingdom
       genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$kingdom),]

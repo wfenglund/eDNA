@@ -67,11 +67,21 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
 #' @export
 #'
 SumRes <- function(blastRes, counts, taxGroup) {
+    # Create invertebrate string:
+    invClasses <- unique(blastResYTest$class[blastResYTest$phylum != "Chordata" & blastResYTest$kingdom == "Metazoa"])
+    invClasses <- invClasses[!is.na(invClasses)]
+    invString <- do.call(paste, c(as.list(invClasses), sep = "|"))
+    # Load group options:
     taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia",
                              "Insecta", "Mammalia", "Arachnida",
-                             "Gastropoda", "Archaea|Bacteria", "Eukaryota", "Plantae|Viridiplantae", "Fungi")
-    names(taxGroupConv) <- c("Fish", "Birds", "Mussels", "Insects",
-                             "Mammals", "Spiders", "Snails", "Prokaryota", "Eukaryota", "Plants", "Fungi")
+                             "Gastropoda", "Archaea|Bacteria", "Eukaryota",
+			     "Plantae|Viridiplantae", "Fungi", invString,
+    			     "Amphibia")
+    names(taxGroupConv) <- c("Fish", "Birds", "Mussels",
+			     "Insects", "Mammals", "Spiders",
+			     "Snails", "Prokaryota", "Eukaryota",
+			     "Plants", "Fungi", "Invertebrates",
+                             "Amphibia")
 
     if(!taxGroup %in% names(taxGroupConv)) {
         cat("This taxonomic group is not supported.\n

@@ -77,9 +77,9 @@ SumRes <- function(blastRes, counts, taxGroup) {
                              "Gastropoda", "Archaea|Bacteria", "Eukaryota",
 			     "Plantae|Viridiplantae", "Fungi", invString,
     			     "Amphibia")
-    names(taxGroupConv) <- c("Fish", "Birds", "Mussels",
-			     "Insects", "Mammals", "Spiders",
-			     "Snails", "Prokaryota", "Eukaryota",
+    names(taxGroupConv) <- c("Fish", "Aves", "Bivalvia",
+			     "Insecta", "Mammalia", "Arachnida",
+			     "Gastropoda", "Prokaryota", "Eukaryota",
 			     "Plants", "Fungi", "Invertebrates",
                              "Amphibia")
 

@@ -115,36 +115,6 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
 }
 ```
 
-### Functions:
-```{r}
-### To be added to package:
-MakeNotes <- function(countsObject) {
-  colnames(countsObject)[colnames(countsObject) == "Species"] <- "Latin"
-  columnNames <- colnames(countsObject) # save colnames
-  outObject <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(countsObject$Latin),
-                     countsObject)
-  outObject <- cbind(outObject[, c(1, 2)],
-                     Percent_all = SpeciesPercent(countsObject),
-                     outObject[, -c(1, 2)])
-  outObject <- cbind(Notes = rep("", nrow(outObject)), outObject)
-  outObject <- cbind(Reference = paste0("hit", 1:nrow(outObject)), outObject)
-  colnames(outObject)[6:ncol(outObject)] <- columnNames[2:ncol(outObject)] # restore colnames
-  return(outObject)
-}
-  
-AddNote <- function(note, reference, countsObject) {
-  countsObject$Notes[countsObject$Reference == reference] <- note
-  return(countsObject)
-}
-
-TrimCutoffs <- function(countsObject, total = 0, within = 0) {
-  outObject <- countsObject[countsObject$Percent_all >= total,]
-  outObject <- RemoveLowFreqSeqs(outObject, within)
-  outObject <- outObject[rowSums(outObject[, -c(1:5)]) > 0,] # remove empty rows
-  return(outObject)
-}
-```
-
 ### Curate the results:
 ```{r}
 library(MetaBAnalysis)

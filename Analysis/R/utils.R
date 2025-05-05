@@ -357,3 +357,51 @@ getRawSeqs <- function(searchFolder = "../Pre_analysis", searchPattern = "1_fast
   allTable$nreads <- as.numeric(allTable$nreads)
   return(allTable)
 }
+
+#' Create an object for curating and taking notes about sequences
+#'
+#' @param countsObject data frame with one row with names of species and one to several columns with sequence counts of those species.
+#' @return dataframe with columns 1:5 with sequence info (sequence reference, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
+#'
+#' @export
+#'
+MakeNotes <- function(countsObject) {
+  colnames(countsObject)[colnames(countsObject) == "Species"] <- "Latin"
+  columnNames <- colnames(countsObject) # save colnames
+  outObject <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(countsObject$Latin), countsObject)
+  outObject <- cbind(outObject[, c(1, 2)], Percent_all = SpeciesPercent(countsObject), outObject[, -c(1, 2)])
+  outObject <- cbind(Notes = rep("", nrow(outObject)), outObject)
+  outObject <- cbind(Reference = paste0("hit", 1:nrow(outObject)), outObject)
+  colnames(outObject)[6:ncol(outObject)] <- columnNames[2:ncol(outObject)] # restore colnames
+  return(outObject)
+}
+
+#' Add a note to the counts note dataframe
+#'
+#' @param note a string containing the note to be added.
+#' @param reference the reference of the sequence to take a note about.
+#' @param countsObject dataframe with columns 1:5 with sequence info (unique sequence references, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
+#' @return dataframe with columns 1:5 with sequence info (sequence reference, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
+#'
+#' @export
+#'
+AddNote <- function(note, reference, countsObject) {
+  countsObject$Notes[countsObject$Reference == reference] <- note
+  return(countsObject)
+}
+
+#' Remove sequences and counts based on cutoffs
+#'
+#' @param countsObject dataframe with columns 1:5 with sequence info (unique sequence references, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
+#' @param total percentage cutoff specifying the minimum percentage of counts a sequence has to be represented by of out of the total number of counts in the data frame. Sequences that fall below the total% get removed.
+#' @param within percentage cutoff specifying the minimum percentage of counts a sequence has to be represented by of out of the total number of counts in a sample (a column in the data fram). Sequences that fall below the within% get gets reduced to 0 within that specific sample.
+#' @return dataframe with columns 1:5 with sequence info (sequence reference, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
+#'
+#' @export
+#'
+TrimCutoffs <- function(countsObject, total = 0, within = 0) {
+  outObject <- countsObject[countsObject$Percent_all >= total,]
+  outObject <- RemoveLowFreqSeqs(outObject, within)
+  outObject <- outObject[rowSums(outObject[, -c(1:5)]) > 0,] # remove empty rows
+  return(outObject)
+}

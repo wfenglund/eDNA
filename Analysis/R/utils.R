@@ -129,20 +129,20 @@ RenameSpecies <- function(ref, newName, dataFrame) {
 #' @return The input dataframe with the two species counts for ref1 and ref2 combined under the ref1 name.
 #' @export
 #'
-CombineSpecies <- function(ref1, ref2, dataFrame) {
-  speciesSum <- dataFrame[ref1 == dataFrame$Reference, 5:ncol(dataFrame)] +
-    dataFrame[ref2 == dataFrame$Reference, 5:ncol(dataFrame)]
-  speciesSum <- cbind(dataFrame[ref1 == dataFrame$Reference, 1:4], speciesSum)
-  names(speciesSum)[1:4] <- names(dataFrame[1:4])
-  dataFrame <- dataFrame[ref1 != dataFrame$Reference,]
-  dataFrame <- dataFrame[ref2 != dataFrame$Reference,]
-  dataFrame <- rbind(dataFrame, speciesSum)
-  if (ncol(dataFrame) > 6) { # if more than one sample
-    dataFrame <- dataFrame[order(rowSums(dataFrame[, -c(1:5)]), decreasing = TRUE),]
+CombineSpecies <- function(ref1, ref2, countsObject) {
+  speciesSum <- countsObject[ref1 == countsObject$Reference, 5:ncol(countsObject)] +
+    countsObject[ref2 == countsObject$Reference, 5:ncol(countsObject)]
+  speciesSum <- cbind(countsObject[ref1 == countsObject$Reference, 1:4], speciesSum)
+  names(speciesSum)[1:4] <- names(countsObject[1:4])
+  countsObject <- countsObject[ref1 != countsObject$Reference,]
+  countsObject <- countsObject[ref2 != countsObject$Reference,]
+  countsObject <- rbind(countsObject, speciesSum)
+  if (ncol(countsObject) > 6) { # if more than one sample
+    countsObject <- countsObject[order(rowSums(countsObject[, -c(1:5)]), decreasing = TRUE),]
   } else { # if only one sample
-    dataFrame <- dataFrame[order(dataFrame[, -c(1:5)], decreasing = TRUE),]
+    countsObject <- countsObject[order(countsObject[, -c(1:5)], decreasing = TRUE),]
   }
-  return(dataFrame)
+  return(countsObject)
 }
 
 #' SpeciesPercent

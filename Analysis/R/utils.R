@@ -129,7 +129,6 @@ RenameSpecies <- function(ref, newName, dataFrame) {
 #' @return The input dataframe with the two species counts for ref1 and ref2 combined under the ref1 name.
 #' @export
 #'
-
 CombineSpecies <- function(ref1, ref2, dataFrame) {
   speciesSum <- dataFrame[ref1 == dataFrame$Reference, 5:ncol(dataFrame)] +
     dataFrame[ref2 == dataFrame$Reference, 5:ncol(dataFrame)]
@@ -138,7 +137,11 @@ CombineSpecies <- function(ref1, ref2, dataFrame) {
   dataFrame <- dataFrame[ref1 != dataFrame$Reference,]
   dataFrame <- dataFrame[ref2 != dataFrame$Reference,]
   dataFrame <- rbind(dataFrame, speciesSum)
-  dataFrame <- dataFrame[order(rowSums(dataFrame[, -c(1:5)]), decreasing = TRUE),]
+  if (ncol(dataFrame) > 6) { # if more than one sample
+    dataFrame <- dataFrame[order(rowSums(dataFrame[, -c(1:5)]), decreasing = TRUE),]
+  } else { # if only one sample
+    dataFrame <- dataFrame[order(dataFrame[, -c(1:5)], decreasing = TRUE),]
+  }
   return(dataFrame)
 }
 

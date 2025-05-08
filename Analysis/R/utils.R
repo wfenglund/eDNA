@@ -205,8 +205,13 @@ RemoveLowFreqSeqs <- function(countsObject, threshold) {
     column[prop.table(column) < cutoff] <- 0
     return(column)
   }
-  counts <- apply(countsObject[, -c(1:5)], MARGIN = 2, DoCutoff, threshold)
-  return(cbind(countsObject[, c(1:5)], counts))
+  if (ncol(dataFrame) > 6) { # if more than one sample
+    counts <- apply(countsObject[, -c(1:5)], MARGIN = 2, DoCutoff, threshold)
+    return(cbind(countsObject[, c(1:5)], counts))
+  } else { # if only one sample
+    countsObject[, 6][(countsObject[, 6] / sum(countsObject[, 6])) < threshold] <- 0
+    return(countsObject)
+  }
 }
 
 #' Get taxonomic information from NCBI
@@ -398,13 +403,18 @@ AddNote <- function(note, reference, countsObject) {
 #' @param countsObject dataframe with columns 1:5 with sequence info (unique sequence references, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
 #' @param total percentage cutoff specifying the minimum percentage of counts a sequence has to be represented by of out of the total number of counts in the data frame. Sequences that fall below the total% get removed.
 #' @param within percentage cutoff specifying the minimum percentage of counts a sequence has to be represented by of out of the total number of counts in a sample (a column in the data fram). Sequences that fall below the within% get gets reduced to 0 within that specific sample.
+#' @param minimum sequence count cutoff specifying the minimum number of counts a sequence has to be represented by in total in the data frame in order to be kept. Species/hits that fall below the minimum get removed.
 #' @return dataframe with columns 1:5 with sequence info (sequence reference, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
 #'
 #' @export
 #'
-TrimCutoffs <- function(countsObject, total = 0, within = 0) {
+TrimCutoffs <- function(countsObject, total = 0, within = 0, minimum = 0) {
   outObject <- countsObject[countsObject$Percent_all >= total,]
   outObject <- RemoveLowFreqSeqs(outObject, within)
-  outObject <- outObject[rowSums(outObject[, -c(1:5)]) > 0,] # remove empty rows
+  if (ncol(dataFrame) > 6) { # if more than one sample
+    outObject <- outObject[rowSums(outObject[, -c(1:5)]) > minimum,] # remove species with a sequence sum less than n
+  } else { # if only one sample
+    outObject <- outObject[outObject[, -c(1:5)] > minimum,] # remove species with a sequence sum less than n
+  }
   return(outObject)
 }

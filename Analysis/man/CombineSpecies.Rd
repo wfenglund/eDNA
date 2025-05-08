@@ -4,7 +4,7 @@
 \alias{CombineSpecies}
 \title{CombineSpecies}
 \usage{
-CombineSpecies(ref1, ref2, dataFrame)
+CombineSpecies(ref1, ref2, countsObject)
 }
 \arguments{
 \item{ref1}{a string containing the name of the first species to be combined (this name will be kept).}

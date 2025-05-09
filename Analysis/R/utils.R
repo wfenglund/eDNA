@@ -418,3 +418,32 @@ TrimCutoffs <- function(countsObject, total = 0, within = 0, minimum = 0) {
   }
   return(outObject)
 }
+
+#' Curate hits (wrapper function)
+#'
+#' @param ref the reference of the sequence to curate.
+#' @param note a string containing the note to be added (no action is taken if string is empty).
+#' @param absorb a string specifying the reference of another hit to absorb / be combined with (no action is taken if string is empty).
+#' @param latin a string specifying new latin name (no action is taken if string is empty).
+#' @param common a string specifying new common name (no action is taken if string is empty).
+#' @param rmHit boolean specifying if the hit should be removed or not (default: FALSE).
+#' @param countsObject dataframe with columns 1:5 with sequence info (unique sequence references, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
+#' @return dataframe with columns 1:5 with sequence info (sequence reference, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.
+#'
+#' @export
+#'
+CurateHit <- function(ref, note = '', absorb = '', latin = '', common = '', rmHit = FALSE, countsObject) {
+  if(nchar(note) > 0) {
+    countsObject <- AddNote(note, ref, countsObject)
+  }
+  if(nchar(latin) > 0) {
+    countsObject <- RenameSpecies(ref, latin, countsObject)
+  }
+  if(nchar(absorb) > 0) {
+    countsObject <- CombineSpecies(ref, absorb, countsObject)
+  }
+  if(nchar(common) > 0) {
+    countsObject$Swedish[countsObject$Reference %in% c(ref)] <- common
+  }
+  return(countsObject)
+}

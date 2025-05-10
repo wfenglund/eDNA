@@ -104,7 +104,7 @@ QSSplit <- function(speciesName, blastResults = blastResY) {
   file.edit("current_sequence.txt")
 }
 
-# Blast the top three sequences of a species
+# Blast the top three sequences of a species # Does not work
 QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
   QSeqGetter(searchName, blastResults)
   blastOut <- MultiBlaster("current_sequence.txt",
@@ -115,7 +115,7 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
 }
 ```
 
-### Curate the results:
+### Curate the results (old):
 ```{r}
 library(MetaBAnalysis)
 library(rvest)
@@ -143,6 +143,33 @@ library(rvest)
   columnNames <- colnames(groupClean)
   # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
   names(groupClean) <- columnNames
+  allResults$Clean <- groupClean
+}
+
+saveRDS(allResults, "allResults.rds") # save the clean object to be used in the report
+```
+
+### Curate the results (new):
+```{r}
+library(MetaBAnalysis)
+library(rvest)
+
+{
+  ### Create object:
+  groupNotes <- MakeNotes(allResults$TargetGroup)
+  
+  ### Filter:
+  groupNotes <- TrimCutoffs(total = 0.0, within = 0.0, minimum = 0, groupNotes) # trim species based on cutoffs
+  
+  ### Curate:
+  groupNotes <- CurateHit(ref = 'hitX', note = '', absorb = '', latin = '', common = '', rmHit = FALSE, groupNotes)
+  
+  ### Create outputs:
+  groupClean <- groupNotes[, -c(1, 2, 5)]
+  columnNames <- colnames(groupClean)
+  # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
+  names(groupClean) <- columnNames
+  # allResults$Clean <- groupClean
   allResults$Clean <- groupClean
 }
 

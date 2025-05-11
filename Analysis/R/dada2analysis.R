@@ -71,6 +71,9 @@ SumRes <- function(blastRes, counts, taxGroup) {
     invClasses <- unique(blastRes$class[blastRes$phylum != "Chordata" & blastRes$kingdom == "Metazoa"])
     invClasses <- invClasses[!is.na(invClasses)]
     invString <- do.call(paste, c(as.list(invClasses), sep = "|"))
+    if(length(invString) == 0) { # if there are no invertebrate classes
+      invString = ""
+    }
     # Load group options:
     taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia",
                              "Insecta", "Mammalia", "Arachnida",

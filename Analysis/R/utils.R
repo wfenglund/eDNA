@@ -205,7 +205,7 @@ RemoveLowFreqSeqs <- function(countsObject, threshold) {
     column[prop.table(column) < cutoff] <- 0
     return(column)
   }
-  if (ncol(dataFrame) > 6) { # if more than one sample
+  if (ncol(countsObject) > 6) { # if more than one sample
     counts <- apply(countsObject[, -c(1:5)], MARGIN = 2, DoCutoff, threshold)
     return(cbind(countsObject[, c(1:5)], counts))
   } else { # if only one sample
@@ -411,7 +411,7 @@ AddNote <- function(note, reference, countsObject) {
 TrimCutoffs <- function(countsObject, total = 0, within = 0, minimum = 0) {
   outObject <- countsObject[countsObject$Percent_all >= total,]
   outObject <- RemoveLowFreqSeqs(outObject, within)
-  if (ncol(dataFrame) > 6) { # if more than one sample
+  if (ncol(countsObject) > 6) { # if more than one sample
     outObject <- outObject[rowSums(outObject[, -c(1:5)]) > minimum,] # remove species with a sequence sum less than n
   } else { # if only one sample
     outObject <- outObject[outObject[, -c(1:5)] > minimum,] # remove species with a sequence sum less than n

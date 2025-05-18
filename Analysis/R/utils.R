@@ -445,5 +445,8 @@ CurateHit <- function(ref, note = '', absorb = '', latin = '', common = '', rmHi
   if(nchar(common) > 0) {
     countsObject$Swedish[countsObject$Reference %in% c(ref)] <- common
   }
+  if(rmHit == TRUE) {
+    countsObject <- countsObject[ref != countsObject$Reference,]
+  }
   return(countsObject)
 }

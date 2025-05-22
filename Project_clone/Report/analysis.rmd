@@ -146,7 +146,7 @@ saveRDS(allResults, "allResults.rds") # save the clean object to be used in the 
 ```{r}
 library(rvest)
 
-rawSeqsTable <- MetaBAnalysis::getRawSeqs()
+rawSeqsTable <- MetaBAnalysis::getRawSeqs() # add searchPattern = "_fastqc.html" if single-end data
 
 rawSeqs <- rawSeqsTable$nreads
 

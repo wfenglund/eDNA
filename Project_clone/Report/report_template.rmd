@@ -202,12 +202,15 @@ kable(groupSpecies, "latex",
 ```
 
 ```{r fig1, fig.height=14, fig.width=11, echo=FALSE, fig.cap="Fördelning i procent av antal sekvenser från olika arter av fisk i proverna. Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover."}
+# if figure is too tall or short, change to either fig.height=7 or fig.height=14 on above line
 library(MetaBAnalysis)
 
 # Prepare the count data:
-groupCounts <- groupData[,3:ncol(groupData)]
-groupCounts <- cbind(groupCounts, Totalt = rowSums(groupCounts))
-figureSpecies <- data.frame(groupSpecies)$Svenska
+groupCounts <- groupData[, -c(1:2), drop = FALSE]
+if(ncol(groupCounts) > 1) { # if more than one sample, add a total of all samples to the plot
+  groupCounts <- cbind(groupCounts, Totalt = rowSums(groupCounts))
+}
+figureSpecies <- data.frame(groupSpecies)$Svenska # change Svenska to Latin if needed
 
 # Sort samples numerically:
 groupCounts <- groupCounts[, order(as.numeric(gsub("[^0-9]+", "", colnames(groupCounts))))]

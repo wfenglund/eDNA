@@ -98,11 +98,17 @@ uppdragsfinansierad verksamhet som erbjuder myndigheter och organisationer hjäl
 med genetiska analyser av biologiskt material.
 
 ```{r}
+options(scipen = 5)
+
 FixMillion <- function(inNumber) {
-  smallNumber <- inNumber / 1000000
-  roundNumber <- round(smallNumber, 1)
-  outNumber <- gsub("\\.", ",", roundNumber)
-  return(outNumber)
+  if(inNumber < 100000) {
+    return(inNumber)
+  } else {
+    smallNumber <- inNumber / 1000000
+    roundNumber <- round(smallNumber, 1)
+    outNumber <- gsub("\\.", ",", roundNumber)
+    return(paste(outNumber, "miljoner"))
+  }
 }
 
 FixPercent <- function(inNumber) {
@@ -182,8 +188,8 @@ sekvenseringsbibliotek. Biblioteken skapades av CGI och sekvenserades av
 BMKGene på ett NovaSeq-instrument (PE150).
 
 ### Fauna
-Det totala antalet fragment efter sekvensering av proverna var `r totalSeqs` miljoner,
-där enskilda prov hade mellan `r minSeqs` miljoner och `r maxSeqs` miljoner fragment. Omkring `r primerPercent`% av sekvenserna
+Det totala antalet fragment efter sekvensering av proverna var `r totalSeqs`,
+där enskilda prov hade mellan `r minSeqs` och `r maxSeqs` fragment. Omkring `r primerPercent`% av sekvenserna
 innehöll förväntade primers och var av tillräckligt god kvalitet för att
 bibehållas i analysen. Av dessa tillhörde ~`r groupPercent`% av sekvenserna fisk. Fiskarna
 tillhörde `r speciesNo` olika arter (se tabell 2 samt se figur 1 och `r seqPlotFigures` för

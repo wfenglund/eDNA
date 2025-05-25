@@ -166,6 +166,21 @@ kable(primerInfo[2,c(1:3,5)], "latex",
       booktabs = T, escape = F)%>%
   kable_styling(latex_options = "hold_position", font_size = 8)%>%
 footnote(symbol = c("Miya et al. 2015"))
+
+library(kableExtra)
+library(readxl)
+
+# Edit this:
+primerChoice <- c(2) # change to desired rows in primer_data.xlsx, default = 2 = mifish
+
+# Not this (generally):
+primerInfo <- read_excel("primer_data.xlsx")
+primerNames <- unlist(lapply(1:length(primerChoice), function(x) {paste0(primerInfo[primerChoice[x],1], footnote_marker_symbol(x))}))
+primerInfo[primerChoice, 1] <- primerNames kable(primerInfo[primerChoice,c(1:3,5)], "latex",
+				 caption = "Sekvenser för de primers som använts för detektion av eDNA. Temperatur är annealingtemperatur i PCR-reaktionerna.",
+				 booktabs = T, escape = F) %>%
+				 kable_styling(latex_options = "hold_position", font_size = 8) %>%
+				 footnote(symbol = as.vector(primerInfo[primerChoice, 7])) # does not work fully for several primers
 ```
 
 ### Bioinformatiska analysmetoder

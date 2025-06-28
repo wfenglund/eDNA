@@ -19,7 +19,9 @@ projId <- "XXX_202X"
 
 # Collect sample paths and names. Duplicate line once per primer:
 primer1 <- CollectData("../Filtered_data", prefix = "mifish")
+saveRDS(primer1, file = "primer1.rds")
 # primer2 <- CollectData("../Filtered_data", prefix = "v16s")
+# saveRDS(primer2, file = "primer2.rds")
 
 # Filter reads and generate out object for later use:
 out <- FiltTrimWrap(primer1)
@@ -68,9 +70,9 @@ ExportFasta(yAll, paste0("y_", projId, primer1$Prefix, ".fa"), minLength = 30, m
 data(compactNameDump, package = "MetaBAnalysis")
 data(compactNodeDump, package = "MetaBAnalysis")
 
-blastResY <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), threshold = 90)
+blastResY <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 90, minCoverage = 60)
 saveRDS(blastResY, file = "blastResY.rds")
-# blastResY2 <- MetaBAnalysis::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), threshold = 90)
+# blastResY2 <- MetaBAnalysis::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), minIdentity = 90, minCoverage = 60)
 # saveRDS(blastResY2, file = "blastResY2.rds")
 ```
 

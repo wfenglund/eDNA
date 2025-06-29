@@ -92,13 +92,13 @@ SumRes <- function (blastRes, counts, taxGroup) {
     }
     names(sumAll) <- c("Species", names(sumAll)[-1])
     if (taxGroup == "Prokaryota" || taxGroup == "Eukaryota") { # if group is a superkingdom
-      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$superkingdom), ]
+      genesCountsFilt <- genesCounts[grepl(taxSel, genesCounts$superkingdom), ]
     } else if (taxGroup == "Plants" || taxGroup == "Fungi") { # if group is a kingdom
-      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$kingdom), ]
+      genesCountsFilt <- genesCounts[grepl(taxSel, genesCounts$kingdom), ]
     } else if (taxGroup == "Invertebrates") { # if group is 'Invertebrates', and results are always animal
-      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class) & blastRes$kingdom == "Metazoa", ]
+      genesCountsFilt <- genesCounts[grepl(taxSel, genesCounts$class) & genesCounts$kingdom == "Metazoa", ]
     } else { # if group is a class
-      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class), ]
+      genesCountsFilt <- genesCounts[grepl(taxSel, genesCounts$class), ]
     }
     sumFilt <- aggregate(genesCountsFilt[, 14:colStart], by = list(genesCountsFilt$species), FUN = sum)
     if (ncol(sumFilt) > 2) {

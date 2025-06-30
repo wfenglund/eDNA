@@ -136,20 +136,20 @@ BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, min
                           "evalue", "bitscore", "staxids", "sscinames", "scomnames", "qcovs")
   blastResult$pident <- as.numeric(blastResult$pident)
   blastResult$qcovs <- as.numeric(blastResult$qcovs)
-  blastResult$pident[is.na(blastResult$pident)] <- 0
-  blastResult$qcovs[is.na(blastResult$qcovs)] <- 0
+  blastResult$pident[is.na(blastResult$pident)] <- 0 # If the input file contained empty values, assign them to 0
+  blastResult$qcovs[is.na(blastResult$qcovs)] <- 0 # -"-
   blastResult <- blastResult[blastResult$pident >= minIdentity, ]
   blastResult <- blastResult[blastResult$qcovs >= minCoverage, ]
-  blastResultUn <- blastResult[!duplicated(blastResult$qseqid), ]
-  GetFirstItem <- function(name) {
+  blastResultUn <- blastResult[!duplicated(blastResult$qseqid), ] # Retain only best hits
+  GetFirstItem <- function(name) { # Function that returns the first of items separated by semicolons
     return(strsplit(as.character(name), split = ";")[[1]][1])
   }
   blastResultUn$staxids <- unlist(lapply(blastResultUn$staxids, GetFirstItem))
   blastResultUn$sscinames <- unlist(lapply(blastResultUn$sscinames, GetFirstItem))
   blastResultUn$scomnames <- unlist(lapply(blastResultUn$scomnames, GetFirstItem))
   taxonomy <- list()
-  for (i in unique(blastResultUn$sscinames)) {
-    print(i)
+  for (i in unique(blastResultUn$sscinames)) { # Get taxonomy locally
+    print(i) # Print current taxa
     taxonomy[[i]] <- GetTaxonomy(i, nameDump = MetaBAnalysis::compactNameDump, nodeDump = MetaBAnalysis::compactNodeDump)
   }
   taxonomy <- do.call("rbind", taxonomy)

@@ -68,7 +68,7 @@ DadaAnalysis <- function(forward, reverse, muThread = TRUE,
 #'
 SumRes <- function(blastRes, counts, taxGroup) {
     # Create invertebrate string:
-    invClasses <- unique(blastResYTest$class[blastResYTest$phylum != "Chordata" & blastResYTest$kingdom == "Metazoa"])
+    invClasses <- unique(blastRes$class[blastRes$phylum != "Chordata" & blastRes$kingdom == "Metazoa"])
     invClasses <- invClasses[!is.na(invClasses)]
     invString <- do.call(paste, c(as.list(invClasses), sep = "|"))
     # Load group options:

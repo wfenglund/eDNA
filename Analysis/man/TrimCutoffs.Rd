@@ -4,7 +4,7 @@
 \alias{TrimCutoffs}
 \title{Remove sequences and counts based on cutoffs}
 \usage{
-TrimCutoffs(countsObject, total = 0, within = 0)
+TrimCutoffs(countsObject, total = 0, within = 0, minimum = 0)
 }
 \arguments{
 \item{countsObject}{dataframe with columns 1:5 with sequence info (unique sequence references, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.}
@@ -12,6 +12,8 @@ TrimCutoffs(countsObject, total = 0, within = 0)
 \item{total}{percentage cutoff specifying the minimum percentage of counts a sequence has to be represented by of out of the total number of counts in the data frame. Sequences that fall below the total\% get removed.}
 
 \item{within}{percentage cutoff specifying the minimum percentage of counts a sequence has to be represented by of out of the total number of counts in a sample (a column in the data fram). Sequences that fall below the within\% get gets reduced to 0 within that specific sample.}
+
+\item{minimum}{sequence count cutoff specifying the minimum number of counts a sequence has to be represented by in total in the data frame in order to be kept. Species/hits that fall below the minimum get removed.}
 }
 \value{
 dataframe with columns 1:5 with sequence info (sequence reference, notes, Swedish name, Latin name and percentage out of all sequences in the data frame) and the rest of the columns of samples with counts of the sequences.

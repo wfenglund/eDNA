@@ -30,7 +30,7 @@ dada2Counts <- MetaBAnalysis::DadaAnalysis(primer1$FiltFs, primer1$FiltRs,
 					   minOverlap = 5, paired = TRUE)
 ```
 
-### Convert and modify  matrix "dada2Counts" to DGEList "yAll":
+### Convert and modify matrix "dada2Counts" to DGEList "yAll":
 ```{r}
 yAll <- MetaBAnalysis::MakeDGEList(dada2Counts, primer1$Samples, primer1$ForwardC)
 saveRDS(yAll, file = "yAll.rds")
@@ -112,64 +112,6 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
                            resultNumber = 10,
                            viewChoice = "YES")
   View(blastOut)
-}
-```
-
-### Functions:
-```{r}
-### To be added to package:
-MakeNotes <- function(countsObject) {
-  colnames(countsObject)[colnames(countsObject) == "Species"] <- "Latin"
-  columnNames <- colnames(countsObject) # save colnames
-  outObject <- cbind(Swedish = MetaBAnalysis::TranslateTaxa(countsObject$Latin),
-                     countsObject)
-  outObject <- cbind(outObject[, c(1, 2)],
-                     Percent_all = SpeciesPercent(countsObject),
-                     outObject[, -c(1, 2)])
-  outObject <- cbind(Notes = rep("", nrow(outObject)), outObject)
-  outObject <- cbind(Reference = paste0("hit", 1:nrow(outObject)), outObject)
-  colnames(outObject)[6:ncol(outObject)] <- columnNames[2:ncol(outObject)] # restore colnames
-  return(outObject)
-}
-  
-AddNote <- function(note, reference, countsObject) {
-  countsObject$Notes[countsObject$Reference == reference] <- note
-  return(countsObject)
-}
-
-TrimCutoffs <- function(countsObject, total = 0, within = 0) {
-  outObject <- countsObject[countsObject$Percent_all >= total,]
-  outObject <- RemoveLowFreqSeqs(outObject, within)
-  outObject <- outObject[rowSums(outObject[, -c(1:5)]) > 0,] # remove empty rows
-  return(outObject)
-}
-
-### To be updated in package:
-RenameSpecies <- function (ref, newName, dataFrame) {
-  dataFrame$Latin[ref == dataFrame$Reference] <- newName
-  return(dataFrame)
-}
-
-CombineSpecies <- function(ref1, ref2, dataFrame) {
-  speciesSum <- dataFrame[ref1 == dataFrame$Reference, 5:ncol(dataFrame)] +
-    dataFrame[ref2 == dataFrame$Reference, 5:ncol(dataFrame)]
-  speciesSum <- cbind(dataFrame[ref1 == dataFrame$Reference, 1:4], speciesSum)
-  names(speciesSum)[1:4] <- names(dataFrame[1:4])
-  dataFrame <- dataFrame[ref1 != dataFrame$Reference,]
-  dataFrame <- dataFrame[ref2 != dataFrame$Reference,]
-  dataFrame <- rbind(dataFrame, speciesSum)
-  dataFrame <- dataFrame[order(rowSums(dataFrame[, -c(1:5)]), decreasing = TRUE),]
-  return(dataFrame)
-}
-
-RemoveLowFreqSeqs <- function(countsObject, threshold) {
-  threshold = threshold / 100 # convert percentage into proportion
-  DoCutoff <- function(column, cutoff) {
-    column[prop.table(column) < cutoff] <- 0
-    return(column)
-  }
-  counts <- apply(countsObject[, -c(1:5)], MARGIN = 2, DoCutoff, threshold)
-  return(cbind(countsObject[, c(1:5)], counts))
 }
 ```
 

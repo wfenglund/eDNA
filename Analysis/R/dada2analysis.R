@@ -107,6 +107,8 @@ SumRes <- function(blastRes, counts, taxGroup) {
       genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$superkingdom), ]
     } else if(taxGroup == "Plants" || taxGroup == "Fungi") { # if group is a kingdom
       genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$kingdom),]
+    } else if(taxGroup == "Invertebrates") { # if group is 'Invertebrates', and results are always animal
+      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class) & blastRes$kingdom == "Metazoa", ] #
     } else { # if group is a class
       genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
     }

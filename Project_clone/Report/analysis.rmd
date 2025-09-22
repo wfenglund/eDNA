@@ -115,41 +115,7 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
 }
 ```
 
-### Curate the results (old):
-```{r}
-library(MetaBAnalysis)
-library(rvest)
-
-{
-  ### Create object:
-  groupNotes <- MakeNotes(allResults$TargetGroup)
-  
-  ### Take notes:
-  groupNotes <- AddNote("note", "hitX", groupNotes)
-  
-  ### Curate:
-  # groupNotes <- RenameSpecies("hit reference", "new latin name", groupNotes)
-  # groupNotes <- CombineSpecies("hit to be kept", "hit to be absorbed", groupNotes)
-  groupNotes$Swedish[groupNotes$Reference %in% c("hitX")] <- "new common name"
-  
-  ### Filter:
-  # groupNotes <- TrimCutoffs(total = 0.5, within = 0.5, groupNotes) # trim species based on percentage cutoffs
-  # groupNotes <- groupNotes[!grepl("drop", groupNotes$Notes),] # Drop all species that has the word "drop" in their notes
-  # groupNotes <- groupNotes[rowSums(groupNotes[, -c(1:5)]) > 100,] # remove species with a sequence sum less than 100
-
-  
-  ### Create outputs:
-  groupClean <- groupNotes[, -c(1, 2, 5)]
-  columnNames <- colnames(groupClean)
-  # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
-  names(groupClean) <- columnNames
-  allResults$Clean <- groupClean
-}
-
-saveRDS(allResults, "allResults.rds") # save the clean object to be used in the report
-```
-
-### Curate the results (new):
+### Curate the results:
 ```{r}
 library(MetaBAnalysis)
 library(rvest)

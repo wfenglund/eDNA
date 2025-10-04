@@ -63,6 +63,10 @@ targetGroup <- "fisk"
 
 primerName1 <- "12S"
 primerName2 <- "V16S" # if relevant #add
+
+commonNo2 <- "NUMBER" # same as above but for second primer
+commonPercent2 <- "NUMBER" # -"-.
+seqPlotFigures2 <- "2-X" # -"-
 ```
 
 \begin{titlepage}
@@ -138,12 +142,14 @@ groupSpecies <- cbind(groupData$Latin, groupData$Swedish)
 colnames(groupSpecies) <- c("Latin", "Svenska")
 
 # Assign variables:
-speciesNo <- nrow(groupSpecies) # Number of species found
+speciesNo <- nrow(groupSpecies) # Number of species found with first primer
 totalSeqs <- FixMillion(sum(rawSeqs)) # Total number of raw sequences
 minSeqs <- FixMillion(min(rawSeqs)) # Number of sequences in the sample with fewest sequences
 maxSeqs <- FixMillion(max(rawSeqs)) # Number of sequences in the sample with most sequences
 primerPercent <- FixPercent(primerSeqs / sum(rawSeqs)) # Percentage of sequences that contained primers
 groupPercent <- FixPercent(groupSeqs / primerSeqs) # Percentage of sequences belonging to target group
+
+primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 och ", seqPlotFigures, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo, " arterna stod för över ", commonPercent, "% av sekvenserna från ", targetGroup, " (se figur 1).")
 
 if("allResults2.rds" %in% list.files(".")) { 
   primerSeqs2 <- sampleMetaData$primerSeqs2
@@ -152,7 +158,16 @@ if("allResults2.rds" %in% list.files(".")) {
   groupData2 <- allResults2$Clean
   groupSpecies2 <- cbind(groupData2$Latin, groupData2$Swedish)
   colnames(groupSpecies2) <- c("Latin", "Svenska")
+  primerPercent2 <- FixPercent(primerSeqs2 / sum(rawSeqs)) # Percentage of sequences that contained primers
+  groupPercent2 <- FixPercent(groupSeqs2 / primerSeqs2) # Percentage of sequences belonging to target group
+  speciesNo2 <- nrow(groupSpecies2) # Number of species found
+  primerText2 <- paste0("För ", primerName2, " innehöll omkring ", primerPercent2, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent2, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo2, " olika arter (se figur 1 och ", seqPlotFigures2, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo2, " arterna stod för över ", commonPercent2, "% av sekvenserna från ", targetGroup, " (se figur 1).")
+} else {
+  speciesNo2 <- c() # No species found, since no other primer
+  primerText2 <- ""
 }
+
+speciesNoAll <- nrow(unique(rbind(groupSpecies, groupSpecies2))) # Number of species from both primers
 ```
 
 ## Uppdrag
@@ -209,16 +224,19 @@ BMKGene på ett NovaSeq-instrument (PE150).
 
 ### Fauna
 Det totala antalet fragment efter sekvensering av proverna var `r totalSeqs`,
-där enskilda prov hade mellan `r minSeqs` och `r maxSeqs` fragment. Omkring `r primerPercent`% av sekvenserna
-innehöll förväntade primers och var av tillräckligt god kvalitet för att
-bibehållas i analysen. Av dessa tillhörde ~`r groupPercent`% av sekvenserna `r targetGroup`. Sekvenserna från `r targetGroup`
-tillhörde `r speciesNo` olika arter (se tabell 2 samt se figur 1 och `r seqPlotFigures` för
-relativa andelar sekvenser från varje art i varje prov) där de vanligaste `r commonNo`
-arterna stod för över `r commonPercent`% av sekvenserna från `r targetGroup` (se figur 1). Övriga sekvenser var
-av låg kvalitet eller var spår av andra organismer.
+där enskilda prov hade mellan `r minSeqs` och `r maxSeqs` fragment.
+`r primerText1`
+`r primerText2`
+<!-- Omkring `r primerPercent`% av sekvenserna -->
+<!-- innehöll förväntade primers och var av tillräckligt god kvalitet för att -->
+<!-- bibehållas i analysen. Av dessa tillhörde ~`r groupPercent`% av sekvenserna `r targetGroup`. Sekvenserna från `r targetGroup` -->
+<!-- tillhörde `r speciesNo` olika arter (se tabell 2 samt se figur 1 och `r seqPlotFigures` för -->
+<!-- relativa andelar sekvenser från varje art i varje prov) där de vanligaste `r commonNo` -->
+<!-- arterna stod för över `r commonPercent`% av sekvenserna från `r targetGroup` (se figur 1). -->
+Se tabell 2 för samtliga identifierade arter av `r targetGroup`. Övriga sekvenser var av låg kvalitet eller var spår av andra organismer.
 
 ```{r tab2, echo=FALSE}
-fixedCaption <- paste("Tabell över latinska och svenska namn på de arter av", targetGroup, "som identifierats i proverna. Om sekvenser ej kunde bestämmas till exakt art anges i dessa fall ", "sp.", " eller vilka två arter det kan handla om.", sep = "'")
+fixedCaption <- paste(paste("Tabell över latinska och svenska namn på de arter av", targetGroup, "som identifierats i proverna. Om sekvenser ej kunde bestämmas till exakt art anges i dessa fall "), "sp.", " eller vilka två arter det kan handla om.", sep = "'")
 
 if("allResults2.rds" %in% list.files(".")) {
   tableSpecies <- unique(rbind(groupSpecies, groupSpecies2))
@@ -349,7 +367,7 @@ if("allResults2.rds" %in% list.files(".")) { # if two primers
 
 ## Sammanfattning
 Undersökning med eDNA på `r samplesNo` vattenprover har identifierat sekvenser
-från `r speciesNo` olika arter av `r targetGroup`. Vår bedömning är att
+från `r speciesNoAll` olika arter av `r targetGroup`. Vår bedömning är att
 de detekterade arterna med stor sannolikhet finns närvarande i proverna, men eDNA är indirekta spår vilket innebär att spår inte nödvändigtvis kommer från individer som lever på provtagen lokal. Vidare innebär ett negativt resultat (alltså arter som inte detekterades) inte
 nödvändigtvis att dessa arter är frånvarande. Vi vill även påpeka att
 DNA rör sig med vatten och att en eventuell lokal uppströms kan påverka vilka

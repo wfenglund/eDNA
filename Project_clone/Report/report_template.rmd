@@ -227,12 +227,6 @@ Det totala antalet fragment efter sekvensering av proverna var `r totalSeqs`,
 där enskilda prov hade mellan `r minSeqs` och `r maxSeqs` fragment.
 `r primerText1`
 `r primerText2`
-<!-- Omkring `r primerPercent`% av sekvenserna -->
-<!-- innehöll förväntade primers och var av tillräckligt god kvalitet för att -->
-<!-- bibehållas i analysen. Av dessa tillhörde ~`r groupPercent`% av sekvenserna `r targetGroup`. Sekvenserna från `r targetGroup` -->
-<!-- tillhörde `r speciesNo` olika arter (se tabell 2 samt se figur 1 och `r seqPlotFigures` för -->
-<!-- relativa andelar sekvenser från varje art i varje prov) där de vanligaste `r commonNo` -->
-<!-- arterna stod för över `r commonPercent`% av sekvenserna från `r targetGroup` (se figur 1). -->
 Se tabell 2 för samtliga identifierade arter av `r targetGroup`. Övriga sekvenser var av låg kvalitet eller var spår av andra organismer.
 
 ```{r tab2, echo=FALSE}
@@ -285,7 +279,7 @@ if("allResults2.rds" %in% list.files(".")) {
   groupCounts2 <- groupCounts2[, order(as.numeric(gsub("[^0-9]+", "", colnames(groupCounts2))))]
   
   # Plot:
-  FractionPlot(data = groupCounts2, species = figureSpecies, col = MetaBAnalysis:::color25, inset = c(-0.3, 0.01))
+  FractionPlot(data = groupCounts2, species = figureSpecies2, col = MetaBAnalysis:::color25, inset = c(-0.3, 0.01))
 }
 ```
 

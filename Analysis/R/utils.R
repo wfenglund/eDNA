@@ -423,7 +423,7 @@ TrimCutoffs <- function(countsObject, total = 0, within = 0, minimum = 0) {
 #'
 #' @param ref the reference of the sequence to curate.
 #' @param note a string containing the note to be added (no action is taken if string is empty).
-#' @param absorb a string specifying the reference of another hit to absorb / be combined with (no action is taken if string is empty).
+#' @param absorb a string or vector specifying the reference(s) of another hit(s) to absorb / be combined with (no action is taken if string is empty).
 #' @param latin a string specifying new latin name (no action is taken if string is empty).
 #' @param common a string specifying new common name (no action is taken if string is empty).
 #' @param rmHit boolean specifying if the hit should be removed or not (default: FALSE).
@@ -439,8 +439,10 @@ CurateHit <- function(ref, note = '', absorb = '', latin = '', common = '', rmHi
   if(nchar(latin) > 0) {
     countsObject <- RenameSpecies(ref, latin, countsObject)
   }
-  if(nchar(absorb) > 0) {
-    countsObject <- CombineSpecies(ref, absorb, countsObject)
+  if(length(absorb) > 0 && all(nzchar(absorb))) { # if not an empty string
+    for(target in absorb) { # for every target hit to be absorbed
+      countsObject <- CombineSpecies(ref, target, countsObject)
+    }
   }
   if(nchar(common) > 0) {
     countsObject$Swedish[countsObject$Reference %in% c(ref)] <- common

@@ -380,7 +380,7 @@ MakeNotes <- function(countsObject) {
   outObject <- cbind(outObject[, c(1, 2)], Percent_all = SpeciesPercent(countsObject), outObject[, -c(1, 2)])
   outObject <- cbind(Notes = rep("", nrow(outObject)), outObject)
   outObject <- cbind(Reference = paste0("hit", 1:nrow(outObject)), outObject)
-  colnames(outObject)[6:ncol(outObject)] <- columnNames[2:ncol(outObject)] # restore colnames
+  colnames(outObject)[6:ncol(outObject)] <- columnNames[2:length(columnNames)] # restore colnames
   return(outObject)
 }
 

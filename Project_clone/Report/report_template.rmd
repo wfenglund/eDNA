@@ -53,7 +53,7 @@ authorName <- "FIRST LAST" # Name of the author of this report
 clientName <- "klient" # The name of the client
 samplesNo <- "NUMBER" # Number of samples analysed
 blastDate <- "MONTH 20XX" # Which month the blast search was performed
-sampleCutoff <- "0,X" # Within sample cutoff
+sampleCutoff <- "0,1" # Within sample cutoff
 
 commonNo <- "NUMBER" # How many species that stood for [commonPercent] of all sequences
 commonPercent <- "NUMBER" # A given large percentage, e.g. "75" or "90" etc.

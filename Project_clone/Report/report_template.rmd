@@ -57,16 +57,16 @@ sampleCutoff <- "0,X" # Within sample cutoff
 
 commonNo <- "NUMBER" # How many species that stood for [commonPercent] of all sequences
 commonPercent <- "NUMBER" # A given large percentage, e.g. "75" or "90" etc.
-seqPlotFigures <- "2-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
+seqPlotFigures <- "3-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
 
-targetGroup <- "fisk"
+targetGroup <- "fisk" # group of organism focused on
 
 primerName1 <- "12S"
-primerName2 <- "V16S" # if relevant #add
+primerName2 <- "V16S" # if relevant
 
 commonNo2 <- "NUMBER" # same as above but for second primer
 commonPercent2 <- "NUMBER" # -"-.
-seqPlotFigures2 <- "2-X" # -"-
+seqPlotFigures2 <- "4-X" # -"-
 ```
 
 \begin{titlepage}
@@ -161,7 +161,7 @@ if("allResults2.rds" %in% list.files(".")) {
   primerPercent2 <- FixPercent(primerSeqs2 / sum(rawSeqs)) # Percentage of sequences that contained primers
   groupPercent2 <- FixPercent(groupSeqs2 / primerSeqs2) # Percentage of sequences belonging to target group
   speciesNo2 <- nrow(groupSpecies2) # Number of species found
-  primerText2 <- paste0("För ", primerName2, " innehöll omkring ", primerPercent2, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent2, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo2, " olika arter (se figur 1 och ", seqPlotFigures2, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo2, " arterna stod för över ", commonPercent2, "% av sekvenserna från ", targetGroup, " (se figur 1).")
+  primerText2 <- paste0("För ", primerName2, " innehöll omkring ", primerPercent2, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent2, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo2, " olika arter (se figur 2 och ", seqPlotFigures2, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo2, " arterna stod för över ", commonPercent2, "% av sekvenserna från ", targetGroup, " (se figur 1).")
 } else {
   speciesNo2 <- c() # No species found, since no other primer
   primerText2 <- ""
@@ -283,51 +283,6 @@ if("allResults2.rds" %in% list.files(".")) {
 }
 ```
 
-```{r fig3, fig.height=7, fig.width=14, echo=FALSE, fig.cap="Simpsons diversitetsindex för varje prov. Simpson (1 - D) ger sannolikheten att två slumpmässiga sekvenser dragna ur ett prov tillhör samma art. En högre siffra föreslår en högre diversitet inom det provet."}
-PlotAlphaDiv <- function(plotData, dataNames, plotCol) {
-  if(length(plotData) == 1 && !is.list(plotData)) {
-    dataList <- as.list(plotData)
-  } else {
-    dataList <- plotData
-  }
-  .addSize <- function(group) {
-    name <- paste0(group[1], "\nn=", length(group[[2]]))
-    return(name)
-  }
-  newNames <- apply(X = cbind(dataNames, plotData), MARGIN = 1, FUN = .addSize)
-  ylabel <- ""
-  if(length(newNames) == 1) {ylabel <- newNames}
-  par(mar = c(4.1, 9.1, 4.1, 12.1), xpd = TRUE, las = 1, srt = 0, cex = 1.2, bty = "n")
-  boxplot(dataList, horizontal = TRUE, names = newNames, col = plotCol, las = 1)
-  text(-0.05, 1, ylabel, adj = 1)
-}
-
-# Format data:
-countsMatrix <- as.matrix(t(allResults$Clean[,-c(1, 2)]))
-# simpValues <- vegan::diversity(x = countsMatrix, index = "simpson")
-
-# Calculate Simpson:
-if("allResults2.rds" %in% list.files(".")) { # if two primers
-  countsMatrix2 <- as.matrix(t(allResults2$Clean[,-c(1, 2)]))
-  plotInput <- list(vegan::diversity(x = countsMatrix, index = "simpson"), vegan::diversity(x = countsMatrix2, index = "simpson"))
-  plotNames <- list(primerName1, primerName2) # needs to be the same length as 'plotInput'
-} else {
-  plotInput <- list(vegan::diversity(x = countsMatrix, index = "simpson"))
-  plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
-}
-
-# Group samples (optional):
-#group1 <- split(simpValues, c('a', 'b'))$a
-#group2 <- split(simpValues, c('a', 'b'))$b
-
-# Prepare plot variables:
-# plotInput <- list(simpValues) # add several if needed
-# plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
-plotPalette <- wesanderson::wes_palette("Zissou1")#[c(3, 1)]
-
-PlotAlphaDiv(plotData = plotInput, dataNames = plotNames, plotCol = plotPalette)
-```
-
 ```{r include=FALSE}
 groupDataFrame <- as.data.frame(groupData)
 names(groupDataFrame) <- make.names(names(groupDataFrame))
@@ -378,6 +333,51 @@ plot_grid(plotlist = indplots[1:5], align = "v", axis = "l", ncol = 1)
 if("allResults2.rds" %in% list.files(".")) { # if two primers
   plot_grid(plotlist = indplots2[1:5], align = "v", axis = "l", ncol = 1)
 }
+```
+
+```{r fig5, fig.height=7, fig.width=14, echo=FALSE, fig.cap="Simpsons diversitetsindex för varje prov. Simpson (1 - D) ger sannolikheten att två slumpmässiga sekvenser dragna ur ett prov tillhör samma art. En högre siffra föreslår en högre diversitet inom det provet."}
+PlotAlphaDiv <- function(plotData, dataNames, plotCol) {
+  if(length(plotData) == 1 && !is.list(plotData)) {
+    dataList <- as.list(plotData)
+  } else {
+    dataList <- plotData
+  }
+  .addSize <- function(group) {
+    name <- paste0(group[1], "\nn=", length(group[[2]]))
+    return(name)
+  }
+  newNames <- apply(X = cbind(dataNames, plotData), MARGIN = 1, FUN = .addSize)
+  ylabel <- ""
+  if(length(newNames) == 1) {ylabel <- newNames}
+  par(mar = c(4.1, 9.1, 4.1, 12.1), xpd = TRUE, las = 1, srt = 0, cex = 1.2, bty = "n")
+  boxplot(dataList, horizontal = TRUE, names = newNames, col = plotCol, las = 1)
+  text(-0.05, 1, ylabel, adj = 1)
+}
+
+# Format data:
+countsMatrix <- as.matrix(t(allResults$Clean[,-c(1, 2)]))
+# simpValues <- vegan::diversity(x = countsMatrix, index = "simpson")
+
+# Calculate Simpson:
+if("allResults2.rds" %in% list.files(".")) { # if two primers
+  countsMatrix2 <- as.matrix(t(allResults2$Clean[,-c(1, 2)]))
+  plotInput <- list(vegan::diversity(x = countsMatrix, index = "simpson"), vegan::diversity(x = countsMatrix2, index = "simpson"))
+  plotNames <- list(primerName1, primerName2) # needs to be the same length as 'plotInput'
+} else {
+  plotInput <- list(vegan::diversity(x = countsMatrix, index = "simpson"))
+  plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
+}
+
+# Group samples (optional):
+#group1 <- split(simpValues, c('a', 'b'))$a
+#group2 <- split(simpValues, c('a', 'b'))$b
+
+# Prepare plot variables:
+# plotInput <- list(simpValues) # add several if needed
+# plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
+plotPalette <- wesanderson::wes_palette("Zissou1")#[c(3, 1)]
+
+PlotAlphaDiv(plotData = plotInput, dataNames = plotNames, plotCol = plotPalette)
 ```
 
 ## Projektinformation

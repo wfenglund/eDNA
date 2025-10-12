@@ -18,8 +18,8 @@ knitr::knit_engines$set(python = reticulate::eng_python)
 projId <- "XXX_202X"
 
 # Collect sample paths and names. Duplicate line once per primer:
-primer1 <- CollectData2("../Filtered_data", prefix = "mifish")
-# primer2 <- CollectData2("../Filtered_data", prefix = "v16s")
+primer1 <- CollectData("../Filtered_data", prefix = "mifish")
+# primer2 <- CollectData("../Filtered_data", prefix = "v16s")
 
 # Filter reads and generate out object for later use:
 out <- FiltTrimWrap(primer1)
@@ -28,15 +28,15 @@ saveRDS(out, file = "out.rds")
 # saveRDS(out2, file = "out2.rds")
 
 # Dereplicate and merge pairs with dada2:
-dada2Counts <- DadaAnalysis2(primer1, justConcatenate = FALSE, minOverlap = 5)
-# dada2Counts2 <- DadaAnalysis2(primer2, justConcatenate = FALSE, minOverlap = 5)
+dada2Counts <- DadaAnalysis(primer1, justConcatenate = FALSE, minOverlap = 5)
+# dada2Counts2 <- DadaAnalysis(primer2, justConcatenate = FALSE, minOverlap = 5)
 ```
 
 ### Convert and modify matrix "dada2Counts" to DGEList "yAll":
 ```{r}
-yAll <- MakeDGEList2(dada2Counts, primer1)
+yAll <- MakeDGEList(dada2Counts, primer1)
 saveRDS(yAll, file = "yAll.rds")
-# yAll2 <- MakeDGEList2(dada2Counts2, primer2)
+# yAll2 <- MakeDGEList(dada2Counts2, primer2)
 # saveRDS(yAll2, file = "yAll2.rds")
 ```
 
@@ -205,12 +205,12 @@ sampleMetaData <- list(rawSeqs = rawSeqs, primerSeqs = primerSeqs, groupSeqs = g
 saveRDS(sampleMetaData, "sampleMetaData.rds")
 
 sum(groupClean[1, -c(1, 2)]) / sum(groupClean[, -c(1, 2)]) # see what percentage of counts the top four species accounts for
-sum(groupClean2[1, -c(1, 2)]) / sum(groupClean2[, -c(1, 2)]) # see what percentage of counts the top four species accounts for
 
 if("allResults2" %in% ls()) { # if second primer
   sampleMetaData$primerSeqs2 <- sum(out2[, 1]) # add n seqs with primer for second primer
   sampleMetaData$groupSeqs2 <- sum(groupClean2[, -c(1, 2)])
   saveRDS(sampleMetaData, "sampleMetaData.rds")
+  sum(groupClean2[1, -c(1, 2)]) / sum(groupClean2[, -c(1, 2)]) # see what percentage of counts the top four species accounts for
 }
 ```
 

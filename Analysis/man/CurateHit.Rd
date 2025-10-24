@@ -19,7 +19,7 @@ CurateHit(
 
 \item{note}{a string containing the note to be added (no action is taken if string is empty).}
 
-\item{absorb}{a string specifying the reference of another hit to absorb / be combined with (no action is taken if string is empty).}
+\item{absorb}{a string or vector specifying the reference(s) of another hit(s) to absorb / be combined with (no action is taken if string is empty).}
 
 \item{latin}{a string specifying new latin name (no action is taken if string is empty).}
 

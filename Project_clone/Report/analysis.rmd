@@ -14,31 +14,36 @@ knitr::knit_engines$set(python = reticulate::eng_python)
 
 ### Filter the data and run dada2:
 ```{r}
+# Set project name:
+projId <- "XXX_202X"
+
 # Collect sample paths and names. Duplicate line once per primer:
-primer1 <- MetaBAnalysis::CollectData("../Filtered_data")
+primer1 <- CollectData2("../Filtered_data", prefix = "mifish")
+# primer2 <- CollectData2("../Filtered_data", prefix = "v16s")
 
 # Filter reads and generate out object for later use:
-out <- dada2::filterAndTrim(primer1$Forward, primer1$FiltFs, 
-                            primer1$Reverse, primer1$FiltRs, # comment out line if running single-ended
-                            maxN=0, truncQ=2, rm.phix=TRUE,
-                            compress=TRUE, multithread=TRUE)
+out <- FiltTrimWrap(primer1)
 saveRDS(out, file = "out.rds")
+# out2 <- FiltTrimWrap(primer2)
+# saveRDS(out2, file = "out2.rds")
 
 # Dereplicate and merge pairs with dada2:
-dada2Counts <- MetaBAnalysis::DadaAnalysis(primer1$FiltFs, primer1$FiltRs, 
-                                           justConcatenate = FALSE,
-					   minOverlap = 5, paired = TRUE)
+dada2Counts <- DadaAnalysis2(primer1, justConcatenate = FALSE, minOverlap = 5)
+# dada2Counts2 <- DadaAnalysis2(primer2, justConcatenate = FALSE, minOverlap = 5)
 ```
 
 ### Convert and modify matrix "dada2Counts" to DGEList "yAll":
 ```{r}
-yAll <- MetaBAnalysis::MakeDGEList(dada2Counts, primer1$Samples, primer1$ForwardC)
+yAll <- MakeDGEList2(dada2Counts, primer1)
 saveRDS(yAll, file = "yAll.rds")
+# yAll2 <- MakeDGEList2(dada2Counts2, primer2)
+# saveRDS(yAll2, file = "yAll2.rds")
 ```
 
 ### Export fasta-file:
 ```{r}
-ExportFasta(yAll, "y_test.fa", minLength = 50, maxLength = 1000)
+ExportFasta(yAll, paste0("y_", projId, primer1$Prefix, ".fa"), minLength = 30, maxLength = 1000)
+# ExportFasta(yAll2, paste0("y_", projId, primer2$Prefix, ".fa"), minLength = 30, maxLength = 1000)
 ```
 
 ### BLAST-tools (Experimental):
@@ -61,13 +66,16 @@ ExportFasta(yAll, "y_test.fa", minLength = 50, maxLength = 1000)
 data(compactNameDump, package = "MetaBAnalysis")
 data(compactNodeDump, package = "MetaBAnalysis")
 
-blastResY <- MetaBAnalysis::BlastParse(yAll, "y_test.out", threshold = 90)
+blastResY <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), threshold = 90)
 saveRDS(blastResY, file = "blastResY.rds")
+# blastResY2 <- MetaBAnalysis::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), threshold = 90)
+# saveRDS(blastResY2, file = "blastResY2.rds")
 ```
 
 ### Create Summaryfiles from the BLAST-results:
 ```{r}
 allResults <- MetaBAnalysis::SumRes(blastRes = blastResY, counts = yAll$counts, taxGroup = "Fish") # Summarize a list of result objects
+# allResults2 <- MetaBAnalysis::SumRes(blastRes = blastResY2, counts = yAll2$counts, taxGroup = "Fish") # Summarize a list of result objects
 ```
 
 # Rstudio functions:
@@ -79,7 +87,7 @@ allResults <- MetaBAnalysis::SumRes(blastRes = blastResY, counts = yAll$counts, 
 library(MetaBAnalysis)
 
 # Write sequences to file
-QSeqGetter <- function(speciesName, blastResults = blastResY) {
+`1QSeqGetter` <- function(speciesName, blastResults = blastResY) {
   species_seq <- paste0(">",
                         blastResults[grepl(speciesName, blastResults$species),1],
                         "\n",
@@ -88,8 +96,10 @@ QSeqGetter <- function(speciesName, blastResults = blastResY) {
   file.edit("current_sequence.txt")
 }
 
+`2QSeqGetter` <- function(x) {`1QSeqGetter`(x, blastResY2)} # wrapper for second primer
+
 # Write sequences to file and split sequences that contains 'NNNNNNNNNN'
-QSSplit <- function(speciesName, blastResults = blastResY) {
+`1QSSplit` <- function(speciesName, blastResults = blastResY) {
   seqName <- blastResults[grepl(speciesName, blastResults$species),1]
   seqFull <- blastResults[grepl(speciesName, blastResults$species),2]
   seq1 <- lapply(strsplit(seqFull, "NNNNNNNNNN"), "[[", 1)
@@ -104,6 +114,8 @@ QSSplit <- function(speciesName, blastResults = blastResY) {
   file.edit("current_sequence.txt")
 }
 
+`2QSSplit` <- function(x) {`1QSSplit`(x, blastResY2)} # wrapper for second primer
+
 # Blast the top three sequences of a species # Does not work
 QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
   QSeqGetter(searchName, blastResults)
@@ -115,7 +127,7 @@ QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
 }
 ```
 
-### Curate the results:
+### Curate the results (first primer):
 ```{r}
 library(MetaBAnalysis)
 library(rvest)
@@ -125,7 +137,7 @@ library(rvest)
   groupNotes <- MakeNotes(allResults$TargetGroup)
   
   ### Filter:
-  groupNotes <- TrimCutoffs(total = 0.0, within = 0.0, minimum = 0, groupNotes) # trim species based on cutoffs
+  groupNotes <- TrimCutoffs(total = 0.1, within = 0.1, minimum = 0, groupNotes) # trim species based on cutoffs
   
   ### Curate:
   groupNotes <- CurateHit(ref = 'hitX', note = '', absorb = '', latin = '', common = '', rmHit = FALSE, groupNotes)
@@ -133,14 +145,42 @@ library(rvest)
   ### Create outputs:
   groupClean <- groupNotes[, -c(1, 2, 5)]
   columnNames <- colnames(groupClean)
-  # columnNames <- lapply(strsplit(columnNames, "_"), `[`, 1)
+  columnNames[-c(1, 2)] <- lapply(strsplit(columnNames[-c(1, 2)], "_"), `[`, 2) # remove first underscore
+  # columnNames <- gsub("pattern", "replacement", columnNames)
   # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
   names(groupClean) <- columnNames
-  # allResults$Clean <- groupClean
   allResults$Clean <- groupClean
 }
 
 saveRDS(allResults, "allResults.rds") # save the clean object to be used in the report
+```
+
+### Curate the results (second primer, if relevant):
+```{r}
+library(MetaBAnalysis)
+library(rvest)
+
+{
+  ### Create object:
+  groupNotes2 <- MakeNotes(allResults2$TargetGroup)
+  
+  ### Filter:
+  groupNotes2 <- TrimCutoffs(total = 0.1, within = 0.1, minimum = 0, groupNotes2) # trim species based on cutoffs
+  
+  ### Curate:
+  groupNotes2 <- CurateHit(ref = 'hitX', note = '', absorb = '', latin = '', common = '', rmHit = FALSE, groupNotes2)
+  
+  ### Create outputs:
+  groupClean2 <- groupNotes2[, -c(1, 2, 5)]
+  columnNames2 <- colnames(groupClean2)
+  columnNames2[-c(1, 2)] <- lapply(strsplit(columnNames2[-c(1, 2)], "_"), `[`, 2) # remove first underscore
+  # columnNames2 <- gsub("pattern", "replacement", columnNames2)
+  # columnNames2[grepl("old sample name", columnNames2)] <- "new sample name"
+  names(groupClean2) <- columnNames2
+  allResults2$Clean <- groupClean2
+}
+
+saveRDS(allResults2, "allResults2.rds") # save the clean object to be used in the report
 ```
 
 ### Generate information about the sequences for use in report:
@@ -164,11 +204,19 @@ groupSeqs / primerSeqs # ratio of filtered sequences belonging to target group
 sampleMetaData <- list(rawSeqs = rawSeqs, primerSeqs = primerSeqs, groupSeqs = groupSeqs)
 saveRDS(sampleMetaData, "sampleMetaData.rds")
 
-sum(groupClean[1:4, -c(1, 2)]) / sum(groupClean[, -c(1, 2)]) # see what percentage of counts the top four species accounts for
+sum(groupClean[1, -c(1, 2)]) / sum(groupClean[, -c(1, 2)]) # see what percentage of counts the top four species accounts for
+sum(groupClean2[1, -c(1, 2)]) / sum(groupClean2[, -c(1, 2)]) # see what percentage of counts the top four species accounts for
+
+if("allResults2" %in% ls()) { # if second primer
+  sampleMetaData$primerSeqs2 <- sum(out2[, 1]) # add n seqs with primer for second primer
+  sampleMetaData$groupSeqs2 <- sum(groupClean2[, -c(1, 2)])
+  saveRDS(sampleMetaData, "sampleMetaData.rds")
+}
 ```
 
 ### Generate excel-sheet with counts from "groupClean":
 ```{r}
 library(writexl)
-write_xlsx(groupClean, "projekt_xyz_sekvensantal.xlsx")
+write_xlsx(groupClean, paste0("projekt_", projId,"_sekvensantal_", primer1$Prefix, ".xlsx"))
+# write_xlsx(groupClean2, paste0("projekt_", projId,"_sekvensantal_", primer2$Prefix, ".xlsx"))
 ```

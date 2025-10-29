@@ -4,10 +4,12 @@
 \alias{CollectData}
 \title{Collect sample names and paths}
 \usage{
-CollectData(directory = "../Filtered_data")
+CollectData(directory = "../Filtered_data", prefix = "")
 }
 \arguments{
 \item{directory}{path to directory with filtered data}
+
+\item{prefix}{only files with the chosen prefix will be identified, default is "".}
 }
 \value{
 list with sample paths and sample names

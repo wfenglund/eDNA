@@ -2,8 +2,7 @@
 #'
 #' This largely runs several of the standard steps in a dada2 analysis
 #' with default parameters.
-#' @param forward vector with file names for filtered forward reads
-#' @param reverse vector with file names for filtered reverse reads
+#' @param primerData list containing information about samples to be run, can be generated with the function [CollectData].
 #' @param muThread Should the analysis use multithreads for analysis
 #' @param justConcatenate if reads pairs do not overlap set to TRUE
 #' @param minOverlap minimum overlap between reads when merging pairs
@@ -22,28 +21,25 @@
 #' package = "MetaBAnalysis")
 #' DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
 #'
-DadaAnalysis <- function(forward, reverse, muThread = TRUE,
-			 justConcatenate = FALSE, minOverlap = 5,
-			 paired = TRUE) {
+DadaAnalysis <- function(primerData, muThread = TRUE, justConcatenate = FALSE, minOverlap = 5) {
+  forward <- primerData$FiltFs
+  reverse <- primerData$FiltRs
   errF <- dada2::learnErrors(forward, multithread = muThread)
   derepsF <- dada2::derepFastq(forward)
   dadaF <- dada2::dada(derepsF, err = errF, multithread = muThread)
-  if(paired == TRUE) {
+  if (length(reverse) > 0) { # if there are paired ends
     errR <- dada2::learnErrors(reverse, multithread = muThread)
     derepsR <- dada2::derepFastq(reverse)
     dadaR <- dada2::dada(derepsR, err = errR, multithread = muThread)
-    mergers <- dada2::mergePairs(dadaF, derepsF, dadaR,
-				 derepsR, verbose = TRUE,
-				 justConcatenate = justConcatenate,
-				 minOverlap = minOverlap)
+    mergers <- dada2::mergePairs(dadaF, derepsF, dadaR, derepsR, 
+                                 verbose = TRUE, justConcatenate = justConcatenate, 
+                                 minOverlap = minOverlap)
     seqTab <- dada2::makeSequenceTable(mergers)
-  } else {
+  }
+  else {
     seqTab <- dada2::makeSequenceTable(dadaF)
   }
-  seqtabNochim <- dada2::removeBimeraDenovo(seqTab,
-					    method = "consensus",
-					    multithread = muThread,
-					    verbose = TRUE)
+  seqtabNochim <- dada2::removeBimeraDenovo(seqTab, method = "consensus", multithread = muThread, verbose = TRUE)
   return(seqtabNochim)
 }
 

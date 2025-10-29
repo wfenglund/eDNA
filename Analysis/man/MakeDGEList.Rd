@@ -4,18 +4,16 @@
 \alias{MakeDGEList}
 \title{Create DGEList}
 \usage{
-MakeDGEList(dataset, samples, forwardSamples)
+MakeDGEList(dataset, primerData)
 }
 \arguments{
 \item{dataset}{matrix with count data. Samples on rows and variants over columns}
 
-\item{samples}{vector of sample names}
-
-\item{forwardSamples}{vector of forward read files}
+\item{primerData}{list containing information about samples to be run, can be generated with the function \link{CollectData}.}
 }
 \value{
 DGEList
 }
 \description{
-Create DGEList
+Function that creates a DGEList while also combining forward and reverse runs if reverse runs are present.
 }

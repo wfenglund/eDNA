@@ -255,26 +255,27 @@ GetTaxonomy <- function(searchName, nameDump, nodeDump) {
 #' Collect sample names and paths
 #'
 #' @param directory path to directory with filtered data
+#' @param prefix only files with the chosen prefix will be identified, default is "".
 #'
 #' @return list with sample paths and sample names
 #'
 #' @export
 #'
-CollectData <- function(directory = "../Filtered_data") {
+CollectData <- function(directory = "../Filtered_data", prefix = "") {
   forward <- list.files(directory, pattern = "_1.fastq.gz", full.names = TRUE)
   reverse <- list.files(directory, pattern = "_2.fastq.gz", full.names = TRUE)
   forwardC <- list.files(directory, pattern = "_1.fastq.gz", full.names = FALSE)
   reverseC <- list.files(directory, pattern = "_2.fastq.gz", full.names = FALSE)
+  forward <- forward[grepl(prefix, forward)]
+  reverse <- reverse[grepl(prefix, reverse)]
+  forwardC <- forwardC[grepl(prefix, forwardC)]
+  reverseC <- reverseC[grepl(prefix, reverseC)]
   filtFs <- file.path(directory, "filtered", forwardC)
   filtRs <- file.path(directory, "filtered", reverseC)
   allSamples <- unique(gsub("_outFwd_1.fastq.gz|_outRev_1.fastq.gz", "", forwardC))
-  output <- list(Forward = forward,
-                 Reverse = reverse,
-                 ForwardC = forwardC,
-                 ReverseC = reverseC,
-                 FiltFs = filtFs,
-                 FiltRs = filtRs,
-                 Samples = allSamples)
+  output <- list(Forward = forward, Reverse = reverse, ForwardC = forwardC, 
+                 ReverseC = reverseC, FiltFs = filtFs, FiltRs = filtRs, 
+                 Samples = allSamples, Prefix = prefix)
   return(output)
 }
 
@@ -325,20 +326,24 @@ DFCombine <- function(dataset, samples) {
 }
 
 #' Create DGEList
-#'
+#' 
+#' Function that creates a DGEList while also combining forward and reverse runs if reverse runs are present.
+#' 
 #' @param dataset matrix with count data. Samples on rows and variants over columns
-#' @param samples vector of sample names
-#' @param forwardSamples vector of forward read files
+#' @param primerData list containing information about samples to be run, can be generated with the function [CollectData].
 #' @return DGEList
 #'
 #' @export
 #'
-MakeDGEList <- function(dataset, samples, forwardSamples) { # Function that combines forward and reverse runs if reverse runs are present
+MakeDGEList <- function(dataset, primerData) {
+  samples <- primerData$Samples
+  forwardSamples <- primerData$ForwardC
   datasetDF <- as.data.frame(t(dataset))
-  if(any(grepl("outRev", forwardSamples))) {
+  if (any(grepl("outRev", forwardSamples))) {
     dfAll <- DFCombine(datasetDF, samples)
     yAll <- edgeR::DGEList(dfAll)
-  } else {
+  }
+  else {
     yAll <- edgeR::DGEList(datasetDF)
   }
   return(yAll)
@@ -451,4 +456,36 @@ CurateHit <- function(ref, note = '', absorb = '', latin = '', common = '', rmHi
     countsObject <- countsObject[ref != countsObject$Reference,]
   }
   return(countsObject)
+}
+
+#' Convenience function to run dada2
+#'
+#' This largely runs several of the standard steps in a dada2 analysis
+#' with default parameters.
+#' @param primerData list containing information about samples to be run, can be generated with the function [CollectData].
+#'
+#' @return a matrix with counts of trimmed and untrimmed sequences for every sample
+#' @import dada2
+#'
+#' @export
+#'
+#' @examples
+#' fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
+#' package = "MetaBAnalysis")
+#' fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
+#' package = "MetaBAnalysis")
+#' DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+#'
+FiltTrimWrap <- function(primerData) {
+  if (length(primerData$Reverse) > 0) { # if paired-ended
+    out <- dada2::filterAndTrim(primerData$Forward, primerData$FiltFs, 
+                                primerData$Reverse, primerData$FiltRs,
+                                maxN=0, truncQ=2, rm.phix=TRUE,
+                                compress=TRUE, multithread=TRUE)
+  } else {
+    out <- dada2::filterAndTrim(primerData$Forward, primerData$FiltFs, 
+                                maxN=0, truncQ=2, rm.phix=TRUE,
+                                compress=TRUE, multithread=TRUE)
+  }
+  return(out)
 }

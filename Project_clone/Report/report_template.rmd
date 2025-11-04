@@ -163,7 +163,7 @@ if("allResults2.rds" %in% list.files(".")) {
   speciesNo2 <- nrow(groupSpecies2) # Number of species found
   primerText2 <- paste0("För ", primerName2, " innehöll omkring ", primerPercent2, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent2, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo2, " olika arter (se figur 2 och ", seqPlotFigures2, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo2, " arterna stod för över ", commonPercent2, "% av sekvenserna från ", targetGroup, " (se figur 1).")
 } else {
-  speciesNo2 <- c() # No species found, since no other primer
+  groupSpecies2 <- c() # No species found, since no other primer
   primerText2 <- ""
 }
 

@@ -29,7 +29,9 @@ saveRDS(out, file = "out.rds")
 
 # Dereplicate and merge pairs with dada2:
 dada2Counts <- DadaAnalysis(primer1, justConcatenate = FALSE, minOverlap = 5)
+saveRDS(dada2Counts, file = "dada2Counts.rds")
 # dada2Counts2 <- DadaAnalysis(primer2, justConcatenate = FALSE, minOverlap = 5)
+# saveRDS(dada2Counts2, file = "dada2Counts2.rds")
 ```
 
 ### Convert and modify matrix "dada2Counts" to DGEList "yAll":

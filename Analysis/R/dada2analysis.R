@@ -62,64 +62,53 @@ DadaAnalysis <- function(primerData, muThread = TRUE, justConcatenate = FALSE, m
 #'
 #' @export
 #'
-SumRes <- function(blastRes, counts, taxGroup) {
-    # Create invertebrate string:
-    invClasses <- unique(blastRes$class[blastRes$phylum != "Chordata" & blastRes$kingdom == "Metazoa"])
-    invClasses <- invClasses[!is.na(invClasses)]
-    invString <- do.call(paste, c(as.list(invClasses), sep = "|"))
-    if(length(invString) == 0) { # if there are no invertebrate classes
-      invString = ""
-    }
-    # Load group options:
-    taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia",
-                             "Insecta", "Mammalia", "Arachnida",
-                             "Gastropoda", "Archaea|Bacteria", "Eukaryota",
-			     "Plantae|Viridiplantae", "Fungi", invString,
-    			     "Amphibia")
-    names(taxGroupConv) <- c("Fish", "Aves", "Bivalvia",
-			     "Insecta", "Mammalia", "Arachnida",
-			     "Gastropoda", "Prokaryota", "Eukaryota",
-			     "Plants", "Fungi", "Invertebrates",
-                             "Amphibia")
-
-    if(!taxGroup %in% names(taxGroupConv)) {
-        cat("This taxonomic group is not supported.\n
-             Supported groups are:\n")
-        cat(paste0(names(taxGroupConv), "\n"))
-    } else {
+SumRes <- function (blastRes, counts, taxGroup) {
+  # Create invertebrate string:
+  invClasses <- unique(blastRes$class[blastRes$phylum != "Chordata" & blastRes$kingdom == "Metazoa"])
+  invClasses <- invClasses[!is.na(invClasses)]
+  invString <- do.call(paste, c(as.list(invClasses), sep = "|"))
+  if (length(invString) == 0) { # if there are no invertebrate classes
+    invString = ""
+  }
+  # Load group options:
+  taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia", 
+                    "Insecta", "Mammalia", "Arachnida", "Gastropoda", "Archaea|Bacteria", 
+                    "Eukaryota", "Plantae|Viridiplantae", "Fungi", invString, "Amphibia")
+  names(taxGroupConv) <- c("Fish", "Aves", "Bivalvia", "Insecta", 
+                           "Mammalia", "Arachnida", "Gastropoda", "Prokaryota", 
+                           "Eukaryota", "Plants", "Fungi", "Invertebrates", "Amphibia")
+  if (!taxGroup %in% names(taxGroupConv)) {
+    cat("This taxonomic group is not supported.\n\n             Supported groups are:\n")
+    cat(paste0(names(taxGroupConv), "\n"))
+  } else {
     taxSel <- taxGroupConv[names(taxGroupConv) == taxGroup]
     genesCounts <- cbind(blastRes, counts)
     colStart <- ncol(genesCounts)
-    sumAll <- aggregate(genesCounts[,13:colStart],
-                        by = list(genesCounts$species),
-                        FUN = sum)
-    if(ncol(sumAll) > 2) {
-      sumAll <- sumAll[order(rowSums(sumAll[,-1]), decreasing = TRUE),]
+    sumAll <- aggregate(genesCounts[, 14:colStart], by = list(genesCounts$species), FUN = sum)
+    if (ncol(sumAll) > 2) {
+      sumAll <- sumAll[order(rowSums(sumAll[, -1]), decreasing = TRUE), ]
     } else {
       sumAll <- sumAll[order(sumAll[, -1], decreasing = TRUE), ]
     }
     names(sumAll) <- c("Species", names(sumAll)[-1])
-    if(taxGroup == "Prokaryota" || taxGroup == "Eukaryota") { # if group is a superkingdom
-      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$superkingdom), ]
-    } else if(taxGroup == "Plants" || taxGroup == "Fungi") { # if group is a kingdom
-      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$kingdom),]
-    } else if(taxGroup == "Invertebrates") { # if group is 'Invertebrates', and results are always animal
-      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class) & blastRes$kingdom == "Metazoa", ] #
+    if (taxGroup == "Prokaryota" || taxGroup == "Eukaryota") { # if group is a superkingdom
+      genesCountsFilt <- genesCounts[grepl(taxSel, genesCounts$superkingdom), ]
+    } else if (taxGroup == "Plants" || taxGroup == "Fungi") { # if group is a kingdom
+      genesCountsFilt <- genesCounts[grepl(taxSel, genesCounts$kingdom), ]
+    } else if (taxGroup == "Invertebrates") { # if group is 'Invertebrates', and results are always animal
+      genesCountsFilt <- genesCounts[grepl(taxSel, genesCounts$class) & genesCounts$kingdom == "Metazoa", ]
     } else { # if group is a class
-      genesCountsFilt <- genesCounts[grepl(taxSel, blastRes$class),]
+      genesCountsFilt <- genesCounts[grepl(taxSel, genesCounts$class), ]
     }
-    sumFilt <- aggregate(genesCountsFilt[,13:colStart],
-                         by = list(genesCountsFilt$species),
-                         FUN = sum)
-    if(ncol(sumFilt) > 2) {
-      sumFilt <- sumFilt[order(rowSums(sumFilt[,-1]), decreasing =
-                                                        TRUE),]
-      } else {
+    sumFilt <- aggregate(genesCountsFilt[, 14:colStart], by = list(genesCountsFilt$species), FUN = sum)
+    if (ncol(sumFilt) > 2) {
+      sumFilt <- sumFilt[order(rowSums(sumFilt[, -1]), decreasing = TRUE), ]
+    } else {
       sumFilt <- sumFilt[order(sumFilt[, -1], decreasing = TRUE), ]
     }
     names(sumFilt) <- c("Species", names(sumFilt)[-1])
     resCount <- list(sumAll = sumAll, sumFilt = sumFilt)
     names(resCount) <- c("AllSpecies", "TargetGroup")
     return(resCount)
-    }
+  }
 }

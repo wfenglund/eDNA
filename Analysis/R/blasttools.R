@@ -107,7 +107,8 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' @param blastRes file with blast results assumes blastoutput option
 #' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
 #' sstart send evalue bitscore staxids sscinames scomnames"
-#' @param threshold if identity is below this value no hit will be reported
+#' @param minIdentity if identity percentage is below this value no hit will be reported
+#' @param minCoverage if coverage percentage is below this value no hit will be reported
 #'
 #' @import utils
 #'
@@ -127,34 +128,39 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
 #' BlastParse(DGEList = yForward, blastRes = exOut)
 #'
-BlastParse <- function(DGEList, blastRes = "blastRes.out", threshold = 90) {
+BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, minCoverage = 60) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
   blastResult <- read.table(blastRes, sep = "\t", quote = "€", stringsAsFactors = FALSE)
-  blastResult$V3 <- as.numeric(blastResult$V3)
-  blastResult$V3[is.na(blastResult$V3)] <- 0 # If the input file contained empty values, assign them to 0
-  blastResult <- blastResult[blastResult$V3 > threshold,]
-  names(blastResult) <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "staxids", "sscinames", "scomnames")
-  blastResultUn <- blastResult[!duplicated(blastResult$qseqid),] # Retain only best hits
-  GetFirstItem <- function(name) { # Function that returns the first of items separated by semicolons
+  names(blastResult) <- c("qseqid", "sseqid", "pident", "length", 
+                          "mismatch", "gapopen", "qstart", "qend", "sstart", "send", 
+                          "evalue", "bitscore", "staxids", "sscinames", "scomnames", "qcovs")
+  blastResult$pident <- as.numeric(blastResult$pident)
+  blastResult$qcovs <- as.numeric(blastResult$qcovs)
+  blastResult$pident[is.na(blastResult$pident)] <- 0
+  blastResult$qcovs[is.na(blastResult$qcovs)] <- 0
+  blastResult <- blastResult[blastResult$pident >= minIdentity, ]
+  blastResult <- blastResult[blastResult$qcovs >= minCoverage, ]
+  blastResultUn <- blastResult[!duplicated(blastResult$qseqid), ]
+  GetFirstItem <- function(name) {
     return(strsplit(as.character(name), split = ";")[[1]][1])
   }
   blastResultUn$staxids <- unlist(lapply(blastResultUn$staxids, GetFirstItem))
   blastResultUn$sscinames <- unlist(lapply(blastResultUn$sscinames, GetFirstItem))
   blastResultUn$scomnames <- unlist(lapply(blastResultUn$scomnames, GetFirstItem))
   taxonomy <- list()
-  for(i in unique(blastResultUn$sscinames)) { # Get taxonomy locally
-    print(i) # Print current taxa
-    taxonomy[[i]] <- GetTaxonomy(i,
-                                 nameDump = MetaBAnalysis::compactNameDump,
-                                 nodeDump = MetaBAnalysis::compactNodeDump)
+  for (i in unique(blastResultUn$sscinames)) {
+    print(i)
+    taxonomy[[i]] <- GetTaxonomy(i, nameDump = MetaBAnalysis::compactNameDump, nodeDump = MetaBAnalysis::compactNodeDump)
   }
   taxonomy <- do.call("rbind", taxonomy)
   taxonomy <- cbind(rownames(taxonomy), taxonomy)
   blastTax <- merge(blastResultUn, taxonomy, by.x = "sscinames", by.y = "V1", all.x = TRUE)
-  blastTax <- blastTax[, c(2,3,4,12, 1, 16:21)]
-  colnames(blastTax) <- c("id", "besthit", "identity", "e-value", "species", "family", "order", "class", "phylum", "kingdom", "superkingdom")
+  blastTax <- blastTax[, c(2, 3, 4, 16, 12, 1, 17:22)]
+  colnames(blastTax) <- c("id", "besthit", "identity", "coverage", "e-value", 
+                          "species", "family", "order", "class", "phylum", "kingdom", 
+                          "superkingdom")
   seqTax <- merge(sequences, blastTax, by.x = "id", by.y = "id", all.x = TRUE)
-  seqTax <- seqTax[order(as.numeric(gsub("[^0-9]+", "", seqTax$id))),]
+  seqTax <- seqTax[order(as.numeric(gsub("[^0-9]+", "", seqTax$id))), ]
   seqTax$family <- factor(seqTax$family)
   seqTax$order <- factor(seqTax$order)
   seqTax$class <- factor(seqTax$class)

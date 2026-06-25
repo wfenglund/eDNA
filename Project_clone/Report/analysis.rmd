@@ -218,9 +218,21 @@ if("allResults2" %in% ls()) { # if second primer
 }
 ```
 
-### Generate excel-sheet with counts from "groupClean":
+### Generate output files:
 ```{r}
 library(writexl)
+
+### Generate excel-sheet with counts from "groupClean":
 write_xlsx(groupClean, paste0("projekt_", projId,"_sekvensantal_", primer1$Prefix, ".xlsx"))
 # write_xlsx(groupClean2, paste0("projekt_", projId,"_sekvensantal_", primer2$Prefix, ".xlsx"))
+
+### Generate ASV table:
+primer1ASV <- GenerateASV()
+primer1ASVGroup <- GenerateASV(filterByClass = TRUE) # fish classes is the default
+# primer2ASV <- GenerateASV(blastObject = blastResY2, countsObject = yAll2)
+# primer2ASVGroup <- GenerateASV(blastObject = blastResY2, countsObject = yAll2, filterByClass = TRUE) # fish classes is the default
+writexl::write_xlsx(x = primer1ASV, path = paste0("Project_", projId, "_ASV_results_", primer1$Prefix, ".xlsx")
+writexl::write_xlsx(x = primer1ASVGroup, path = paste0("Project_", projId, "_ASV_results_", primer1$Prefix, "_only_group.xlsx"))
+# writexl::write_xlsx(x = primer2ASV, path = paste0("Project_", projId, "_ASV_results_", primer2$Prefix, ".xlsx")
+# writexl::write_xlsx(x = primer2ASVGroup, path = paste0("Project_", projId, "_ASV_results_", primer2$Prefix, "_only_group.xlsx"))
 ```

@@ -218,6 +218,10 @@ RemoveLowFreqSeqs <- function(countsObject, threshold) {
 #'
 #' Takes a species name and extract taxonomic information from compactNameDump
 #' and compactNodeDump available in the MetaBAnalysis package.
+#' 
+#' Attach data with:
+#' data(compactNameDump, package = "MetaBAnalysis")
+#' data(compactNodeDump, package = "MetaBAnalysis")
 #'
 #' @param searchName string of species name to extract taxonomic information about
 #' @param nameDump dataframe with names and node information
@@ -232,9 +236,9 @@ RemoveLowFreqSeqs <- function(countsObject, threshold) {
 #'             nameDump = compactNameDump,
 #'             nodeDump = compactNodeDump)
 #'
-GetTaxonomy <- function(searchName, nameDump, nodeDump) {
-  if(grepl("\\.|'", searchName) || length(strsplit(searchName, split = " ")[[1]]) > 2) { # Look out for species with "sp.", quotations or more than two names
-    searchName <- strsplit(searchName, split = " ")[[1]][1]
+GetTaxonomy <- function(searchName, nameDump = compactNameDump, nodeDump = compactNodeDump) {
+  if(grepl("\\.|'", searchName) || length(strsplit(searchName, split = " ")[[1]]) > 1) { # Look out for species with "sp.", quotations or more than two names
+    searchName <- strsplit(searchName, split = " ")[[1]][1] # only search with genus
   }
   taxList <- c("unknown", "unknown", "unknown", "unknown", "unknown", "unknown")
   taxId <- nameDump[searchName == nameDump$V2, 1]

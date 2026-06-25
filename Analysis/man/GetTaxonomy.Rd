@@ -4,7 +4,7 @@
 \alias{GetTaxonomy}
 \title{Get taxonomic information from NCBI}
 \usage{
-GetTaxonomy(searchName, nameDump, nodeDump)
+GetTaxonomy(searchName, nameDump = compactNameDump, nodeDump = compactNodeDump)
 }
 \arguments{
 \item{searchName}{string of species name to extract taxonomic information about}
@@ -19,6 +19,11 @@ vector with taxonomic information
 \description{
 Takes a species name and extract taxonomic information from compactNameDump
 and compactNodeDump available in the MetaBAnalysis package.
+}
+\details{
+Attach data with:
+data(compactNameDump, package = "MetaBAnalysis")
+data(compactNodeDump, package = "MetaBAnalysis")
 }
 \examples{
 GetTaxonomy(searchName = "Esox lucius",

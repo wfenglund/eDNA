@@ -4,7 +4,12 @@
 \alias{BlastParse}
 \title{Parse blast output}
 \usage{
-BlastParse(DGEList, blastRes = "blastRes.out", threshold = 90)
+BlastParse(
+  DGEList,
+  blastRes = "blastRes.out",
+  minIdentity = 90,
+  minCoverage = 60
+)
 }
 \arguments{
 \item{DGEList}{count data in the form of DGEList}
@@ -13,7 +18,9 @@ BlastParse(DGEList, blastRes = "blastRes.out", threshold = 90)
 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
 sstart send evalue bitscore staxids sscinames scomnames"}
 
-\item{threshold}{if identity is below this value no hit will be reported}
+\item{minIdentity}{if identity percentage is below this value no hit will be reported}
+
+\item{minCoverage}{if coverage percentage is below this value no hit will be reported}
 }
 \value{
 seqTax a dataframe with annotation of results from sequence

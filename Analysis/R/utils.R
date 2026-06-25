@@ -493,3 +493,22 @@ FiltTrimWrap <- function(primerData) {
   }
   return(out)
 }
+
+#' Generate Amplicon Sequence Variant Table
+#'
+#' @param blastObject object containing the BLAST results
+#' @param countsObject object containing sequences and counts
+#' @param classFilter vector of class hits to keep, or simply a string
+#' @param filterByClass boolean if class filter should be applied or not
+#' @return ASV table in the form of a data.frame
+#'
+#' @export
+#'
+GenerateASV <- function(blastObject = blastResY, countsObject = yAll, classFilter = c("Actinopteri", "Hyperoartia", "Chondrichthyes"), filterByClass = FALSE) {
+  ASVobject <- merge(x = blastResY, y = as.data.frame(yAll$counts), by.x = "seq", by.y = 'row.names')
+  if(filterByClass) {
+    return(ASVobject[ASVobject$class %in% classFilter, ])
+  } else {
+    return(ASVobject)
+  }
+}

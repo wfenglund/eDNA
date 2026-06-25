@@ -71,7 +71,7 @@ SumRes <- function (blastRes, counts, taxGroup) {
     invString = ""
   }
   # Load group options:
-  taxGroupConv <- c("Actinopteri|Hyperoartia", "Aves", "Bivalvia", 
+  taxGroupConv <- c("Actinopteri|Hyperoartia|Chondrichthyes", "Aves", "Bivalvia", 
                     "Insecta", "Mammalia", "Arachnida", "Gastropoda", "Archaea|Bacteria", 
                     "Eukaryota", "Plantae|Viridiplantae", "Fungi", invString, "Amphibia")
   names(taxGroupConv) <- c("Fish", "Aves", "Bivalvia", "Insecta", 

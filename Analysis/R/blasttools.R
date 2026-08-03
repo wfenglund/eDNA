@@ -128,7 +128,7 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
 #' BlastParse(DGEList = yForward, blastRes = exOut)
 #'
-BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, minCoverage = 60) {
+BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, minCoverage = 90) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
   blastResult <- read.table(blastRes, sep = "\t", quote = "€", stringsAsFactors = FALSE)
   names(blastResult) <- c("qseqid", "sseqid", "pident", "length", 

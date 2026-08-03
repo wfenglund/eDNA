@@ -70,9 +70,10 @@ ExportFasta(yAll, paste0("y_", projId, primer1$Prefix, ".fa"), minLength = 30, m
 data(compactNameDump, package = "MetaBAnalysis")
 data(compactNodeDump, package = "MetaBAnalysis")
 
-blastResY <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 90, minCoverage = 60)
+# Parse BLAST results, by default only hits with both 90% identity as well as coverage are kept:
+blastResY <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 90, minCoverage = 90)
 saveRDS(blastResY, file = "blastResY.rds")
-# blastResY2 <- MetaBAnalysis::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), minIdentity = 90, minCoverage = 60)
+# blastResY2 <- MetaBAnalysis::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), minIdentity = 90, minCoverage = 90)
 # saveRDS(blastResY2, file = "blastResY2.rds")
 ```
 

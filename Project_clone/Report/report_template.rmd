@@ -191,8 +191,9 @@ library(readxl)
 
 # Edit this:
 primerChoice <- c(2) # change to desired row(s) in primer_data.xlsx, default = 2 = mifish
+# primerChoice <- c(2, 13) # mifish, v16s
 
-# Not this (generally):
+# Do not edit this (generally):
 primerInfo <- read_excel("primer_data.xlsx")
 primerNames <- unlist(lapply(1:length(primerChoice), function(x) {paste0(primerInfo[primerChoice[x],1], footnote_marker_symbol(x))}))
 primerInfo[primerChoice, 1] <- primerNames

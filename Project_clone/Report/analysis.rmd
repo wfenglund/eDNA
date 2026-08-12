@@ -90,6 +90,7 @@ allResults <- MetaBAnalysis::SumRes(blastRes = blastResY, counts = yAll$counts, 
 # and QSSplit) or blast the top three sequences related to a species and View the
 # results in Rstudio (QSBLAST).
 library(MetaBAnalysis)
+library(annotate)
 
 # Write sequences to file
 `1QSeqGetter` <- function(speciesName, blastResults = blastResY) {
@@ -121,15 +122,23 @@ library(MetaBAnalysis)
 
 `2QSSplit` <- function(x) {`1QSSplit`(x, blastResY2)} # wrapper for second primer
 
-# Blast the top three sequences of a species # Does not work
-QSBLAST <- function(searchName, seqNumber = 3, blastResults = blastResY) {
-  QSeqGetter(searchName, blastResults)
-  blastOut <- MultiBlaster("current_sequence.txt",
-                           seqNumber,
-                           resultNumber = 10,
-                           viewChoice = "YES")
-  View(blastOut)
+# Blast the top three sequences of a species/hit
+`1CurationBLAST` <- function(searchName, seqNumber = 3, blastResults = blastResY, curationDF = groupNotes) { # does work
+  if(searchName %in% curationDF$Reference) {searchName <- curationDF$Latin[curationDF$Reference == searchName]}
+  cat(paste0("BLASTing \"", searchName, "\":\n\n"))
+  seqDF <- blastResults[blastResults$species == searchName & !is.na(blastResults$species), ]
+  seqNumber <- ifelse(nrow(seqDF) >= seqNumber, seqNumber, nrow(seqDF)) # update seqNumber
+  seqStr <- paste0(">", seqDF$id[1:seqNumber], "\n", seqDF$seq[1:seqNumber], collapse = "\n")
+  cat(seqStr)
+  blastOut <- annotate::blastSequences(x = seqStr, program = "blastn", database = "nr", hitListSize = 10, timeout = 120, as = "data.frame")
+  blastOut$Percent_id <- (as.numeric(blastOut$Hsp_identity) / as.numeric(blastOut$`Hsp_align-len`)) * 100
+  blastOut$Hit_coverage <- (abs(as.numeric(blastOut$`Hsp_query-to`) - as.numeric(blastOut$`Hsp_query-from`)) + 1) / as.numeric(blastOut$`Iteration_query-len`) * 100
+  blastOut$Hsp_evalue <- as.numeric(blastOut$Hsp_evalue)
+  blastResults <- blastOut[, c("Iteration_query-def", "Iteration_query-len", "Hit_def", "Hsp_evalue", "Percent_id", "Hit_coverage", "Hit_len", "Hit_accession", "Hit_id")]
+  View(blastResults)
 }
+
+`2CurationBLAST` <- function(searchName, seqNumber = 3) {`1CurationBLAST`(searchName = searchName, seqNumber = seqNumber, blastResults = blastResY2, curationDF = groupNotes2)}
 ```
 
 ### Curate the results (first primer):

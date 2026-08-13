@@ -130,7 +130,7 @@ library(annotate)
   seqNumber <- ifelse(nrow(seqDF) >= seqNumber, seqNumber, nrow(seqDF)) # update seqNumber
   seqStr <- paste0(">", seqDF$id[1:seqNumber], "\n", seqDF$seq[1:seqNumber], collapse = "\n")
   cat(seqStr)
-  blastOut <- annotate::blastSequences(x = seqStr, program = "blastn", database = "nr", hitListSize = 10, timeout = 120, as = "data.frame")
+  blastOut <- annotate::blastSequences(x = seqStr, program = "blastn", database = "nr", hitListSize = 10, timeout = 512, as = "data.frame")
   blastOut$Percent_id <- (as.numeric(blastOut$Hsp_identity) / as.numeric(blastOut$`Hsp_align-len`)) * 100
   blastOut$Hit_coverage <- (abs(as.numeric(blastOut$`Hsp_query-to`) - as.numeric(blastOut$`Hsp_query-from`)) + 1) / as.numeric(blastOut$`Iteration_query-len`) * 100
   blastOut$Hsp_evalue <- as.numeric(blastOut$Hsp_evalue)
@@ -139,6 +139,14 @@ library(annotate)
 }
 
 `2CurationBLAST` <- function(searchName, seqNumber = 3) {`1CurationBLAST`(searchName = searchName, seqNumber = seqNumber, blastResults = blastResY2, curationDF = groupNotes2)}
+
+AccessionLookup <- function(accNumber, returnSummary = FALSE) {
+  accessionSummary <- rentrez::entrez_summary(db = "nuccore", id = rentrez::entrez_search(db = "nuccore", term = accNumber)$ids)
+  str(accessionSummary)
+  if(returnSummary == TRUE) {
+    return(accessionSummary)
+  }
+}
 ```
 
 ### Curate the results (first primer):

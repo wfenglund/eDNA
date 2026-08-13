@@ -382,7 +382,7 @@ PlotAlphaDiv(plotData = plotInput, dataNames = plotNames, plotCol = plotPalette)
 ```
 
 ## Projektinformation
-Analysdata och resultat lagras tills vidare hos NRM. Vid eventuella
+Analysdata och resultat lagras tills vidare hos NRM och är open access. Vid eventuella
 framtida frågor i detta ärende kontakta NRM på antingen cgi@nrm.se
 eller registrator@nrm.se och ange diarienummer i mailets
 ämnesrad. Artbestämning av DNA-sekvenser sker genom jämförelse med

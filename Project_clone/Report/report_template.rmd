@@ -64,6 +64,10 @@ commonNo2 <- "3" # same as above but for second primer
 
 seqPlotFigures <- "3-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
 seqPlotFigures2 <- "4-X" # -"-
+
+# References (uncomment the appropriate choice):
+primerVar <- list(citation = "[@miya2015mifish]", index = c(2)) # mifish
+# primerVar <- list(citation = "[@miya2015mifish;@wang2023vertu]", index = c(2, 13)) # mifish & 16s
 ```
 
 \begin{titlepage}
@@ -180,27 +184,23 @@ Efter filtrering tillsattes ATL-buffer och prover skickades till Naturhistoriska
 ### Molekylära metoder
 Proteinas K tillsattes till filter med ATL-buffer och prover inkuberades vid 56° i minst 4 timmar. DNA-extraktion utfördes därefter med en Kingfisher extraktionsrobot (model Duo prime eller Flex) och ett "Omega
 MagBind Blood and Tissue" DNA-extraktionskit enligt beskrivning från
-tillverkaren. För analyserna amplifierades en kort bit av mitokondrien med 
-primers (se Tabell 1) beskrivna i en tidigare studie [@miya2015mifish] med 
-PCR-reaktioner som optimerats för flerartsanalys med sekvensering.
+tillverkaren. För analyserna amplifierades specifika DNA-fragment med 
+primers `r primerVar$citation` och
+PCR-reaktioner som optimerats för flerartsanalys med sekvensering (se Tabell 1).
 
 ```{r tab1, echo=FALSE}
 library(kableExtra)
 library(readxl)
 
-# Edit this:
-primerChoice <- c(2) # change to desired row(s) in primer_data.xlsx, default = 2 = mifish
-# primerChoice <- c(2, 13) # mifish, v16s
-
 # Do not edit this (generally):
 primerInfo <- read_excel("primer_data.xlsx")
-primerNames <- unlist(lapply(1:length(primerChoice), function(x) {paste0(primerInfo[primerChoice[x],1], footnote_marker_symbol(x))}))
-primerInfo[primerChoice, 1] <- primerNames
-kable(primerInfo[primerChoice,c(1:3,5)], "latex",
+primerNames <- unlist(lapply(1:length(primerVar$index), function(x) {paste0(primerInfo[primerVar$index[x],1], footnote_marker_symbol(x))}))
+primerInfo[primerVar$index, 1] <- primerNames
+kable(primerInfo[primerVar$index, c(1:3,5)], "latex",
 				 caption = "Sekvenser för de primers som använts för detektion av eDNA. Temperatur är annealingtemperatur i PCR-reaktionerna.",
 				 booktabs = T, escape = F) %>%
 				 kable_styling(latex_options = "hold_position", font_size = 8) %>%
-			         footnote(symbol = apply(primerInfo[primerChoice, 7], 2, function(x) {x})) # works fully for several primers
+			         footnote(symbol = apply(primerInfo[primerVar$index, 7], 2, function(x) {x})) # works fully for several primers
 ```
 
 ### Bioinformatiska analysmetoder

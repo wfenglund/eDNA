@@ -133,8 +133,8 @@ sampleMetaData <- readRDS("sampleMetaData.rds")
 rawSeqs <- sampleMetaData$rawSeqs
 primerSeqs <- sampleMetaData$primerSeqs
 groupSeqs <- sampleMetaData$groupSeqs
-allResults <- readRDS("allResults.rds")
-groupData <- allResults$Clean
+groupData <- readRDS("allResults.rds")$Clean
+groupData <- cbind(groupData[, c(1, 2)], groupData[, -c(1, 2)][, order(as.numeric(gsub("[^0-9]+", "", colnames(groupData)[-c(1, 2)])))])
 groupSpecies <- cbind(groupData$Latin, groupData$Swedish)
 colnames(groupSpecies) <- c("Latin", "Svenska")
 
@@ -145,7 +145,7 @@ minSeqs <- FixMillion(min(rawSeqs)) # Number of sequences in the sample with few
 maxSeqs <- FixMillion(max(rawSeqs)) # Number of sequences in the sample with most sequences
 primerPercent <- FixPercent(primerSeqs / sum(rawSeqs)) # Percentage of sequences that contained primers
 groupPercent <- FixPercent(groupSeqs / primerSeqs) # Percentage of sequences belonging to target group
-commonPercent <- paste0("~", round(sum(allResults$Clean[1:commonNo, -c(1, 2)]) / sum(allResults$Clean[, -c(1, 2)]) * 100)) # proportion of sequences that [commonNo] make up
+commonPercent <- paste0("~", round(sum(groupData[1:commonNo, -c(1, 2)]) / sum(groupData[, -c(1, 2)]) * 100)) # proportion of sequences that [commonNo] make up
 
 primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 och ", seqPlotFigures, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo, " arterna stod för över ", commonPercent, "% av sekvenserna från ", targetGroup, " (se figur 1).")
 
@@ -251,13 +251,11 @@ library(MetaBAnalysis)
 
 # Prepare the count data:
 groupCounts <- groupData[, -c(1:2), drop = FALSE]
+groupCounts <- groupCounts[, rev(seq_along(groupCounts))] # reverse order of samples
 if(ncol(groupCounts) > 1) { # if more than one sample, add a total of all samples to the plot
-  groupCounts <- cbind(groupCounts, Totalt = rowSums(groupCounts))
+  groupCounts <- cbind(Totalt = rowSums(groupCounts), groupCounts)
 }
 figureSpecies <- data.frame(groupSpecies)$Svenska # change Svenska to Latin if needed
-
-# Sort samples numerically:
-groupCounts <- groupCounts[, order(as.numeric(gsub("[^0-9]+", "", colnames(groupCounts))))]
 
 # Plot:
 FractionPlot(data = groupCounts, species = figureSpecies, col = MetaBAnalysis:::color25, inset = c(-0.3, 0.01))
@@ -270,13 +268,11 @@ if("allResults2.rds" %in% list.files(".")) {
   library(MetaBAnalysis)
   # Prepare the count data:
   groupCounts2 <- groupData2[, -c(1:2), drop = FALSE]
+  groupCounts2 <- groupCounts2[, rev(seq_along(groupCounts2))] # reverse order of samples
   if(ncol(groupCounts2) > 1) { # if more than one sample, add a total of all samples to the plot
-    groupCounts2 <- cbind(groupCounts2, Totalt = rowSums(groupCounts2))
+    groupCounts2 <- cbind(Totalt = rowSums(groupCounts2), groupCounts2)
   }
   figureSpecies2 <- data.frame(groupSpecies2)$Svenska # change Svenska to Latin if needed
-  
-  # Sort samples numerically:
-  groupCounts2 <- groupCounts2[, order(as.numeric(gsub("[^0-9]+", "", colnames(groupCounts2))))]
   
   # Plot:
   FractionPlot(data = groupCounts2, species = figureSpecies2, col = MetaBAnalysis:::color25, inset = c(-0.3, 0.01))
@@ -355,7 +351,7 @@ PlotAlphaDiv <- function(plotData, dataNames, plotCol) {
 }
 
 # Format data:
-countsMatrix <- as.matrix(t(allResults$Clean[,-c(1, 2)]))
+countsMatrix <- as.matrix(t(groupData[,-c(1, 2)]))
 # simpValues <- vegan::diversity(x = countsMatrix, index = "simpson")
 
 # Calculate Simpson:

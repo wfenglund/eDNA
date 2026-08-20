@@ -5,7 +5,7 @@ date: ""
 header-includes:
    - \usepackage{geometry}
    - \usepackage{fancyhdr}
-   - \usepackage[swedish]{babel}
+   - \usepackage[swedish,provide=*]{babel}
    - \usepackage[default]{lato}
    - \usepackage{float}
    - \pagestyle{fancy}

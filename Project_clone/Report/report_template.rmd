@@ -54,18 +54,15 @@ clientName <- "klient" # The name of the client
 samplesNo <- "NUMBER" # Number of samples analysed
 blastDate <- "MONTH 20XX" # Which month the blast search was performed
 sampleCutoff <- "0,1" # Within sample cutoff
-
-commonNo <- "NUMBER" # How many species that stood for [commonPercent] of all sequences
-commonPercent <- "NUMBER" # A given large percentage, e.g. "75" or "90" etc.
-seqPlotFigures <- "3-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
-
 targetGroup <- "fisk" # group of organism focused on
 
 primerName1 <- "12S"
 primerName2 <- "V16S" # if relevant
 
-commonNo2 <- "NUMBER" # same as above but for second primer
-commonPercent2 <- "NUMBER" # -"-.
+commonNo <- "3" # How many species that stood for [commonPercent] of all sequences
+commonNo2 <- "3" # same as above but for second primer
+
+seqPlotFigures <- "3-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
 seqPlotFigures2 <- "4-X" # -"-
 ```
 
@@ -148,6 +145,7 @@ minSeqs <- FixMillion(min(rawSeqs)) # Number of sequences in the sample with few
 maxSeqs <- FixMillion(max(rawSeqs)) # Number of sequences in the sample with most sequences
 primerPercent <- FixPercent(primerSeqs / sum(rawSeqs)) # Percentage of sequences that contained primers
 groupPercent <- FixPercent(groupSeqs / primerSeqs) # Percentage of sequences belonging to target group
+commonPercent <- paste0("~", round(sum(allResults$Clean[1:commonNo, -c(1, 2)]) / sum(allResults$Clean[, -c(1, 2)]) * 100)) # proportion of sequences that [commonNo] make up
 
 primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 och ", seqPlotFigures, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo, " arterna stod för över ", commonPercent, "% av sekvenserna från ", targetGroup, " (se figur 1).")
 
@@ -160,8 +158,9 @@ if("allResults2.rds" %in% list.files(".")) {
   colnames(groupSpecies2) <- c("Latin", "Svenska")
   primerPercent2 <- FixPercent(primerSeqs2 / sum(rawSeqs)) # Percentage of sequences that contained primers
   groupPercent2 <- FixPercent(groupSeqs2 / primerSeqs2) # Percentage of sequences belonging to target group
+  commonPercent2 <- paste0("~", round(sum(allResults2$Clean[1:commonNo2, -c(1, 2)]) / sum(allResults2$Clean[, -c(1, 2)]) * 100)) # proportion of sequences that [commonNo2] make up
   speciesNo2 <- nrow(groupSpecies2) # Number of species found
-  primerText2 <- paste0("För ", primerName2, " innehöll omkring ", primerPercent2, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent2, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo2, " olika arter (se figur 2 och ", seqPlotFigures2, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo2, " arterna stod för över ", commonPercent2, "% av sekvenserna från ", targetGroup, " (se figur 1).")
+  primerText2 <- paste0("För ", primerName2, " innehöll omkring ", primerPercent2, "% av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent2, "% av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo2, " olika arter (se figur 2 och ", seqPlotFigures2, " för relativa andelar sekvenser från varje art i varje prov) där de vanligaste ", commonNo2, " arterna stod för över ", commonPercent2, "% av sekvenserna från ", targetGroup, " (se figur 2).")
 } else {
   groupSpecies2 <- c() # No species found, since no other primer
   primerText2 <- ""

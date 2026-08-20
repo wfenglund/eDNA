@@ -67,7 +67,8 @@ seqPlotFigures2 <- "4-X" # -"-
 
 # References (uncomment the appropriate choice):
 # primerVar <- list(citation = "[@miya2015mifish]", index = c(2)) # mifish
-primerVar <- list(citation = "[@miya2015mifish;@wang2023vertu]", index = c(2, 13)) # mifish & 16s
+primerVar <- list(citation = "[@miya2015mifish;@wang2023vertu]", index = c(2, 13)) # mifish & 16s (fish)
+# primerVar <- list(citation = "[@prie2021environmental;@zieritz2012identifying]", index = c(3, 11)) # ITS & 16s (mussels)
 ```
 
 \begin{titlepage}

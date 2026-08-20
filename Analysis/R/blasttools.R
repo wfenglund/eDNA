@@ -138,9 +138,12 @@ BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, min
   blastResult$qcovs <- as.numeric(blastResult$qcovs)
   blastResult$pident[is.na(blastResult$pident)] <- 0 # If the input file contained empty values, assign them to 0
   blastResult$qcovs[is.na(blastResult$qcovs)] <- 0 # -"-
+  cat(paste0("Total sequences: ", nrow(sequences), "\n"))
+  cat(paste0("Total hits pre filtration: ", length(unique(blastResult$qseqid)), "\n"))
   blastResult <- blastResult[blastResult$pident >= minIdentity, ]
   blastResult <- blastResult[blastResult$qcovs >= minCoverage, ]
   blastResultUn <- blastResult[!duplicated(blastResult$qseqid), ] # Retain only best hits
+  cat(paste0("Total hits post filtration: ", length(unique(blastResultUn$qseqid)), "\n"))
   GetFirstItem <- function(name) { # Function that returns the first of items separated by semicolons
     return(strsplit(as.character(name), split = ";")[[1]][1])
   }

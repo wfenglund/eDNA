@@ -57,7 +57,7 @@ sampleCutoff <- "0,1" # Within sample cutoff
 targetGroup <- "fisk" # group of organism focused on
 
 primerName1 <- "12S"
-primerName2 <- "V16S" # if relevant
+primerName2 <- "16S" # if relevant
 
 commonNo <- "3" # How many species that stood for [commonPercent] of all sequences
 commonNo2 <- "3" # same as above but for second primer
@@ -66,8 +66,9 @@ seqPlotFigures <- "3-X" # Which figure numbers belong to the SeqPlots? e.G. "2" 
 seqPlotFigures2 <- "4-X" # -"-
 
 # References (uncomment the appropriate choice):
-primerVar <- list(citation = "[@miya2015mifish]", index = c(2)) # mifish
-# primerVar <- list(citation = "[@miya2015mifish;@wang2023vertu]", index = c(2, 13)) # mifish & 16s
+# primerVar <- list(citation = "[@miya2015mifish]", index = c(2)) # mifish
+primerVar <- list(citation = "[@miya2015mifish;@wang2023vertu]", index = c(2, 13)) # mifish & 16s (fish)
+# primerVar <- list(citation = "[@prie2021environmental;@zieritz2012identifying]", index = c(3, 11)) # ITS & 16s (mussels)
 ```
 
 \begin{titlepage}
@@ -217,8 +218,8 @@ träffen utgjorde mindre än `r sampleCutoff`% av det totala antalet sekvenser i
 för att minska risken för falskt positiva träffar.
 
 ## Resultat
-PCR-reaktioner genererade rena amplifieringar av förväntad storlek i alla tre
-replikat för alla prover och bedömdes därmed lämpliga för att skapa
+PCR-reaktioner genererade rena amplifieringar av förväntad storlek i båda
+replikaten för alla prover och bedömdes därmed lämpliga för att skapa
 sekvenseringsbibliotek. Biblioteken skapades av CGI och sekvenserades av
 BMKGene på ett NovaSeq-instrument (PE150).
 

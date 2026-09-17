@@ -68,7 +68,7 @@ SumRes <- function (blastRes, counts, taxGroup) {
   invClasses <- invClasses[!is.na(invClasses)]
   invString <- do.call(paste, c(as.list(invClasses), sep = "|"))
   if (length(invString) == 0) { # if there are no invertebrate classes
-    invString = ""
+    invString = "NO_INVERTEBRATES_FOUND"
   }
   # Load group options:
   taxGroupConv <- c("Actinopteri|Hyperoartia|Chondrichthyes", "Aves", "Bivalvia", 

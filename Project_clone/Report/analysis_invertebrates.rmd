@@ -1,0 +1,240 @@
+---
+title: "proj_test"
+author: ""
+date: '202X-XX-XX'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(reticulate)
+library(MetaBAnalysis)
+knitr::opts_chunk$set(echo = TRUE)
+knitr::knit_engines$set(python = reticulate::eng_python)
+```
+
+### Filter the data and run dada2:
+```{r}
+# Set project name:
+projId <- "XXX_202X"
+
+# Collect sample paths and names. Duplicate line once per primer:
+primer1 <- CollectData("../Filtered_data", prefix = "mifish")
+saveRDS(primer1, file = "primer1.rds")
+
+# Filter reads and generate out object for later use:
+out <- FiltTrimWrap(primer1)
+saveRDS(out, file = "out.rds")
+
+# Dereplicate and merge pairs with dada2:
+dada2Counts <- DadaAnalysis(primer1, justConcatenate = FALSE, minOverlap = 5)
+saveRDS(dada2Counts, file = "dada2Counts.rds")
+```
+
+### Convert and modify matrix "dada2Counts" to DGEList "yAll":
+```{r}
+yAll <- MakeDGEList(dada2Counts, primer1)
+saveRDS(yAll, file = "yAll.rds")
+```
+
+### Export fasta-file:
+```{r}
+ExportFasta(yAll, paste0("y_", projId, primer1$Prefix, ".fa"), minLength = 30, maxLength = 1000)
+```
+
+### Parse BLAST-results:
+```{r}
+### The following code assumes that the folder "../../Suppl_data" exists and contains the files "compact_names.csv" and
+# "compact_nodes.csv. If it does not, create the folder in that location and perform the following:
+# 1. $ cd Suppl_data
+# 2. $ wget https://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip
+# 3. $ unzip taxdmp.zip
+# 4. $ awk -F\t '{gsub(/[^[:alnum:]]/," ", $3); if ($7 == "scientific name") {print $1 "\t" $3}}' names.dmp > compact_names.csv
+# 5. $ awk -F\t '{gsub(/[^[:alnum:]]/," ", $3); print $1 "\t" $3 "\t" $5}' nodes.dmp > compact_nodes.csv
+# 6. $ rm *.dmp *.prt *.txt *.zip
+
+data(compactNameDump, package = "MetaBAnalysis")
+data(compactNodeDump, package = "MetaBAnalysis")
+
+# Parse BLAST results, by default two levels are kept: minimum 85% identity for genera/families/orders and 98% for species. Both need at least 80% coverage per hit:
+blastResY85 <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 85, minCoverage = 80)
+blastResY98 <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 98, minCoverage = 80)
+saveRDS(blastResY85, "blastResY85.rds")
+saveRDS(blastResY98, "blastResY98.rds")
+```
+
+### Invertebrate specific output generation:
+```{r}
+allResults85 <- MetaBAnalysis::SumRes(blastRes = blastResY85, counts = yAll$counts, taxGroup = "Invertebrates")
+allResults98 <- MetaBAnalysis::SumRes(blastRes = blastResY98, counts = yAll$counts, taxGroup = "Invertebrates")
+allResults85 <- MetaBAnalysis::SumRes(blastRes = blastResY85, counts = yAll$counts, taxGroup = "Fish") # delete
+allResults98 <- MetaBAnalysis::SumRes(blastRes = blastResY98, counts = yAll$counts, taxGroup = "Fish") # delete
+
+colNames <- colnames(allResults85$TargetGroup)
+colNames <- gsub("", "", colNames) # add if something should be removed from names
+colnames(allResults85$TargetGroup) <- colNames
+colnames(allResults98$TargetGroup) <- colNames
+
+groupNotes85 <- MetaBAnalysis::MakeNotes(allResults85$TargetGroup)
+groupNotes98 <- MetaBAnalysis::MakeNotes(allResults98$TargetGroup)
+groupNotes85 <- MetaBAnalysis::TrimCutoffs(total = 0.0, within = 0.1, minimum = 0, groupNotes85) # trim species based on cutoffs
+groupNotes98 <- MetaBAnalysis::TrimCutoffs(total = 0.0, within = 0.1, minimum = 0, groupNotes98) # trim species based on cutoffs
+
+AddTaxonomy <- function(countsResNotes) {
+  countsRes <- countsResNotes[, -c(1, 2, 5)]
+  groupTax <- cbind(countsRes[,c(1:2)], do.call(rbind, lapply(countsRes$Latin, MetaBAnalysis::GetTaxonomy, nameDump = compactNameDump, nodeDump = compactNodeDump)), countsRes[,-c(1:2)])
+  colnames(groupTax)[3:8] <- c("Family", "Order", "Class", "Phylum", "Kingdom", "Superkingdom")
+  groupTax <- cbind(Genus = unlist(lapply(strsplit(groupTax$Latin, " "), `[`, 1)), groupTax)
+  
+  for(i in 1:nrow(groupTax)) { # fix missing values
+    if(grepl("idae", groupTax$Genus[i]) & groupTax$Family[i] == "unknown") {
+      print(groupTax$Latin[i])
+      groupTax$Family[i] <- groupTax$Genus[i] # if no family, assume hit name is a family
+    }
+    if(groupTax$Genus[i] %in% c("Coleoptera", "Diptera", "Lepidoptera", "Ephemeroptera") & groupTax$Order[i] == "unknown") {
+      print(groupTax$Latin[i])
+      groupTax$Order[i] <- groupTax$Genus[i]
+    }
+  }
+  return(groupTax)
+}
+
+groupTax85 <- AddTaxonomy(groupNotes85)
+groupTax98 <- AddTaxonomy(groupNotes98)
+saveRDS(groupTax85, "groupTax85.rds")
+saveRDS(groupTax98, "groupTax98.rds")
+
+genusRes85 <- aggregate(. ~ Genus + Family + Order + Class + Phylum + Kingdom + Superkingdom, data = groupTax85[,-c(2, 3)], FUN = sum)
+familRes85 <- aggregate(. ~ Family + Order + Class + Phylum + Kingdom + Superkingdom, data = groupTax85[,-c(1, 2, 3)], FUN = sum)
+orderRes85 <- aggregate(. ~ Order + Class + Phylum + Kingdom + Superkingdom, data = groupTax85[,-c(1, 2, 3, 4)], FUN = sum)
+speciRes98 <- groupTax98[, c(2, 3, 1, 4:ncol(groupTax98))]
+
+genusRes85 <- genusRes85[order(rowSums(genusRes85[8:ncol(genusRes85)]), decreasing = TRUE),]
+familRes85 <- familRes85[order(rowSums(familRes85[8:ncol(familRes85)]), decreasing = TRUE),]
+orderRes85 <- orderRes85[order(rowSums(orderRes85[8:ncol(orderRes85)]), decreasing = TRUE),]
+speciRes98 <- speciRes98[order(rowSums(speciRes98[10:ncol(speciRes98)]), decreasing = TRUE),]
+
+# Red list, optional and requires Dyntaxa data:
+GetRedStatus <- function(searchNames, taxFile = "../../../../../random/dyntaxa_data/Taxon.csv", redFile = "../../../../../random/dyntaxa_data/SpeciesDistribution.csv") {
+  taxDF <- read.csv(taxFile, sep = "\t")
+  redDF <- read.csv(redFile, sep = "\t")
+  redStatuses <- c()
+  for(searchName in searchNames) {
+    searchName <- paste(unlist(strsplit(searchName, " "))[1:2], collapse = " ")
+    taxName <- taxDF$taxonId[taxDF$scientificName == searchName & taxDF$taxonRank == "species" & taxDF$taxonomicStatus == "accepted"]
+    redStat <- redDF$threatStatus[redDF$taxonId == taxName]
+    if(identical(redStat, character(0))) {redStat <- ""}
+    print(paste(searchName, taxName, redStat))
+    redStatuses <- c(redStatuses, redStat)
+  }
+  return(redStatuses)
+}
+
+speciRes98 <- cbind(RedList = GetRedStatus(speciRes98$Latin), speciRes98)
+
+saveRDS(list(Species = speciRes98, Genera = genusRes85, Families = familRes85, Orders = orderRes85), "allResultsInv.rds")
+```
+
+# Rstudio functions:
+```{r}
+# These functions are intended to aid the curation step by allowing the user to
+# quickly write the sequences related to a species name to a file (98QSeqGetter
+# and 98QSSplit) or blast the top three sequences related to a species and View the
+# results in Rstudio (98CurationBLAST).
+library(MetaBAnalysis)
+library(annotate)
+
+# Write sequences to file
+`98QSeqGetter` <- function(speciesName, blastResults = blastResY98) {
+  species_seq <- paste0(">",
+                        blastResults[grepl(speciesName, blastResults$species),1],
+                        "\n",
+                        blastResults[grepl(speciesName, blastResults$species),2])
+  writeLines(species_seq, "current_sequence.txt")
+  file.edit("current_sequence.txt")
+}
+
+`85QSeqGetter` <- function(x) {`98QSeqGetter`(x, blastResY85)} # wrapper for second primer
+
+# Write sequences to file and split sequences that contains 'NNNNNNNNNN'
+`98QSSplit` <- function(speciesName, blastResults = blastResY98) {
+  seqName <- blastResults[grepl(speciesName, blastResults$species),1]
+  seqFull <- blastResults[grepl(speciesName, blastResults$species),2]
+  seq1 <- lapply(strsplit(seqFull, "NNNNNNNNNN"), "[[", 1)
+  seq2 <- lapply(strsplit(seqFull, "NNNNNNNNNN"), "[[", 2)
+  species_seq <- paste0(">", seqName,
+                        "\n", seqFull, "\n",
+                        ">", seqName, ".1",
+                        "\n", seq1, "\n",
+                        ">", seqName, ".2",
+                        "\n", seq2)
+  writeLines(species_seq, "current_sequence.txt")
+  file.edit("current_sequence.txt")
+}
+
+`85QSSplit` <- function(x) {`98QSSplit`(x, blastResY85)} # wrapper for second primer
+
+# Blast the top three sequences of a species/hit
+`98CurationBLAST` <- function(searchName, seqNumber = 3, blastResults = blastResY98, curationDF = groupNotes) { # does work
+  if(searchName %in% curationDF$Reference) {searchName <- curationDF$Latin[curationDF$Reference == searchName]}
+  cat(paste0("BLASTing \"", searchName, "\":\n\n"))
+  seqDF <- blastResults[blastResults$species == searchName & !is.na(blastResults$species), ]
+  seqNumber <- ifelse(nrow(seqDF) >= seqNumber, seqNumber, nrow(seqDF)) # update seqNumber
+  seqStr <- paste0(">", seqDF$id[1:seqNumber], "\n", seqDF$seq[1:seqNumber], collapse = "\n")
+  cat(seqStr)
+  blastOut <- annotate::blastSequences(x = seqStr, program = "blastn", database = "nr", hitListSize = 10, timeout = 512, as = "data.frame")
+  blastOut$Percent_id <- (as.numeric(blastOut$Hsp_identity) / as.numeric(blastOut$`Hsp_align-len`)) * 100
+  blastOut$Hit_coverage <- (abs(as.numeric(blastOut$`Hsp_query-to`) - as.numeric(blastOut$`Hsp_query-from`)) + 1) / as.numeric(blastOut$`Iteration_query-len`) * 100
+  blastOut$Hsp_evalue <- as.numeric(blastOut$Hsp_evalue)
+  blastResults <- blastOut[, c("Iteration_query-def", "Iteration_query-len", "Hit_def", "Hsp_evalue", "Percent_id", "Hit_coverage", "Hit_len", "Hit_accession", "Hit_id")]
+  View(blastResults)
+}
+
+`85CurationBLAST` <- function(searchName, seqNumber = 3) {`98CurationBLAST`(searchName = searchName, seqNumber = seqNumber, blastResults = blastResY85, curationDF = groupNotes2)}
+
+AccessionLookup <- function(accNumber, returnSummary = FALSE) {
+  accessionSummary <- rentrez::entrez_summary(db = "nuccore", id = rentrez::entrez_search(db = "nuccore", term = accNumber)$ids)
+  str(accessionSummary)
+  if(returnSummary == TRUE) {
+    return(accessionSummary)
+  }
+}
+```
+
+### Generate information about the sequences for use in report:
+```{r}
+library(rvest)
+
+rawSeqsTable <- MetaBAnalysis::getRawSeqs() # add searchPattern = "_fastqc.html" if single-end data
+
+rawSeqs <- rawSeqsTable$nreads
+
+sum(rawSeqs)
+min(rawSeqs)
+max(rawSeqs)
+
+primerSeqs <- sum(out[, 1])
+primerSeqs / sum(rawSeqs) # ratio of sequences left after primer trimming and filtration
+
+groupSeqs98 <- sum(groupTax98[, -c(1:9)])
+groupSeqs85 <- sum(groupTax85[, -c(1:9)])
+groupSeqs98 / primerSeqs # ratio of filtered sequences belonging to target group
+groupSeqs85 / primerSeqs # ratio of filtered sequences belonging to target group
+
+sampleMetaData <- list(rawSeqs = rawSeqs, primerSeqs = primerSeqs, groupSeqs98 = groupSeqs98, groupSeqs85 = groupSeqs85)
+saveRDS(sampleMetaData, "sampleMetaDataInv.rds")
+```
+
+### Generate output files:
+```{r}
+library(writexl)
+
+### Generate excel-sheets with counts and taxonomy:
+writexl::write_xlsx(x = genusRes85, paste0("Projekt_", projId, "_sekvensantal_85id_släkten.xlsx"))
+writexl::write_xlsx(x = familRes85, paste0("Projekt_", projId, "_sekvensantal_85id_familjer.xlsx"))
+writexl::write_xlsx(x = orderRes85, paste0("Projekt_", projId, "_sekvensantal_85id_ordningar.xlsx"))
+writexl::write_xlsx(x = speciRes98, paste0("Projekt_", projId, "_sekvensantal_98id_arter.xlsx"))
+
+### Generate ASV table:
+primer1ASV <- GenerateASV(blastObject = blastResY98)
+writexl::write_xlsx(x = primer1ASV, path = paste0("Project_", projId, "_ASV_results_", primer1$Prefix, ".xlsx"))
+```

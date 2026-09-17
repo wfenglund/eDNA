@@ -86,9 +86,9 @@ allResults <- MetaBAnalysis::SumRes(blastRes = blastResY, counts = yAll$counts, 
 # Rstudio functions:
 ```{r}
 # These functions are intended to aid the curation step by allowing the user to
-# quickly write the sequences related to a species name to a file (QSeqGetter
-# and QSSplit) or blast the top three sequences related to a species and View the
-# results in Rstudio (QSBLAST).
+# quickly write the sequences related to a species name to a file (1QSeqGetter
+# and 1QSSplit) or blast the top three sequences related to a species and View the
+# results in Rstudio (1CurationBLAST).
 library(MetaBAnalysis)
 library(annotate)
 

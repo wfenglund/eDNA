@@ -249,7 +249,7 @@ primer1ASV <- GenerateASV()
 primer1ASVGroup <- GenerateASV(filterByClass = TRUE) # fish classes is the default
 # primer2ASV <- GenerateASV(blastObject = blastResY2, countsObject = yAll2)
 # primer2ASVGroup <- GenerateASV(blastObject = blastResY2, countsObject = yAll2, filterByClass = TRUE) # fish classes is the default
-writexl::write_xlsx(x = primer1ASV, path = paste0("Project_", projId, "_ASV_results_", primer1$Prefix, ".xlsx")
+writexl::write_xlsx(x = primer1ASV, path = paste0("Project_", projId, "_ASV_results_", primer1$Prefix, ".xlsx"))
 writexl::write_xlsx(x = primer1ASVGroup, path = paste0("Project_", projId, "_ASV_results_", primer1$Prefix, "_only_group.xlsx"))
 # writexl::write_xlsx(x = primer2ASV, path = paste0("Project_", projId, "_ASV_results_", primer2$Prefix, ".xlsx")
 # writexl::write_xlsx(x = primer2ASVGroup, path = paste0("Project_", projId, "_ASV_results_", primer2$Prefix, "_only_group.xlsx"))

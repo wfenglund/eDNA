@@ -1,6 +1,6 @@
-Package: MetaBAnalysis
-Title: Analysis of metabarcoding data
-Version: 0.0.2.0100
+Package: MetAlPipe
+Title: Metabarcoding Analysis Pipeline
+Version: 0.0.3.0000
 Authors@R: c( 
     person(given = "Thomas",
            family = "Källman",

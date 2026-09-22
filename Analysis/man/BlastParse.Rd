@@ -8,7 +8,7 @@ BlastParse(
   DGEList,
   blastRes = "blastRes.out",
   minIdentity = 90,
-  minCoverage = 60
+  minCoverage = 90
 )
 }
 \arguments{

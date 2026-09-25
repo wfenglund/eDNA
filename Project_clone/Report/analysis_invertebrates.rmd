@@ -71,6 +71,7 @@ allResults98 <- MetAlPipe::SumRes(blastRes = blastResY98, counts = yAll$counts, 
 
 colNames <- colnames(allResults85$TargetGroup)
 colNames <- gsub("", "", colNames) # add if something should be removed from names
+colNames[colNames == "SAMPLE NAME"] <- "NEW SAMPLE NAME" # replace sample names if needed
 colnames(allResults85$TargetGroup) <- colNames
 colnames(allResults98$TargetGroup) <- colNames
 
@@ -109,8 +110,8 @@ orderRes85 <- aggregate(. ~ Order + Class + Phylum + Kingdom + Superkingdom, dat
 speciRes98 <- groupTax98[, c(2, 3, 1, 4:ncol(groupTax98))]
 
 genusRes85 <- genusRes85[order(rowSums(genusRes85[8:ncol(genusRes85)]), decreasing = TRUE),]
-familRes85 <- familRes85[order(rowSums(familRes85[8:ncol(familRes85)]), decreasing = TRUE),]
-orderRes85 <- orderRes85[order(rowSums(orderRes85[8:ncol(orderRes85)]), decreasing = TRUE),]
+familRes85 <- familRes85[order(rowSums(familRes85[7:ncol(familRes85)]), decreasing = TRUE),]
+orderRes85 <- orderRes85[order(rowSums(orderRes85[6:ncol(orderRes85)]), decreasing = TRUE),]
 speciRes98 <- speciRes98[order(rowSums(speciRes98[10:ncol(speciRes98)]), decreasing = TRUE),]
 
 # Red list, optional and requires Dyntaxa data:

@@ -189,7 +189,7 @@ library(annotate)
   View(blastResults)
 }
 
-`85CurationBLAST` <- function(searchName, seqNumber = 3) {`98CurationBLAST`(searchName = searchName, seqNumber = seqNumber, blastResults = blastResY85, curationDF = groupNotes2)}
+`85CurationBLAST` <- function(searchName, seqNumber = 3) {`98CurationBLAST`(searchName = searchName, seqNumber = seqNumber, blastResults = blastResY85, curationDF = groupNotes85)}
 
 AccessionLookup <- function(accNumber, returnSummary = FALSE) {
   accessionSummary <- rentrez::entrez_summary(db = "nuccore", id = rentrez::entrez_search(db = "nuccore", term = accNumber)$ids)

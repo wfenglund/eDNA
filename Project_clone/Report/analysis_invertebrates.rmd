@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(reticulate)
-library(MetaBAnalysis)
+library(MetAlPipe)
 knitr::opts_chunk$set(echo = TRUE)
 knitr::knit_engines$set(python = reticulate::eng_python)
 ```
@@ -52,36 +52,36 @@ ExportFasta(yAll, paste0("y_", projId, primer1$Prefix, ".fa"), minLength = 30, m
 # 5. $ awk -F\t '{gsub(/[^[:alnum:]]/," ", $3); print $1 "\t" $3 "\t" $5}' nodes.dmp > compact_nodes.csv
 # 6. $ rm *.dmp *.prt *.txt *.zip
 
-data(compactNameDump, package = "MetaBAnalysis")
-data(compactNodeDump, package = "MetaBAnalysis")
+data(compactNameDump, package = "MetAlPipe")
+data(compactNodeDump, package = "MetAlPipe")
 
 # Parse BLAST results, by default two levels are kept: minimum 85% identity for genera/families/orders and 98% for species. Both need at least 80% coverage per hit:
-blastResY85 <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 85, minCoverage = 80)
-blastResY98 <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 98, minCoverage = 80)
+blastResY85 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 85, minCoverage = 80)
+blastResY98 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 98, minCoverage = 80)
 saveRDS(blastResY85, "blastResY85.rds")
 saveRDS(blastResY98, "blastResY98.rds")
 ```
 
 ### Invertebrate specific output generation:
 ```{r}
-allResults85 <- MetaBAnalysis::SumRes(blastRes = blastResY85, counts = yAll$counts, taxGroup = "Invertebrates")
-allResults98 <- MetaBAnalysis::SumRes(blastRes = blastResY98, counts = yAll$counts, taxGroup = "Invertebrates")
-allResults85 <- MetaBAnalysis::SumRes(blastRes = blastResY85, counts = yAll$counts, taxGroup = "Fish") # delete
-allResults98 <- MetaBAnalysis::SumRes(blastRes = blastResY98, counts = yAll$counts, taxGroup = "Fish") # delete
+allResults85 <- MetAlPipe::SumRes(blastRes = blastResY85, counts = yAll$counts, taxGroup = "Invertebrates")
+allResults98 <- MetAlPipe::SumRes(blastRes = blastResY98, counts = yAll$counts, taxGroup = "Invertebrates")
+allResults85 <- MetAlPipe::SumRes(blastRes = blastResY85, counts = yAll$counts, taxGroup = "Fish") # delete
+allResults98 <- MetAlPipe::SumRes(blastRes = blastResY98, counts = yAll$counts, taxGroup = "Fish") # delete
 
 colNames <- colnames(allResults85$TargetGroup)
 colNames <- gsub("", "", colNames) # add if something should be removed from names
 colnames(allResults85$TargetGroup) <- colNames
 colnames(allResults98$TargetGroup) <- colNames
 
-groupNotes85 <- MetaBAnalysis::MakeNotes(allResults85$TargetGroup)
-groupNotes98 <- MetaBAnalysis::MakeNotes(allResults98$TargetGroup)
-groupNotes85 <- MetaBAnalysis::TrimCutoffs(total = 0.0, within = 0.1, minimum = 0, groupNotes85) # trim species based on cutoffs
-groupNotes98 <- MetaBAnalysis::TrimCutoffs(total = 0.0, within = 0.1, minimum = 0, groupNotes98) # trim species based on cutoffs
+groupNotes85 <- MetAlPipe::MakeNotes(allResults85$TargetGroup)
+groupNotes98 <- MetAlPipe::MakeNotes(allResults98$TargetGroup)
+groupNotes85 <- MetAlPipe::TrimCutoffs(total = 0.0, within = 0.1, minimum = 0, groupNotes85) # trim species based on cutoffs
+groupNotes98 <- MetAlPipe::TrimCutoffs(total = 0.0, within = 0.1, minimum = 0, groupNotes98) # trim species based on cutoffs
 
 AddTaxonomy <- function(countsResNotes) {
   countsRes <- countsResNotes[, -c(1, 2, 5)]
-  groupTax <- cbind(countsRes[,c(1:2)], do.call(rbind, lapply(countsRes$Latin, MetaBAnalysis::GetTaxonomy, nameDump = compactNameDump, nodeDump = compactNodeDump)), countsRes[,-c(1:2)])
+  groupTax <- cbind(countsRes[,c(1:2)], do.call(rbind, lapply(countsRes$Latin, MetAlPipe::GetTaxonomy, nameDump = compactNameDump, nodeDump = compactNodeDump)), countsRes[,-c(1:2)])
   colnames(groupTax)[3:8] <- c("Family", "Order", "Class", "Phylum", "Kingdom", "Superkingdom")
   groupTax <- cbind(Genus = unlist(lapply(strsplit(groupTax$Latin, " "), `[`, 1)), groupTax)
   
@@ -140,7 +140,7 @@ saveRDS(list(Species = speciRes98, Genera = genusRes85, Families = familRes85, O
 # quickly write the sequences related to a species name to a file (98QSeqGetter
 # and 98QSSplit) or blast the top three sequences related to a species and View the
 # results in Rstudio (98CurationBLAST).
-library(MetaBAnalysis)
+library(MetAlPipe)
 library(annotate)
 
 # Write sequences to file
@@ -204,7 +204,7 @@ AccessionLookup <- function(accNumber, returnSummary = FALSE) {
 ```{r}
 library(rvest)
 
-rawSeqsTable <- MetaBAnalysis::getRawSeqs() # add searchPattern = "_fastqc.html" if single-end data
+rawSeqsTable <- MetAlPipe::getRawSeqs() # add searchPattern = "_fastqc.html" if single-end data
 
 rawSeqs <- rawSeqsTable$nreads
 

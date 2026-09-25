@@ -505,7 +505,7 @@ FiltTrimWrap <- function(primerData) {
 #' @export
 #'
 GenerateASV <- function(blastObject = blastResY, countsObject = yAll, classFilter = c("Actinopteri", "Hyperoartia", "Chondrichthyes"), filterByClass = FALSE) {
-  ASVobject <- merge(x = blastResY, y = as.data.frame(yAll$counts), by.x = "seq", by.y = 'row.names')
+  ASVobject <- merge(x = blastObject, y = as.data.frame(countsObject$counts), by.x = "seq", by.y = 'row.names')
   if(filterByClass) {
     return(ASVobject[ASVobject$class %in% classFilter, ])
   } else {

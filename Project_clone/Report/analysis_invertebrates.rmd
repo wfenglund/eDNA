@@ -71,6 +71,7 @@ allResults98 <- MetAlPipe::SumRes(blastRes = blastResY98, counts = yAll$counts, 
 
 colNames <- colnames(allResults85$TargetGroup)
 colNames <- gsub("", "", colNames) # add if something should be removed from names
+colNames[colNames == "SAMPLE NAME"] <- "NEW SAMPLE NAME" # replace sample names if needed
 colnames(allResults85$TargetGroup) <- colNames
 colnames(allResults98$TargetGroup) <- colNames
 

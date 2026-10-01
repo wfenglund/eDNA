@@ -19,8 +19,15 @@ projId <- "XXX_202X"
 
 # Collect sample paths and names. Duplicate line once per primer:
 primer1 <- CollectData("../Filtered_data", prefix = "mifish")
-saveRDS(primer1, file = "primer1.rds")
 # primer2 <- CollectData("../Filtered_data", prefix = "v16s")
+
+# Edit sample names:
+primer1$Samples
+primer1$Samples <- unlist(lapply(strsplit(primer1$Samples, "_|-"), `[[`, 2)) # works for most BMK runs
+primer1$Samples <- gsub("", "", primer1$Samples) # add if something should be removed from names
+primer1$Samples[primer1$Samples == "SAMPLE NAME"] <- "NEW SAMPLE NAME" # replace sample names if needed
+saveRDS(primer1, file = "primer1.rds")
+# primer2$Samples <- primer1$Samples
 # saveRDS(primer2, file = "primer2.rds")
 
 # Filter reads and generate out object for later use:

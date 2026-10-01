@@ -12,7 +12,7 @@ DadaAnalysis(
 )
 }
 \arguments{
-\item{primerData}{list containing information about samples to be run, can be generated with the function \link{CollectData}.}
+\item{primerData}{list containing information about samples to be run, can be generated with the function \link{CollectData}. The samples in the resulting object will be named after primerData$Samples}
 
 \item{muThread}{Should the analysis use multithreads for analysis}
 

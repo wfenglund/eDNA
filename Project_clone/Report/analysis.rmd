@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(reticulate)
-library(MetaBAnalysis)
+library(MetAlPipe)
 knitr::opts_chunk$set(echo = TRUE)
 knitr::knit_engines$set(python = reticulate::eng_python)
 ```
@@ -67,20 +67,20 @@ ExportFasta(yAll, paste0("y_", projId, primer1$Prefix, ".fa"), minLength = 30, m
 # 5. $ awk -F\t '{gsub(/[^[:alnum:]]/," ", $3); print $1 "\t" $3 "\t" $5}' nodes.dmp > compact_nodes.csv
 # 6. $ rm *.dmp *.prt *.txt *.zip
 
-data(compactNameDump, package = "MetaBAnalysis")
-data(compactNodeDump, package = "MetaBAnalysis")
+data(compactNameDump, package = "MetAlPipe")
+data(compactNodeDump, package = "MetAlPipe")
 
 # Parse BLAST results, by default only hits with both 90% identity as well as coverage are kept:
-blastResY <- MetaBAnalysis::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 90, minCoverage = 90)
+blastResY <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 90, minCoverage = 90)
 saveRDS(blastResY, file = "blastResY.rds")
-# blastResY2 <- MetaBAnalysis::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), minIdentity = 90, minCoverage = 90)
+# blastResY2 <- MetAlPipe::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), minIdentity = 90, minCoverage = 90)
 # saveRDS(blastResY2, file = "blastResY2.rds")
 ```
 
 ### Create Summaryfiles from the BLAST-results:
 ```{r}
-allResults <- MetaBAnalysis::SumRes(blastRes = blastResY, counts = yAll$counts, taxGroup = "Fish") # Summarize a list of result objects
-# allResults2 <- MetaBAnalysis::SumRes(blastRes = blastResY2, counts = yAll2$counts, taxGroup = "Fish") # Summarize a list of result objects
+allResults <- MetAlPipe::SumRes(blastRes = blastResY, counts = yAll$counts, taxGroup = "Fish") # Summarize a list of result objects
+# allResults2 <- MetAlPipe::SumRes(blastRes = blastResY2, counts = yAll2$counts, taxGroup = "Fish") # Summarize a list of result objects
 ```
 
 # Rstudio functions:
@@ -89,7 +89,7 @@ allResults <- MetaBAnalysis::SumRes(blastRes = blastResY, counts = yAll$counts, 
 # quickly write the sequences related to a species name to a file (1QSeqGetter
 # and 1QSSplit) or blast the top three sequences related to a species and View the
 # results in Rstudio (1CurationBLAST).
-library(MetaBAnalysis)
+library(MetAlPipe)
 library(annotate)
 
 # Write sequences to file
@@ -151,7 +151,7 @@ AccessionLookup <- function(accNumber, returnSummary = FALSE) {
 
 ### Curate the results (first primer):
 ```{r}
-library(MetaBAnalysis)
+library(MetAlPipe)
 library(rvest)
 
 {
@@ -179,7 +179,7 @@ saveRDS(allResults, "allResults.rds") # save the clean object to be used in the 
 
 ### Curate the results (second primer, if relevant):
 ```{r}
-library(MetaBAnalysis)
+library(MetAlPipe)
 library(rvest)
 
 {
@@ -209,7 +209,7 @@ saveRDS(allResults2, "allResults2.rds") # save the clean object to be used in th
 ```{r}
 library(rvest)
 
-rawSeqsTable <- MetaBAnalysis::getRawSeqs() # add searchPattern = "_fastqc.html" if single-end data
+rawSeqsTable <- MetAlPipe::getRawSeqs() # add searchPattern = "_fastqc.html" if single-end data
 
 rawSeqs <- rawSeqsTable$nreads
 

@@ -2,7 +2,7 @@
 #'
 #' This largely runs several of the standard steps in a dada2 analysis
 #' with default parameters.
-#' @param primerData list containing information about samples to be run, can be generated with the function [CollectData].
+#' @param primerData list containing information about samples to be run, can be generated with the function [CollectData]. The samples in the resulting object will be named after primerData$Samples
 #' @param muThread Should the analysis use multithreads for analysis
 #' @param justConcatenate if reads pairs do not overlap set to TRUE
 #' @param minOverlap minimum overlap between reads when merging pairs
@@ -40,6 +40,7 @@ DadaAnalysis <- function(primerData, muThread = TRUE, justConcatenate = FALSE, m
     seqTab <- dada2::makeSequenceTable(dadaF)
   }
   seqtabNochim <- dada2::removeBimeraDenovo(seqTab, method = "consensus", multithread = muThread, verbose = TRUE)
+  rownames(seqtabNochim) <- primerData$Samples[match(rownames(seqtabNochim), primerData$ForwardC)]
   return(seqtabNochim)
 }
 

@@ -19,6 +19,12 @@ projId <- "XXX_202X"
 
 # Collect sample paths and names. Duplicate line once per primer:
 primer1 <- CollectData("../Filtered_data", prefix = "mifish")
+
+# Edit sample names:
+primer1$Samples
+primer1$Samples <- unlist(lapply(strsplit(primer1$Samples, "_|-"), `[[`, 2)) # works for most BMK runs
+primer1$Samples <- gsub("", "", primer1$Samples) # add if something should be removed from names
+primer1$Samples[primer1$Samples == "SAMPLE NAME"] <- "NEW SAMPLE NAME" # replace sample names if needed
 saveRDS(primer1, file = "primer1.rds")
 
 # Filter reads and generate out object for later use:
@@ -69,11 +75,11 @@ allResults98 <- MetAlPipe::SumRes(blastRes = blastResY98, counts = yAll$counts, 
 allResults85 <- MetAlPipe::SumRes(blastRes = blastResY85, counts = yAll$counts, taxGroup = "Fish") # delete
 allResults98 <- MetAlPipe::SumRes(blastRes = blastResY98, counts = yAll$counts, taxGroup = "Fish") # delete
 
-colNames <- colnames(allResults85$TargetGroup)
-colNames <- gsub("", "", colNames) # add if something should be removed from names
-colNames[colNames == "SAMPLE NAME"] <- "NEW SAMPLE NAME" # replace sample names if needed
-colnames(allResults85$TargetGroup) <- colNames
-colnames(allResults98$TargetGroup) <- colNames
+# colNames <- colnames(allResults85$TargetGroup)
+# colNames <- gsub("", "", colNames) # add if something should be removed from names
+# colNames[colNames == "SAMPLE NAME"] <- "NEW SAMPLE NAME" # replace sample names if needed
+# colnames(allResults85$TargetGroup) <- colNames
+# colnames(allResults98$TargetGroup) <- colNames
 
 groupNotes85 <- MetAlPipe::MakeNotes(allResults85$TargetGroup)
 groupNotes98 <- MetAlPipe::MakeNotes(allResults98$TargetGroup)
@@ -228,7 +234,7 @@ saveRDS(sampleMetaData, "sampleMetaDataInv.rds")
 ### Generate output files:
 ```{r}
 library(writexl)
-
+# 
 ### Generate excel-sheets with counts and taxonomy:
 writexl::write_xlsx(x = genusRes85, paste0("Projekt_", projId, "_sekvensantal_85id_släkten.xlsx"))
 writexl::write_xlsx(x = familRes85, paste0("Projekt_", projId, "_sekvensantal_85id_familjer.xlsx"))

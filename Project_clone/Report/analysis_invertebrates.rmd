@@ -234,7 +234,7 @@ saveRDS(sampleMetaData, "sampleMetaDataInv.rds")
 ### Generate output files:
 ```{r}
 library(writexl)
-# 
+
 ### Generate excel-sheets with counts and taxonomy:
 writexl::write_xlsx(x = genusRes85, paste0("Projekt_", projId, "_sekvensantal_85id_släkten.xlsx"))
 writexl::write_xlsx(x = familRes85, paste0("Projekt_", projId, "_sekvensantal_85id_familjer.xlsx"))

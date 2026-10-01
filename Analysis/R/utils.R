@@ -276,7 +276,8 @@ CollectData <- function(directory = "../Filtered_data", prefix = "") {
   reverseC <- reverseC[grepl(prefix, reverseC)]
   filtFs <- file.path(directory, "filtered", forwardC)
   filtRs <- file.path(directory, "filtered", reverseC)
-  allSamples <- unique(gsub("_outFwd_1.fastq.gz|_outRev_1.fastq.gz|_outFwd_2.fastq.gz|_outRev_2.fastq.gz", "", forwardC))
+  allSamples <- gsub("_outFwd_1.fastq.gz|_outRev_1.fastq.gz|_outFwd_2.fastq.gz|_outRev_2.fastq.gz", "", forwardC)
+  allSamples <- gsub(prefix, "", allSamples)
   output <- list(Forward = forward, Reverse = reverse, ForwardC = forwardC, 
                  ReverseC = reverseC, FiltFs = filtFs, FiltRs = filtRs, 
                  Samples = allSamples, Prefix = prefix)
@@ -295,7 +296,7 @@ CollectData <- function(directory = "../Filtered_data", prefix = "") {
 #'
 OutCombine <- function(dataset, samples) {
   counter <- 0
-  for(i in samples) {
+  for(i in unique(samples)) {
     if (counter == 0) {
       output <- data.frame()
       counter <- counter + 1
@@ -316,7 +317,7 @@ OutCombine <- function(dataset, samples) {
 #'
 DFCombine <- function(dataset, samples) {
   counter <- 0
-  for(i in samples) {
+  for(i in unique(samples)) {
     if (counter == 0) {
       output <- data.frame(S2 = rowSums(dataset[, grepl(x = names(dataset), pattern = i)]))
       counter <- counter + 1
@@ -491,6 +492,7 @@ FiltTrimWrap <- function(primerData) {
                                 maxN=0, truncQ=2, rm.phix=TRUE,
                                 compress=TRUE, multithread=TRUE)
   }
+  rownames(out) <- primerData$Samples[match(rownames(out), primerData$ForwardC)]
   return(out)
 }
 

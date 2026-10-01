@@ -173,11 +173,11 @@ library(rvest)
   
   ### Create outputs:
   groupClean <- groupNotes[, -c(1, 2, 5)]
-  columnNames <- colnames(groupClean)
-  columnNames[-c(1, 2)] <- lapply(strsplit(columnNames[-c(1, 2)], "_"), `[`, 2) # remove first underscore
+  # columnNames <- colnames(groupClean)
+  # columnNames[-c(1, 2)] <- lapply(strsplit(columnNames[-c(1, 2)], "_"), `[`, 2) # remove first underscore
   # columnNames <- gsub("pattern", "replacement", columnNames)
   # columnNames[grepl("old sample name", columnNames)] <- "new sample name"
-  names(groupClean) <- columnNames
+  # names(groupClean) <- columnNames
   allResults$Clean <- groupClean
 }
 
@@ -201,11 +201,11 @@ library(rvest)
   
   ### Create outputs:
   groupClean2 <- groupNotes2[, -c(1, 2, 5)]
-  columnNames2 <- colnames(groupClean2)
-  columnNames2[-c(1, 2)] <- lapply(strsplit(columnNames2[-c(1, 2)], "_"), `[`, 2) # remove first underscore
+  # columnNames2 <- colnames(groupClean2)
+  # columnNames2[-c(1, 2)] <- lapply(strsplit(columnNames2[-c(1, 2)], "_"), `[`, 2) # remove first underscore
   # columnNames2 <- gsub("pattern", "replacement", columnNames2)
   # columnNames2[grepl("old sample name", columnNames2)] <- "new sample name"
-  names(groupClean2) <- columnNames2
+  # names(groupClean2) <- columnNames2
   allResults2$Clean <- groupClean2
 }
 

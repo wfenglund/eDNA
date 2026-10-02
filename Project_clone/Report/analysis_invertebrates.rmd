@@ -181,7 +181,7 @@ library(annotate)
 `85QSSplit` <- function(x) {`98QSSplit`(x, blastResY85)} # wrapper for second primer
 
 # Blast the top three sequences of a species/hit
-`98CurationBLAST` <- function(searchName, seqNumber = 3, blastResults = blastResY98, curationDF = groupNotes) { # does work
+`98CurationBLAST` <- function(searchName, seqNumber = 3, blastResults = blastResY98, curationDF = groupNotes98) { # does work
   if(searchName %in% curationDF$Reference) {searchName <- curationDF$Latin[curationDF$Reference == searchName]}
   cat(paste0("BLASTing \"", searchName, "\":\n\n"))
   seqDF <- blastResults[blastResults$species == searchName & !is.na(blastResults$species), ]

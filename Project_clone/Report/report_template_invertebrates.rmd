@@ -1,0 +1,359 @@
+---
+title: ""
+author: ""
+date: ""
+header-includes:
+   - \usepackage{geometry}
+   - \usepackage{fancyhdr}
+   - \usepackage[swedish,provide=*]{babel}
+   - \usepackage[default]{lato}
+   - \usepackage{float}
+   - \pagestyle{fancy}
+   - \fancyhf{}
+   - \lhead{\includegraphics[height=1cm]{./NRM_figures/naturhistoriska-riksmuseet2.png}}
+   - \rhead{Centrum för Genetisk Identifiering}
+   - \lfoot{}
+   - \usepackage{xcolor}
+   - \definecolor{forest}{RGB}{60, 122, 94}
+   - \definecolor{forest2}{RGB}{20, 72, 54}
+   - \usepackage{afterpage}
+output:
+  pdf_document:
+    keep_md: yes
+bibliography: references.bib
+biblio-style: unsrt
+---
+```{r setup, include=FALSE, cache = FALSE}
+require("knitr")
+knitr::opts_chunk$set(eval = TRUE, echo = FALSE, warning = FALSE)
+options(knitr.kable.NA = '')
+
+# To place figure where they are declared in the source file:
+#knitr::opts_chunk$set(fig.pos = "h", out.extra = "") # try
+#knitr::opts_chunk$set(fig.pos = "H", out.extra = "") # force
+```
+
+```{r setup2, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(kableExtra)
+library(readxl)
+library(wesanderson)
+library(vegan)
+library(MetAlPipe)
+```
+
+```{r}
+# User set variables:
+projectTitle <- "eDNA-detektering av evertebrater" # The title of this report
+projectId <- "XXX-20XX" # Diarienummer assigned to this project
+authorName <- "FIRST LAST" # Name of the author of this report
+
+clientName <- "klient" # The name of the client
+samplesNo <- "NUMBER" # Number of samples analysed
+blastDate <- "MONTH 20XX" # Which month the blast search was performed
+sampleCutoff <- "0,1" # Within sample cutoff
+targetGroup <- "evertebrater" # group of organism focused on
+
+primerName1 <- "COI"
+primerName2 <- "16S" # if relevant
+
+commonNo <- "3" # How many species that stood for [commonPercent] of all sequences
+commonNo2 <- "3" # same as above but for second primer
+
+seqPlotFigures <- "3-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
+seqPlotFigures2 <- "4-X" # -"-
+
+# References (uncomment the appropriate choice):
+# primerVar <- list(citation = "[@miya2015mifish]", index = c(2)) # mifish
+primerVar <- list(citation = "[@miya2015mifish;@wang2023vertu]", index = c(2, 13)) # mifish & 16s (fish)
+# primerVar <- list(citation = "[@prie2021environmental;@zieritz2012identifying]", index = c(3, 11)) # ITS & 16s (mussels)
+```
+
+\begin{titlepage}
+\center
+\vspace{2cm}
+NATURHISTORISKA RIKSMUSEET • FORSKAR, BEVARAR OCH FÖRKLARAR • NRM.SE \\
+	\colorbox{forest2}{
+		\parbox[t]{0.93\textwidth}{ % Outer full width box
+			\parbox[t]{0.91\textwidth}{ % Inner box for inner right text margin
+				\center % Right align the text
+				\fontsize{30pt}{40pt}\selectfont % Title font size, the first argument is the font size and the second is the line spacing, adjust depending on title length
+				\vspace{0.7cm} % Space between the start of the title and the top of the grey box
+				\textcolor{white}{
+				`r projectTitle`}\\
+				\vspace{0.5cm} 
+				\Large
+				\textcolor{white}{
+				Diarienummer NRM `r projectId`}\\
+				\vspace{0.7cm} % Space between the end of the title and the bottom of the grey box
+			}
+		}
+	}
+   \vfill % Space between the title box and author information
+	
+	%------------------------------------------------
+	%	Author name and information
+	%------------------------------------------------
+	\center
+	\includegraphics[width=330mm]{./NRM_figures/nrm-logo-staende-svensk-fullfarg}
+	\vspace{2cm}
+	%\parbox[t]{0.93\textwidth}{ % Box to inset this section slightly
+	%	\raggedleft % Right align the text
+	%	\large % Increase the font size
+	%	{\Large `r authorName`}\\[4pt] % Extra space after name
+	%	Centrum för genetisk identifiering\\
+	%	}
+
+\end{titlepage}
+
+Centrum för genetisk identifiering (CGI) vid Naturhistoriska riksmuseet är en
+uppdragsfinansierad verksamhet som erbjuder myndigheter och organisationer hjälp
+med genetiska analyser av biologiskt material.
+
+```{r}
+options(scipen = 5)
+
+FixMillion <- function(inNumber) {
+  if(inNumber < 100000) {
+    return(inNumber)
+  } else {
+    smallNumber <- inNumber / 1000000
+    roundNumber <- round(smallNumber, 1)
+    outNumber <- gsub("\\.", ",", roundNumber)
+    return(paste(outNumber, "miljoner"))
+  }
+}
+
+FixPercent <- function(inNumber) {
+  bigNumber <- inNumber * 100
+  roundNumber <- round(bigNumber, 0)
+  outNumber <- gsub("\\.", ",", roundNumber)
+  return(outNumber)
+}
+
+# Load and modify data:
+sampleMetaData <- readRDS("sampleMetaDataInv.rds")
+rawSeqs <- sampleMetaData$rawSeqs
+primerSeqs <- sampleMetaData$primerSeqs
+groupSeqs98 <- sampleMetaData$groupSeqs98
+groupSeqs85 <- sampleMetaData$groupSeqs85
+groupResults <- readRDS("allResultsInv.rds")
+groupSpecies <- groupResults$Species
+groupGenera <- groupResults$Genera
+groupFamilies <- groupResults$Families
+groupOrders <- groupResults$Orders
+# groupData <- cbind(groupData[, c(1, 2)], groupData[, -c(1, 2)][, order(as.numeric(gsub("[^0-9]+", "", colnames(groupData)[-c(1, 2)])))])
+# groupSpecies <- cbind(groupData$Latin, groupData$Swedish)
+# colnames(groupSpecies) <- c("Latin", "Svenska")
+
+# Assign variables:
+speciesNo <- nrow(groupSpecies) # Number of species found with first primer
+genusNo <- nrow(groupGenera) # Number of species found with first primer
+familyNo <- nrow(groupFamilies) # Number of species found with first primer
+orderNo <- nrow(groupOrders) # Number of species found with first primer
+totalSeqs <- FixMillion(sum(rawSeqs)) # Total number of raw sequences
+minSeqs <- FixMillion(min(rawSeqs)) # Number of sequences in the sample with fewest sequences
+maxSeqs <- FixMillion(max(rawSeqs)) # Number of sequences in the sample with most sequences
+primerPercent <- FixPercent(primerSeqs / sum(rawSeqs)) # Percentage of sequences that contained primers
+groupPercent98 <- FixPercent(groupSeqs98 / primerSeqs) # Percentage of sequences belonging to target group
+groupPercent85 <- FixPercent(groupSeqs85 / primerSeqs) # Percentage of sequences belonging to target group
+# commonPercent <- paste0("~", round(sum(groupData[1:commonNo, -c(1, 2)]) / sum(groupData[, -c(1, 2)]) * 100)) # proportion of sequences that [commonNo] make up
+
+primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent85, "% (", FixMillion(groupSeqs85), ") av sekvenserna ", targetGroup, ", varav ~", FixPercent(groupSeqs98 / groupSeqs85), "% (", FixMillion(groupSeqs98), ") kunde bestämmas hela vägen till art. Resterande sekvenser bestämdes till åtminstone släkte, familj eller ordning. Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 och ", seqPlotFigures, " för relativa andelar sekvenser från varje art i varje prov).")
+```
+
+## Uppdrag
+CGI har fått i uppdrag av `r clientName` att med hjälp av eDNA (environmental DNA) 
+detektera vilka arter av `r targetGroup` som finns i `r samplesNo` prover.
+
+## Material och metoder
+Prover togs av `r clientName` med provtagningsmaterial från CGI. DNA från vatten fångades med ett Sylphium filter med porstorlek 0.8 µm.
+Efter filtrering tillsattes ATL-buffer och prover skickades till Naturhistoriska för fortsatt analys.
+
+### Molekylära metoder
+Proteinas K tillsattes till filter med ATL-buffer och prover inkuberades vid 56° i minst 4 timmar. DNA-extraktion utfördes därefter med en Kingfisher extraktionsrobot (model Duo prime eller Flex) och ett "Omega
+MagBind Blood and Tissue" DNA-extraktionskit enligt beskrivning från
+tillverkaren. För analyserna amplifierades specifika DNA-fragment med 
+primers `r primerVar$citation` och
+PCR-reaktioner som optimerats för flerartsanalys med sekvensering (se Tabell 1).
+
+```{r tab1, echo=FALSE}
+library(kableExtra)
+library(readxl)
+
+# Do not edit this (generally):
+primerInfo <- read_excel("primer_data.xlsx")
+primerNames <- unlist(lapply(1:length(primerVar$index), function(x) {paste0(primerInfo[primerVar$index[x],1], footnote_marker_symbol(x))}))
+primerInfo[primerVar$index, 1] <- primerNames
+kable(primerInfo[primerVar$index, c(1:3,5)], "latex",
+				 caption = "Sekvenser för de primers som använts för detektion av eDNA. Temperatur är annealingtemperatur i PCR-reaktionerna.",
+				 booktabs = T, escape = F) %>%
+				 kable_styling(latex_options = "hold_position", font_size = 8) %>%
+			         footnote(symbol = apply(primerInfo[primerVar$index, 7], 2, function(x) {x})) # works fully for several primers
+```
+
+### Bioinformatiska analysmetoder
+Från rådata trimmades primersekvenser bort med hjälp av programmet cutadapt 
+[@martin2011cutadapt] och kvarvarande data analyserades med R-paketet dada2 
+[@callahan2016dada2]. Dada2 använder sekvensdata från prover för att identifiera
+unika sekvenser av biologiskt ursprung och hur många gånger dessa hittas i 
+vardera prov. Kvarvarande sekvensvarianter spårades till art genom att med hjälp
+av verktyget BLAST (Basic Local Alignment Search Tool)  [@altschul1990basic] 
+jämföra sekvenserna mot NCBIs öppna nukleotiddatabas (Nucleotide collection).
+Vår sökning utfördes `r blastDate`. Träffar med en identifikation på lägre än
+85% eller med en täckning på mindre än 80% exkluderades direkt. Dessutom exkluderades träffar från varje prov där
+träffen utgjorde mindre än `r sampleCutoff`% av det totala antalet sekvenser inom det provet
+för att minska risken för falskt positiva träffar. Alla dessa träffar bestämdes
+till släkte. För att en träff ska räknas som artbestämd krävdes ovanstående
+kriterier samt en identifikation på minst 98%.
+
+## Resultat
+PCR-reaktioner genererade rena amplifieringar av förväntad storlek i båda
+replikaten för alla prover och bedömdes därmed lämpliga för att skapa
+sekvenseringsbibliotek. Biblioteken skapades av CGI och sekvenserades av
+BMKGene på ett NovaSeq-instrument (PE150).
+
+### Fauna
+Det totala antalet fragment efter sekvensering av proverna var `r totalSeqs`,
+där enskilda prov hade mellan `r minSeqs` och `r maxSeqs` fragment.
+`r primerText1`
+Se tabell 2 för samtliga identifierade arter av `r targetGroup`. Övriga sekvenser var av låg kvalitet eller var spår av andra organismer.
+
+```{r tab2, echo=FALSE}
+fixedCaption <- paste(paste("Tabell över latinska och svenska namn på de arter av", targetGroup, "som identifierats i proverna. Om sekvenser ej kunde bestämmas till exakt art anges i dessa fall "), "sp.", " eller vilka två arter det kan handla om.", sep = "'")
+
+tableTaxa <- cbind(groupGenera$Genus, groupGenera$Family, groupGenera$Order)
+colnames(tableTaxa) <- c("Släkte", "Familj", "Ordning")
+
+kable(tableTaxa, "latex",
+      caption = fixedCaption, 
+      booktabs = T, escape = F)%>%
+      kable_styling(latex_options = "hold_position")%>%
+      column_spec(1, italic = TRUE)
+```
+
+```{r fig1, fig.height=14, fig.width=11, echo=FALSE, fig.cap=paste0("Fördelning i procent av antal sekvenser från olika släkten av ", targetGroup, " i proverna detekterade med hjälp av primer ", primerName1, ". Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover.")}
+# simplify and add a flag for species/genera/families/orders. Set orders as default. Look at PCA and diversity plots etc next time.
+
+# if figure is too tall or short, change to either fig.height=7 or fig.height=14 on above line
+library(MetAlPipe)
+
+# Prepare the count data:
+groupCounts <- groupGenera[, -c(1:7), drop = FALSE]
+groupCounts <- groupCounts[, rev(seq_along(groupCounts))] # reverse order of samples
+if(ncol(groupCounts) > 1) { # if more than one sample, add a total of all samples to the plot
+  groupCounts <- cbind(Totalt = rowSums(groupCounts), groupCounts)
+}
+figureTaxa <- groupGenera$Genus # change Svenska to Latin if needed
+
+# Plot:
+FractionPlot(data = groupCounts, species = figureTaxa, col = MetAlPipe:::color25, inset = c(-0.3, 0.01))
+```
+
+```{r include=FALSE}
+# groupDataFrame <- as.data.frame(groupData)
+# names(groupDataFrame) <- make.names(names(groupDataFrame))
+# 
+# options(scipen = 5)
+# 
+# groupDataFrame$Swedish <- str_pad(groupDataFrame$Swedish, side = "left", pad = " ", width = max(nchar(groupDataFrame$Swedish)))
+# 
+# indplots <- list()
+# for(i in names(groupDataFrame[3:ncol(groupDataFrame)])) {
+#    indplots[[i]] <- SeqPlot(data = groupDataFrame, sample = i, title = i, species = "Swedish", log10 = FALSE)
+# }
+# 
+# if("allResults2.rds" %in% list.files(".")) { # if two primers
+#   groupDataFrame2 <- as.data.frame(groupData2)
+#   names(groupDataFrame2) <- make.names(names(groupDataFrame2))
+#   
+#   options(scipen = 5)
+#   
+#   groupDataFrame2$Swedish <- str_pad(groupDataFrame2$Swedish, side = "left", pad = " ", width = max(nchar(groupDataFrame2$Swedish)))
+#   
+#   indplots2 <- list()
+#   for(i in names(groupDataFrame2[3:ncol(groupDataFrame2)])) {
+#      indplots2[[i]] <- SeqPlot(data = groupDataFrame2, sample = i, title = i, species = "Swedish", log10 = FALSE)
+# }
+#   
+# }
+```
+
+\newpage
+
+## Sammanfattning
+Undersökning med eDNA på `r samplesNo` vattenprover har identifierat sekvenser
+från `r speciesNo` olika arter av `r targetGroup`. Vår bedömning är att
+de detekterade arterna med stor sannolikhet finns närvarande i proverna, men eDNA är indirekta spår vilket innebär att spår inte nödvändigtvis kommer från individer som lever på provtagen lokal. Vidare innebär ett negativt resultat (alltså arter som inte detekterades) inte
+nödvändigtvis att dessa arter är frånvarande. Vi vill även påpeka att
+DNA rör sig med vatten och att en eventuell lokal uppströms kan påverka vilka
+arter som detekteras vid en lokal nedströms. Detta kan vara värt att ha i åtanke
+vid tolkning av inventeringsresultat från eDNA.
+
+```{r echo=FALSE, fig.height=13, fig.width=9, fig.cap=paste0("Antal sekvenser från varje art av ", targetGroup, " detekterade med ", primerName1, " i enskilda prover.")}
+# options(scipen = 5)
+# plot_grid(plotlist = indplots[1:5], align = "v", axis = "l", ncol = 1)
+```
+
+```{r fig5, fig.height=7, fig.width=14, echo=FALSE, fig.cap="Simpsons diversitetsindex för varje prov. Simpson (1 - D) ger sannolikheten att två slumpmässiga sekvenser dragna ur ett prov tillhör samma art. En högre siffra föreslår en högre diversitet inom det provet."}
+# PlotAlphaDiv <- function(plotData, dataNames, plotCol) {
+#   if(length(plotData) == 1 && !is.list(plotData)) {
+#     dataList <- as.list(plotData)
+#   } else {
+#     dataList <- plotData
+#   }
+#   .addSize <- function(group) {
+#     name <- paste0(group[1], "\nn=", length(group[[2]]))
+#     return(name)
+#   }
+#   newNames <- apply(X = cbind(dataNames, plotData), MARGIN = 1, FUN = .addSize)
+#   ylabel <- ""
+#   if(length(newNames) == 1) {ylabel <- newNames}
+#   par(mar = c(4.1, 9.1, 4.1, 12.1), xpd = TRUE, las = 1, srt = 0, cex = 1.2, bty = "n")
+#   boxplot(dataList, horizontal = TRUE, names = newNames, col = plotCol, las = 1)
+#   text(-0.05, 1, ylabel, adj = 1)
+# }
+# 
+# # Format data:
+# countsMatrix <- as.matrix(t(groupData[,-c(1, 2)]))
+# # simpValues <- vegan::diversity(x = countsMatrix, index = "simpson")
+# 
+# # Calculate Simpson:
+# if("allResults2.rds" %in% list.files(".")) { # if two primers
+#   countsMatrix2 <- as.matrix(t(allResults2$Clean[,-c(1, 2)]))
+#   plotInput <- list(vegan::diversity(x = countsMatrix, index = "simpson"), vegan::diversity(x = countsMatrix2, index = "simpson"))
+#   plotNames <- list(primerName1, primerName2) # needs to be the same length as 'plotInput'
+# } else {
+#   plotInput <- list(vegan::diversity(x = countsMatrix, index = "simpson"))
+#   plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
+# }
+# 
+# # Group samples (optional):
+# #group1 <- split(simpValues, c('a', 'b'))$a
+# #group2 <- split(simpValues, c('a', 'b'))$b
+# 
+# # Prepare plot variables:
+# # plotInput <- list(simpValues) # add several if needed
+# # plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
+# plotPalette <- wesanderson::wes_palette("Zissou1")#[c(3, 1)]
+# 
+# PlotAlphaDiv(plotData = plotInput, dataNames = plotNames, plotCol = plotPalette)
+```
+
+## Projektinformation
+Analysdata och resultat lagras tills vidare hos NRM och är open access. Vid
+eventuella framtida frågor i detta ärende kontakta NRM på antingen cgi@nrm.se
+eller registrator@nrm.se och ange diarienummer i mailets ämnesrad. Artbestämning
+av DNA-sekvenser sker genom jämförelse med databaser. Vi använder den
+internationellt största och mest kompletta databasen i våra försök att spåra
+ursprung till de sekvenser vi rapporterar, men det finns både luckor och
+felaktigheter i databasen (speciellt för insekter och evertebrater). Arterna i
+denna rapport är den bästa informationen som finns att tillgå vid söktillfället,
+men om databasen uppdateras kan kopplingen mellan sekvens och art komma att
+ändras.
+
+\newpage
+
+## Referenser 

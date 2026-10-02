@@ -18,7 +18,7 @@ knitr::knit_engines$set(python = reticulate::eng_python)
 projId <- "XXX_202X"
 
 # Collect sample paths and names. Duplicate line once per primer:
-primer1 <- CollectData("../Filtered_data", prefix = "mifish")
+primer1 <- CollectData("../Filtered_data", prefix = "IBA")
 
 # Edit sample names:
 primer1$Samples

@@ -70,6 +70,8 @@ seqPlotFigures2 <- "4-X" # -"-
 primerVar <- list(citation = "[@miya2015mifish;@wang2023vertu]", index = c(2, 13)) # mifish & 16s (fish)
 # primerVar <- list(citation = "[@prie2021environmental;@zieritz2012identifying]", index = c(3, 11)) # ITS & 16s (mussels)
 # primerVar <- list(citation = "[@valentini2016next]", index = c(14)) # batra (amphibians)
+# primerVar <- list(citation = "[@elbrecht2019validation]", index = c(8)) # IBA (insects)
+# primerVar <- list(citation = "[@vamos2017short]", index = c(16)) # EPT (insects)
 ```
 
 \begin{titlepage}

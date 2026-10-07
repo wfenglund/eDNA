@@ -23,7 +23,7 @@ primer1 <- CollectData("../Filtered_data", prefix = "mifish")
 
 # Edit sample names:
 primer1$Samples
-primer1$Samples <- unlist(lapply(strsplit(primer1$Samples, "_|-"), `[[`, 2)) # works for most BMK runs
+primer1$Samples <- unlist(lapply(strsplit(primer1$Samples, "_|-|BMK"), `[[`, 2)) # works for most BMK runs
 primer1$Samples <- gsub("", "", primer1$Samples) # add if something should be removed from names
 primer1$Samples[primer1$Samples == "SAMPLE NAME"] <- "NEW SAMPLE NAME" # replace sample names if needed
 saveRDS(primer1, file = "primer1.rds")

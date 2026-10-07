@@ -107,8 +107,8 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' @param blastRes file with blast results assumes blastoutput option
 #' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
 #' sstart send evalue bitscore staxids sscinames scomnames"
-#' @param minIdentity if identity percentage is below this value no hit will be reported
-#' @param minCoverage if coverage percentage is below this value no hit will be reported
+#' @param minIdentity if identity percentage is below this value no hit will be reported, default = 90.
+#' @param minCoverage if coverage percentage is below this value no hit will be reported, default = 90.
 #' @param excludeWithHit remove result for a sequence if any of the hits of that sequence contain given string, even if it is not the top hit. Useful with for example insects where Wolbachia sequences are sometimes added to a database under the name of its insect host.
 #'
 #' @import utils

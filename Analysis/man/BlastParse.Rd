@@ -8,7 +8,8 @@ BlastParse(
   DGEList,
   blastRes = "blastRes.out",
   minIdentity = 90,
-  minCoverage = 90
+  minCoverage = 90,
+  excludeWithHit = "@@@@@@@@@123ABC"
 )
 }
 \arguments{
@@ -18,9 +19,11 @@ BlastParse(
 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
 sstart send evalue bitscore staxids sscinames scomnames"}
 
-\item{minIdentity}{if identity percentage is below this value no hit will be reported}
+\item{minIdentity}{if identity percentage is below this value no hit will be reported, default = 90.}
 
-\item{minCoverage}{if coverage percentage is below this value no hit will be reported}
+\item{minCoverage}{if coverage percentage is below this value no hit will be reported, default = 90.}
+
+\item{excludeWithHit}{remove result for a sequence if any of the hits of that sequence contain given string, even if it is not the top hit. Useful with for example insects where Wolbachia sequences are sometimes added to a database under the name of its insect host.}
 }
 \value{
 seqTax a dataframe with annotation of results from sequence

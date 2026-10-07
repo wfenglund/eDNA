@@ -2,3 +2,14 @@
 .Rhistory
 .RData
 .Ruserdata
+*.fastq.gz
+*.fq.gz
+*.tar.gz
+*fastqc.html
+*fastqc.zip
+Project_clone/Pre_analysis/multiqc_data/*
+*.pdf
+*.rds
+*.log
+*.out
+*.md

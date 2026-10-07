@@ -62,8 +62,8 @@ data(compactNameDump, package = "MetAlPipe")
 data(compactNodeDump, package = "MetAlPipe")
 
 # Parse BLAST results, by default two levels are kept: minimum 85% identity for genera/families/orders and 98% for species. Both need at least 80% coverage per hit:
-blastResY85 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 85, minCoverage = 80)
-blastResY98 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 98, minCoverage = 80)
+blastResY85 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 85, minCoverage = 80, excludeWithHit = "Wolbachia")
+blastResY98 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 98, minCoverage = 80, excludeWithHit = "Wolbachia")
 saveRDS(blastResY85, "blastResY85.rds")
 saveRDS(blastResY98, "blastResY98.rds")
 ```

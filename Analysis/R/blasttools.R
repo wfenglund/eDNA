@@ -107,8 +107,9 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' @param blastRes file with blast results assumes blastoutput option
 #' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
 #' sstart send evalue bitscore staxids sscinames scomnames"
-#' @param minIdentity if identity percentage is below this value no hit will be reported
-#' @param minCoverage if coverage percentage is below this value no hit will be reported
+#' @param minIdentity if identity percentage is below this value no hit will be reported, default = 90.
+#' @param minCoverage if coverage percentage is below this value no hit will be reported, default = 90.
+#' @param excludeWithHit remove result for a sequence if any of the hits of that sequence contain given string, even if it is not the top hit. Useful with for example insects where Wolbachia sequences are sometimes added to a database under the name of its insect host.
 #'
 #' @import utils
 #'
@@ -128,7 +129,7 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
 #' BlastParse(DGEList = yForward, blastRes = exOut)
 #'
-BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, minCoverage = 90) {
+BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, minCoverage = 90, excludeWithHit = "@@@@@@@@@123ABC") {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
   blastResult <- read.table(blastRes, sep = "\t", quote = "€", stringsAsFactors = FALSE)
   names(blastResult) <- c("qseqid", "sseqid", "pident", "length", 
@@ -142,6 +143,7 @@ BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, min
   cat(paste0("Total hits pre filtration: ", length(unique(blastResult$qseqid)), "\n"))
   blastResult <- blastResult[blastResult$pident >= minIdentity, ]
   blastResult <- blastResult[blastResult$qcovs >= minCoverage, ]
+  blastResult <- blastResult[!(blastResult$qseqid %in% blastResult$qseqid[grepl(excludeWithHit, blastResult$sscinames)]), ]
   blastResultUn <- blastResult[!duplicated(blastResult$qseqid), ] # Retain only best hits
   cat(paste0("Total hits post filtration: ", length(unique(blastResultUn$qseqid)), "\n"))
   GetFirstItem <- function(name) { # Function that returns the first of items separated by semicolons

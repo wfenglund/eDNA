@@ -28,7 +28,9 @@ perhaps most suitable with less than 150 sequences. Consider using
 local blast database for larger datasets.
 }
 \examples{
-Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
+\dontrun{
+Fastafile <- system.file("extdata", "test.fa", package = "MetAlPipe")
 MultiBlaster(fastaFile = Fastafile)
+}
 
 }

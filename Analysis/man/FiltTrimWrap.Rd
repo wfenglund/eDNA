@@ -10,17 +10,9 @@ FiltTrimWrap(primerData)
 \item{primerData}{list containing information about samples to be run, can be generated with the function \link{CollectData}.}
 }
 \value{
-a matrix with counts of trimmed and untrimmed sequences for every sample
+summary of sequence data as described in the Dada2 package
 }
 \description{
-This largely runs several of the standard steps in a dada2 analysis
+This function filters read with low quality or containing N
 with default parameters.
-}
-\examples{
-fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
-package = "MetaBAnalysis")
-fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
-package = "MetaBAnalysis")
-DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
-
 }

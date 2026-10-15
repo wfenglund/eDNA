@@ -36,8 +36,10 @@ import(graphics)
 import(readxl)
 import(rvest)
 import(utils)
-importFrom(Biostrings,DNAStringSet)
-importFrom(Biostrings,writeXStringSet)
+importFrom(Biostrings,
+  DNAStringSet,
+  writeXStringSet
+)
 importFrom(gtools,mixedorder)
 importFrom(stats,aggregate)
 importFrom(taxize,tax_name)

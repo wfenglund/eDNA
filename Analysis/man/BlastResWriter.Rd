@@ -20,8 +20,9 @@ information needed to parse the file using the BlastParse
 function.
 }
 \examples{
-Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
+\dontrun{
+Fastafile <- system.file("extdata", "test.fa", package = "MetAlPipe")
 inputDF <- MultiBlaster(fastaFile = Fastafile)
-BlastResWriter(inputDF = inputDF, outName = "MetaBanalysisTest.out")
-
+BlastResWriter(inputDF = inputDF, outName = "MetAlPipeTest.out")
+}
 }

@@ -19,8 +19,6 @@ DadaAnalysis(
 \item{justConcatenate}{if reads pairs do not overlap set to TRUE}
 
 \item{minOverlap}{minimum overlap between reads when merging pairs}
-
-\item{paired}{if reads are paired-ended set to TRUE}
 }
 \value{
 a matrix with count for all inferred sequence variants
@@ -30,10 +28,8 @@ This largely runs several of the standard steps in a dada2 analysis
 with default parameters.
 }
 \examples{
-fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
-package = "MetaBAnalysis")
-fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
-package = "MetaBAnalysis")
-DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+filteredDataFolder <- system.file("extdata", package = "MetAlPipe")
+exampleCollectData <- CollectData(filteredDataFolder)
+DadaAnalysis(exampleCollectData, muThread = FALSE)
 
 }

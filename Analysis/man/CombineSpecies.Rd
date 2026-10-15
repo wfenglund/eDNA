@@ -11,7 +11,7 @@ CombineSpecies(ref1, ref2, countsObject)
 
 \item{ref2}{a string containing the name of the second species to be combined.}
 
-\item{dataFrame}{a dataframe containing counts of species with the species names in the first column to the left.}
+\item{countsObject}{a dataframe containing counts of species with the species names in the first column to the left.}
 }
 \value{
 The input dataframe with the two species counts for ref1 and ref2 combined under the ref1 name.

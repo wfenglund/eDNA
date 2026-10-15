@@ -10,12 +10,12 @@
 #' Needs an active internet connection that can reach NCBI to work.
 #' NB! for optimal performance make sure to get a token from NCBI.
 #' This function is not needed if you have version 1.0 of the
-#' MetaBAnalysis package.
+#' MetAlPipe package.
 #'
 #' @param DGEList count data in the form of DGEList
 #' @param blastRes file with blast results assumes blastoutput option
 #' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
-#' sstart send evalue bitscore staxids sscinames scomnames"
+#' sstart send evalue bitscore staxids sscinames scomnames qcovs"
 #'
 #' @import utils
 #' @importFrom taxize tax_name
@@ -27,35 +27,35 @@
 #' @export
 #'
 #' @examples
-#' fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
-#' package = "MetaBAnalysis")
-#' fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
-#' package = "MetaBAnalysis")
-#' parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+#' \dontrun{
+#' filteredDataFolder <- system.file("extdata", package = "MetAlPipe")
+#' exampleCollectData <- CollectData(filteredDataFolder)
+#' parseTest <- DadaAnalysis(exampleCollectData, muThread = FALSE)
 #' dfForward <- as.data.frame(t(parseTest))
 #' yForward <- edgeR::DGEList(dfForward)
-#' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
+#' exOut <- system.file("extdata", "test.out", package = "MetAlPipe")
 #' BlastParseNCBI(DGEList = yForward, blastRes = exOut)
-#'
+#' }
 BlastParseNCBI <- function(DGEList, blastRes) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"),
                           seq = row.names(DGEList))
   blastRes <- read.table(blastRes, sep = "\t", quote = "'", stringsAsFactors = FALSE)
   names(blastRes) <- c("qseqid",
-                        "sseqid",
-                        "pident",
-                        "length",
-                        "mismatch",
-                        "gapopen",
-                        "qstart",
-                        "qend",
-                        "sstart",
-                        "send",
-                        "evalue",
-                        "bitscore",
-                        "staxids",
-                        "sscinames",
-                        "scomnames")
+                       "sseqid",
+                       "pident",
+                       "length",
+                       "mismatch",
+                       "gapopen",
+                       "qstart",
+                       "qend",
+                       "sstart",
+                       "send",
+                       "evalue",
+                       "bitscore",
+                       "staxids",
+                       "sscinames",
+                       "scomnames",
+                       "qcovs")
   blastResUn <- blastRes[!duplicated(blastRes$qseqid),] # Retain only
                                                         # best hits check manually
   taxonomy <- taxize::tax_name(sci = levels(factor(blastResUn$sscinames)),
@@ -101,12 +101,11 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' Needs an active internet connection that can reach NCBI to work.
 #' NB! for optimal performance make sure to get a token from NCBI.
 #' This function is not needed if you have version 1.0 of the
-#' MetaBAnalysis package.
+#' MetAlPipe package.
 #'
 #' @param DGEList count data in the form of DGEList
 #' @param blastRes file with blast results assumes blastoutput option
-#' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
-#' sstart send evalue bitscore staxids sscinames scomnames"
+#' -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames scomnames qcovs"
 #' @param minIdentity if identity percentage is below this value no hit will be reported, default = 90.
 #' @param minCoverage if coverage percentage is below this value no hit will be reported, default = 90.
 #' @param excludeWithHit remove result for a sequence if any of the hits of that sequence contain given string, even if it is not the top hit. Useful with for example insects where Wolbachia sequences are sometimes added to a database under the name of its insect host.
@@ -119,19 +118,19 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' @export
 #'
 #' @examples
-#' fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
-#' package = "MetaBAnalysis")
-#' fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
-#' package = "MetaBAnalysis")
-#' parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+#' \dontrun{
+#' filteredDataFolder <- system.file("extdata", package = "MetAlPipe")
+#' exampleCollectData <- CollectData(filteredDataFolder)
+#' parseTest <- DadaAnalysis(exampleCollectData, muThread = FALSE)
 #' dfForward <- as.data.frame(t(parseTest))
 #' yForward <- edgeR::DGEList(dfForward)
-#' exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
+#' exOut <- system.file("extdata", "test.out", package = "MetAlPipe")
 #' BlastParse(DGEList = yForward, blastRes = exOut)
+#' }
 #'
 BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, minCoverage = 90, excludeWithHit = "@@@@@@@@@123ABC") {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
-  blastResult <- read.table(blastRes, sep = "\t", quote = "€", stringsAsFactors = FALSE)
+  blastResult <- read.table(blastRes, sep = "\t", quote = "~", stringsAsFactors = FALSE)
   names(blastResult) <- c("qseqid", "sseqid", "pident", "length", 
                           "mismatch", "gapopen", "qstart", "qend", "sstart", "send", 
                           "evalue", "bitscore", "staxids", "sscinames", "scomnames", "qcovs")
@@ -155,7 +154,7 @@ BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, min
   taxonomy <- list()
   for (i in unique(blastResultUn$sscinames)) { # Get taxonomy locally
     print(i) # Print current taxa
-    taxonomy[[i]] <- GetTaxonomy(i, nameDump = MetaBAnalysis::compactNameDump, nodeDump = MetaBAnalysis::compactNodeDump)
+    taxonomy[[i]] <- GetTaxonomy(i, nameDump = MetAlPipe::compactNameDump, nodeDump = MetAlPipe::compactNodeDump)
   }
   taxonomy <- do.call("rbind", taxonomy)
   taxonomy <- cbind(rownames(taxonomy), taxonomy)
@@ -196,10 +195,12 @@ BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, min
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' ntExample <- sample(LETTERS[c(1, 3, 7, 20)], size = 100, replace = TRUE)
 #' ntExample <- paste(ntExample, sep = "", collapse = "")
 #' OnlineBlaster(ntExample)
-#'
+#' }
+#' 
 OnlineBlaster <- function(nucleotide) {
   blast_url <- "https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome"
   result_url <- "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=GetSaved&RECENT_RESULTS=on"
@@ -263,8 +264,10 @@ OnlineBlaster <- function(nucleotide) {
 #' @export
 #'
 #' @examples
-#' Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
+#' \dontrun{
+#' Fastafile <- system.file("extdata", "test.fa", package = "MetAlPipe")
 #' MultiBlaster(fastaFile = Fastafile)
+#' }
 #'
 MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice = "") {
   fastaString <- paste(readLines(fastaFile), collapse = "\n")
@@ -316,10 +319,11 @@ MultiBlaster <- function(fastaFile, seqNumber = 0, resultNumber = 5, viewChoice 
 #' @export
 #'
 #' @examples
-#' Fastafile <- system.file("extdata", "test.fa", package = "MetaBAnalysis")
+#' \dontrun{
+#' Fastafile <- system.file("extdata", "test.fa", package = "MetAlPipe")
 #' inputDF <- MultiBlaster(fastaFile = Fastafile)
-#' BlastResWriter(inputDF = inputDF, outName = "MetaBanalysisTest.out")
-#'
+#' BlastResWriter(inputDF = inputDF, outName = "MetAlPipeTest.out")
+#' }
 BlastResWriter <- function(inputDF, outName) {
   inputDF <- inputDF[!grepl("NA", row.names(inputDF)), ]
   inputDF$Per..Ident <- gsub("%", "", inputDF$Per..Ident)

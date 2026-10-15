@@ -25,8 +25,10 @@ local blast database to compare to.
 NB! The function needs internet access to work.
 }
 \examples{
+\dontrun{
 ntExample <- sample(LETTERS[c(1, 3, 7, 20)], size = 100, replace = TRUE)
 ntExample <- paste(ntExample, sep = "", collapse = "")
 OnlineBlaster(ntExample)
+}
 
 }

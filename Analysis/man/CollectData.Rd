@@ -17,3 +17,8 @@ list with sample paths and sample names
 \description{
 Collect sample names and paths
 }
+\examples{
+filteredDataFolder <- system.file("extdata", package = "MetAlPipe")
+CollectData(filteredDataFolder)
+
+}

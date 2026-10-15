@@ -16,8 +16,7 @@ BlastParse(
 \item{DGEList}{count data in the form of DGEList}
 
 \item{blastRes}{file with blast results assumes blastoutput option
--outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend
-sstart send evalue bitscore staxids sscinames scomnames"}
+-outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids sscinames scomnames qcovs"}
 
 \item{minIdentity}{if identity percentage is below this value no hit will be reported, default = 90.}
 
@@ -41,17 +40,17 @@ package to see the requirements of the input file.
 Needs an active internet connection that can reach NCBI to work.
 NB! for optimal performance make sure to get a token from NCBI.
 This function is not needed if you have version 1.0 of the
-MetaBAnalysis package.
+MetAlPipe package.
 }
 \examples{
-fastqR1 <- system.file("extdata", "exampleFq_R1.fastq.gz",
-package = "MetaBAnalysis")
-fastqR2 <- system.file("extdata", "exampleFq_R2.fastq.gz",
-package = "MetaBAnalysis")
-parseTest <- DadaAnalysis(fastqR1, fastqR2, muThread = FALSE)
+\dontrun{
+filteredDataFolder <- system.file("extdata", package = "MetAlPipe")
+exampleCollectData <- CollectData(filteredDataFolder)
+parseTest <- DadaAnalysis(exampleCollectData, muThread = FALSE)
 dfForward <- as.data.frame(t(parseTest))
 yForward <- edgeR::DGEList(dfForward)
-exOut <- system.file("extdata", "test.out", package = "MetaBAnalysis")
+exOut <- system.file("extdata", "test.out", package = "MetAlPipe")
 BlastParse(DGEList = yForward, blastRes = exOut)
+}
 
 }

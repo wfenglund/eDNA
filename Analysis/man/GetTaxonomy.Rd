@@ -18,12 +18,12 @@ vector with taxonomic information
 }
 \description{
 Takes a species name and extract taxonomic information from compactNameDump
-and compactNodeDump available in the MetaBAnalysis package.
+and compactNodeDump available in the MetAlPipe package.
 }
 \details{
 Attach data with:
-data(compactNameDump, package = "MetaBAnalysis")
-data(compactNodeDump, package = "MetaBAnalysis")
+data(compactNameDump, package = "MetAlPipe")
+data(compactNodeDump, package = "MetAlPipe")
 }
 \examples{
 GetTaxonomy(searchName = "Esox lucius",

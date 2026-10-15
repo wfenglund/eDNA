@@ -9,7 +9,8 @@ BlastParse(
   blastRes = "blastRes.out",
   minIdentity = 90,
   minCoverage = 90,
-  excludeWithHit = "@@@@@@@@@123ABC"
+  excludeWithHit = "@@@@@@@@@123ABC",
+  filterConcatenated = FALSE
 )
 }
 \arguments{

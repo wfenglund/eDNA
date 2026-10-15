@@ -1,6 +1,6 @@
 Package: MetAlPipe
 Title: Metabarcoding Analysis Pipeline
-Version: 0.0.3.0000
+Version: 0.0.3.0001
 Authors@R: c( 
     person(given = "Thomas",
            family = "Källman",
@@ -32,3 +32,4 @@ Suggests:
     knitr
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.0
+RoxygenNote: 7.3.2

@@ -32,7 +32,7 @@ out <- FiltTrimWrap(primer1)
 saveRDS(out, file = "out.rds")
 
 # Dereplicate and merge pairs with dada2:
-dada2Counts <- DadaAnalysis(primer1, justConcatenate = FALSE, minOverlap = 5)
+dada2Counts <- DadaAnalysis(primer1, justConcatenate = TRUE, minOverlap = 5)
 saveRDS(dada2Counts, file = "dada2Counts.rds")
 ```
 
@@ -61,9 +61,9 @@ ExportFasta(yAll, paste0("y_", projId, primer1$Prefix, ".fa"), minLength = 30, m
 data(compactNameDump, package = "MetAlPipe")
 data(compactNodeDump, package = "MetAlPipe")
 
-# Parse BLAST results, by default two levels are kept: minimum 85% identity for genera/families/orders and 98% for species. Both need at least 80% coverage per hit:
-blastResY85 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 85, minCoverage = 80, excludeWithHit = "Wolbachia")
-blastResY98 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 98, minCoverage = 80, excludeWithHit = "Wolbachia")
+# Parse BLAST results, by default two levels are kept: minimum 85% identity for genera/families/orders and 98% for species. Both need at least 80% coverage per hit (use filterConcatenated = TRUE if dada2 was run with justConcatenate = TRUE):
+blastResY85 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 85, minCoverage = 80, excludeWithHit = "Wolbachia", filterConcatenated = TRUE)
+blastResY98 <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 98, minCoverage = 80, excludeWithHit = "Wolbachia", filterConcatenated = TRUE)
 saveRDS(blastResY85, "blastResY85.rds")
 saveRDS(blastResY98, "blastResY98.rds")
 ```

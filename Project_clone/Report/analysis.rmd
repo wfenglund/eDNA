@@ -77,10 +77,10 @@ ExportFasta(yAll, paste0("y_", projId, primer1$Prefix, ".fa"), minLength = 30, m
 data(compactNameDump, package = "MetAlPipe")
 data(compactNodeDump, package = "MetAlPipe")
 
-# Parse BLAST results, by default only hits with both 90% identity as well as coverage are kept:
-blastResY <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 90, minCoverage = 90)
+# Parse BLAST results, by default only hits with both 90% identity as well as coverage are kept (use filterConcatenated = TRUE if dada2 was run with justConcatenate = TRUE):
+blastResY <- MetAlPipe::BlastParse(yAll, paste0("y_", projId, primer1$Prefix, ".out"), minIdentity = 90, minCoverage = 90, filterConcatenated = FALSE)
 saveRDS(blastResY, file = "blastResY.rds")
-# blastResY2 <- MetAlPipe::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), minIdentity = 90, minCoverage = 90)
+# blastResY2 <- MetAlPipe::BlastParse(yAll2, paste0("y_", projId, primer2$Prefix, ".out"), minIdentity = 90, minCoverage = 90, filterConcatenated = FALSE)
 # saveRDS(blastResY2, file = "blastResY2.rds")
 ```
 

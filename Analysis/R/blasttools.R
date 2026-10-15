@@ -89,6 +89,52 @@ BlastParseNCBI <- function(DGEList, blastRes) {
   return(seqTax)
 }
 
+#' Filter BLAST results by end concordance
+#'
+#' Internal function which filters the internal blastResult object from BlastParse function
+#' and keeps hits depending on if the ends of the query sequence hit the same accession.
+#' 
+#' @param blastObject the internal blastObject (called blastResult) from function BlastParse
+#' @param seqObject the internal list of sequences (called sequences) from function BlastParse
+#'
+#' @return outObject an object with the same structure as blastObject except for some hits possibly being filtered out
+#'
+ConcatenatedFilter <- function(blastObject, seqObject) {
+  cat(paste0("- Assign read direction:\n"))
+  timestamp()
+  nBlastRes <- nrow(blastObject)
+  readObject <- lapply(1:nBlastRes, function(x) {
+			 curObject <- blastObject[x, ]
+			 curSeq <- seqObject$seq[seqObject$id == curObject$qseqid]
+			 nStart <- regexpr("NNNNNNNNNN", curSeq)[1]
+			 curObject$readDirection <- ifelse(curObject$qstart < nStart, "forward", "reverse")
+			 if((x %% 1000) == 0 | x == nBlastRes) {
+			   cat(paste0("\rProcessed: ", x, "/", nBlastRes, ""))
+ 			 }
+			 curObject
+			})
+  readObject <- do.call(rbind, readObject)
+  cat(paste0("\n- Filter based on read consistency:\n"))
+  timestamp()
+  outObject <- data.frame()
+  nBlastRes <- nrow(readObject)
+  for(i in 1:nrow(readObject)) {
+    if(readObject$readDirection[i] == "forward") {
+      reverseHits <- readObject$sseqid[(readObject$qseqid == readObject$qseqid[i]) & (readObject$readDirection == "reverse")]
+      if(readObject$sseqid[i] %in% reverseHits) {
+	outObject <- rbind(outObject, readObject[i, ])
+      }
+      if((i %% 1000) == 0 | i == nBlastRes) {
+	cat(paste0("\rProcessed: ", i, "/", nBlastRes, ""))
+      }
+    }
+  }
+  cat("\n")
+  timestamp()
+  outObject <- outObject[, colnames(outObject) != "readDirection"]
+  return(outObject)
+}
+
 #' Parse blast output
 #'
 #' This function will create a dataframe with sequence names, sequence
@@ -128,7 +174,7 @@ BlastParseNCBI <- function(DGEList, blastRes) {
 #' BlastParse(DGEList = yForward, blastRes = exOut)
 #' }
 #'
-BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, minCoverage = 90, excludeWithHit = "@@@@@@@@@123ABC") {
+BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, minCoverage = 90, excludeWithHit = "@@@@@@@@@123ABC", filterConcatenated = FALSE) {
   sequences <- data.frame(id = paste("Seq", 1:length(rownames(DGEList)), sep = "_"), seq = row.names(DGEList))
   blastResult <- read.table(blastRes, sep = "\t", quote = "~", stringsAsFactors = FALSE)
   names(blastResult) <- c("qseqid", "sseqid", "pident", "length", 
@@ -143,6 +189,9 @@ BlastParse <- function(DGEList, blastRes = "blastRes.out", minIdentity = 90, min
   blastResult <- blastResult[blastResult$pident >= minIdentity, ]
   blastResult <- blastResult[blastResult$qcovs >= minCoverage, ]
   blastResult <- blastResult[!(blastResult$qseqid %in% blastResult$qseqid[grepl(excludeWithHit, blastResult$sscinames)]), ]
+  if(filterConcatenated == TRUE) {
+    blastResult <- ConcatenatedFilter(blastResult, sequences) # only keep hits where both ends hit the same accession
+  }
   blastResultUn <- blastResult[!duplicated(blastResult$qseqid), ] # Retain only best hits
   cat(paste0("Total hits post filtration: ", length(unique(blastResultUn$qseqid)), "\n"))
   GetFirstItem <- function(name) { # Function that returns the first of items separated by semicolons

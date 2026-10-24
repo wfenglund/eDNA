@@ -8,6 +8,7 @@ header-includes:
    - \usepackage[swedish,provide=*]{babel}
    - \usepackage[default]{lato}
    - \usepackage{float}
+   - \AtBeginDocument{\setlength{\LTcapwidth}{\textwidth}} # makes table legend expand
    - \pagestyle{fancy}
    - \fancyhf{}
    - \lhead{\includegraphics[height=1cm]{./NRM_figures/naturhistoriska-riksmuseet2.png}}
@@ -138,6 +139,10 @@ FixPercent <- function(inNumber) {
   return(outNumber)
 }
 
+sortColsNumerically <- function(inDataFrame, skipCols = c()) {
+  cbind(inDataFrame[, skipCols], inDataFrame[, -skipCols][, order(as.numeric(gsub("[^0-9]+", "", colnames(inDataFrame)[-skipCols])))]) 
+}
+
 # Load and modify data:
 sampleMetaData <- readRDS("sampleMetaDataInv.rds")
 rawSeqs <- sampleMetaData$rawSeqs
@@ -149,9 +154,21 @@ groupSpecies <- groupResults$Species
 groupGenera <- groupResults$Genera
 groupFamilies <- groupResults$Families
 groupOrders <- groupResults$Orders
+
+groupSpecies <- sortColsNumerically(groupSpecies, skipCols = c(1:10))
+groupGenera <- sortColsNumerically(groupGenera, skipCols = c(1:7))
+groupOrders <- sortColsNumerically(groupOrders, skipCols = c(1:5))
+
 # groupData <- cbind(groupData[, c(1, 2)], groupData[, -c(1, 2)][, order(as.numeric(gsub("[^0-9]+", "", colnames(groupData)[-c(1, 2)])))])
 # groupSpecies <- cbind(groupData$Latin, groupData$Swedish)
 # colnames(groupSpecies) <- c("Latin", "Svenska")
+
+# gör så att allting i rapporten utgår från groupSpecies/groupResults$groupSpecies
+# lägg in figurer över ASV-diversitet?
+
+groupGenera <- groupGenera[!(groupGenera$Genus == "unknown"), ]
+groupFamilies <- groupFamilies[!(groupFamilies$Family == "unknown"), ]
+groupOrders <- groupOrders[!(groupOrders$Order == "unknown"), ]
 
 # Assign variables:
 speciesNo <- nrow(groupSpecies) # Number of species found with first primer
@@ -166,7 +183,8 @@ groupPercent98 <- FixPercent(groupSeqs98 / primerSeqs) # Percentage of sequences
 groupPercent85 <- FixPercent(groupSeqs85 / primerSeqs) # Percentage of sequences belonging to target group
 # commonPercent <- paste0("~", round(sum(groupData[1:commonNo, -c(1, 2)]) / sum(groupData[, -c(1, 2)]) * 100)) # proportion of sequences that [commonNo] make up
 
-primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent85, "% (", FixMillion(groupSeqs85), ") av sekvenserna ", targetGroup, ", varav ~", FixPercent(groupSeqs98 / groupSeqs85), "% (", FixMillion(groupSeqs98), ") kunde bestämmas hela vägen till art. Resterande sekvenser bestämdes till åtminstone släkte, familj eller ordning. Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 och ", seqPlotFigures, " för relativa andelar sekvenser från varje art i varje prov).")
+# primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent85, "% (", FixMillion(groupSeqs85), ") av sekvenserna ", targetGroup, ", varav ~", FixPercent(groupSeqs98 / groupSeqs85), "% (", FixMillion(groupSeqs98), ") kunde bestämmas hela vägen till art. Resterande sekvenser bestämdes till åtminstone släkte, familj eller ordning. Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 och ", seqPlotFigures, " för relativa andelar sekvenser från varje ordning i varje prov).")
+primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent85, "% (", FixMillion(groupSeqs85), ") av sekvenserna ", targetGroup, ", varav ~", FixPercent(groupSeqs98 / groupSeqs85), "% (", FixMillion(groupSeqs98), ") kunde bestämmas hela vägen till art. Resterande sekvenser bestämdes till åtminstone släkte, familj eller ordning. Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 för relativa andelar sekvenser från varje ordning, figur 2 för mångfald av ", targetGroup, " i varje prov. Se även figur 3 för förekomst av de 30 vanligaste arterna över proverna).")
 ```
 
 ## Uppdrag
@@ -195,8 +213,8 @@ primerInfo[primerVar$index, 1] <- primerNames
 kable(primerInfo[primerVar$index, c(1:3,5)], "latex",
 				 caption = "Sekvenser för de primers som använts för detektion av eDNA. Temperatur är annealingtemperatur i PCR-reaktionerna.",
 				 booktabs = T, escape = F) %>%
-				 kable_styling(latex_options = "hold_position", font_size = 8) %>%
-			         footnote(symbol = apply(primerInfo[primerVar$index, 7], 2, function(x) {x})) # works fully for several primers
+				 kable_styling(latex_options = c("hold_position"), font_size = 8) %>%
+			   footnote(symbol = apply(primerInfo[primerVar$index, 7], 2, function(x) {x})) # works fully for several primers
 ```
 
 ### Bioinformatiska analysmetoder
@@ -224,37 +242,187 @@ BMKGene på ett NovaSeq-instrument (PE150).
 Det totala antalet fragment efter sekvensering av proverna var `r totalSeqs`,
 där enskilda prov hade mellan `r minSeqs` och `r maxSeqs` fragment.
 `r primerText1`
-Se tabell 2 för samtliga identifierade arter av `r targetGroup`. Övriga sekvenser var av låg kvalitet eller var spår av andra organismer.
+Se tabell 2 för sammanfattning över samtliga identifierade ordningar av `r targetGroup`. Övriga sekvenser var av låg kvalitet eller var spår av andra organismer.
+
+<!-- # ```{r tab2, echo=FALSE} -->
+<!-- # add to fish document but add redlist, species, family, order -->
+<!-- # fixedCaption <- paste(paste("Tabell över latinska och svenska namn på de arter av", targetGroup, "som identifierats i proverna. Om sekvenser ej kunde bestämmas till exakt art anges i dessa fall "), "sp.", " eller vilka två arter det kan handla om.", sep = "'") -->
+
+<!-- # tableTaxa <- cbind(groupGenera$Genus, groupGenera$Family, groupGenera$Order) -->
+<!-- # colnames(tableTaxa) <- c("Släkte", "Familj", "Ordning") -->
+
+<!-- # kable(tableTaxa, "latex", -->
+<!-- # caption = fixedCaption, -->
+<!-- # booktabs = T, escape = F, linesep = "")%>% -->
+<!-- # kable_styling(latex_options = "hold_position")%>% -->
+<!-- # column_spec(1, italic = TRUE) -->
+<!-- ``` -->
 
 ```{r tab2, echo=FALSE}
-fixedCaption <- paste(paste("Tabell över latinska och svenska namn på de arter av", targetGroup, "som identifierats i proverna. Om sekvenser ej kunde bestämmas till exakt art anges i dessa fall "), "sp.", " eller vilka två arter det kan handla om.", sep = "'")
+# Summary per order: taxonomic richness, detection frequency and read share
+sampleCols <- groupSpecies[, -c(1:10), drop = FALSE]
+totalReads <- sum(sampleCols)
 
-tableTaxa <- cbind(groupGenera$Genus, groupGenera$Family, groupGenera$Order)
-colnames(tableTaxa) <- c("Släkte", "Familj", "Ordning")
+summaryList <- lapply(split(seq_len(nrow(groupSpecies)), groupSpecies$Order), function(idx) {
+  orderCounts <- sampleCols[idx, , drop = FALSE]
+  data.frame(
+    Ordning = groupSpecies$Order[idx[1]],
+    Familjer = length(unique(groupSpecies$Family[idx])),
+    Släkten = length(unique(groupSpecies$Genus[idx])),
+    Arter = length(unique(groupSpecies$Latin[idx])),
+    Prov = sum(colSums(orderCounts) > 0),
+    Andel = 100 * sum(orderCounts) / totalReads
+  )
+})
+orderSummary <- do.call(rbind, summaryList)
+orderSummary <- orderSummary[order(-orderSummary$Andel), ]
+orderSummary$Andel <- ifelse(orderSummary$Andel < 0.1, "<0,1",
+                             formatC(orderSummary$Andel, format = "f", digits = 1, decimal.mark = ","))
+colnames(orderSummary) <- c("Ordning", "Familjer", "Släkten", "Arter/OTU",
+                            paste0("Prov (av ", ncol(sampleCols), ")"),
+                            "Andel av sekvenser (\\%)")
 
-kable(tableTaxa, "latex",
-      caption = fixedCaption, 
-      booktabs = T, escape = F)%>%
-      kable_styling(latex_options = "hold_position")%>%
-      column_spec(1, italic = TRUE)
+kable(orderSummary, "latex", row.names = FALSE,
+      caption = paste("Sammanfattning per ordning av", targetGroup, "som identifierats i proverna med antal familjer, släkten och arter/OTU samt antal prov där ordningen detekterats med ordningens andel av det totala antalet sekvenser."),
+      booktabs = T, escape = F, longtable = TRUE, linesep = "") %>%
+      # kable_styling(latex_options = c("hold_position", "repeat_header")) # unstriped
+      kable_styling(latex_options = c("hold_position", "repeat_header", "striped"), font_size = 10) # striped
+```
+
+```{r orderPalette, include=FALSE}
+# One fixed colour per order (alphabetical assignment) shared by all figures
+allOrders <- sort(unique(na.omit(c(groupSpecies$Order, groupGenera$Order, groupOrders$Order))))
+orderPalette <- setNames(rep_len(MetAlPipe:::color25, length(allOrders)), allOrders)
 ```
 
 ```{r fig1, fig.height=14, fig.width=11, echo=FALSE, fig.cap=paste0("Fördelning i procent av antal sekvenser från olika släkten av ", targetGroup, " i proverna detekterade med hjälp av primer ", primerName1, ". Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover.")}
 # simplify and add a flag for species/genera/families/orders. Set orders as default. Look at PCA and diversity plots etc next time.
 
+library(ggplot2)
+
+FractionPlotGG <- function(data, species, col) {
+  props <- prop.table(as.matrix(data), margin = 2) * 100
+  df <- data.frame(
+    Prov = factor(rep(colnames(props), each = nrow(props)), levels = colnames(props)),
+    Taxon = factor(rep(species, times = ncol(props)), levels = unique(species)),
+    Pct = as.vector(props)
+  )
+  ggplot(df, aes(x = Pct, y = Prov, fill = Taxon)) +
+    geom_col(position = position_stack(reverse = TRUE), width = 0.9) +
+    scale_fill_manual(values = col, name = NULL) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.02))) +
+    labs(x = "Andel (%)", y = NULL) +
+    theme_minimal(base_size = 11) +
+    theme(panel.grid.major.y = element_blank(), legend.position = "right")
+}
+
+
 # if figure is too tall or short, change to either fig.height=7 or fig.height=14 on above line
 library(MetAlPipe)
 
 # Prepare the count data:
-groupCounts <- groupGenera[, -c(1:7), drop = FALSE]
+# groupCounts <- groupGenera[, -c(1:7), drop = FALSE]
+groupCounts <- groupOrders[, -c(1:5), drop = FALSE]
 groupCounts <- groupCounts[, rev(seq_along(groupCounts))] # reverse order of samples
 if(ncol(groupCounts) > 1) { # if more than one sample, add a total of all samples to the plot
   groupCounts <- cbind(Totalt = rowSums(groupCounts), groupCounts)
 }
-figureTaxa <- groupGenera$Genus # change Svenska to Latin if needed
 
 # Plot:
-FractionPlot(data = groupCounts, species = figureTaxa, col = MetAlPipe:::color25, inset = c(-0.3, 0.01))
+# FractionPlot(data = groupCounts, species = groupOrders$Order, col = MetAlPipe:::color25, inset = c(-0.3, 0.01))
+FractionPlotGG(groupCounts, groupOrders$Order, orderPalette)
+
+```
+
+```{r fig2, echo=FALSE, fig.height=13, fig.width=9, fig.cap=paste0("Mångfald av ", targetGroup, " i varje prov, beräknad på samtliga identifierade taxa. Vänster: antal detekterade taxa, uppdelat på ordning. Mitten och höger: Shannons diversitetsindex (H') och Simpsons diversitetsindex (1 - D), där högre värden innebär större mångfald. Indexen bygger på antal sekvenser och ska ses som semikvantitativa.")}
+library(ggplot2)
+
+speciesCounts <- groupSpecies[, -c(1:10), drop = FALSE]
+
+sampleLevels <- colnames(speciesCounts)
+sampleLevels <- sampleLevels[order(suppressWarnings(as.numeric(gsub("\\D", "", sampleLevels))), sampleLevels)]
+
+# All orders, sorted by total number of sequences
+orderLevels <- names(sort(tapply(rowSums(speciesCounts), groupSpecies$Order, sum), decreasing = TRUE))
+orderFac <- factor(groupSpecies$Order, levels = orderLevels)
+
+# Number of taxa detected per sample and order
+detected <- unlist(speciesCounts) > 0
+richnessByOrder <- as.data.frame(
+  table(Order = rep(orderFac, times = ncol(speciesCounts))[detected],
+        Prov = rep(colnames(speciesCounts), each = nrow(speciesCounts))[detected]),
+  responseName = "Value")
+richnessByOrder$Index <- "Antal taxa"
+
+# Diversity indices from sequence counts of all taxa
+shannon <- apply(speciesCounts, 2, function(x) { p <- x[x > 0] / sum(x); -sum(p * log(p)) })
+simpson <- apply(speciesCounts, 2, function(x) { p <- x / sum(x); 1 - sum(p^2) })
+diversity <- data.frame(
+  Prov = rep(colnames(speciesCounts), 2),
+  Index = rep(c("Shannon (H')", "Simpson (1 - D)"), each = ncol(speciesCounts)),
+  Value = c(shannon, simpson)
+)
+
+indexLevels <- c("Antal taxa", "Shannon (H')", "Simpson (1 - D)")
+richnessByOrder$Index <- factor(richnessByOrder$Index, levels = indexLevels)
+diversity$Index <- factor(diversity$Index, levels = indexLevels)
+richnessByOrder$Prov <- factor(richnessByOrder$Prov, levels = rev(sampleLevels))
+diversity$Prov <- factor(diversity$Prov, levels = rev(sampleLevels))
+
+# Alternate row shading to make it easier to follow a sample across panels
+stripes <- data.frame(ymin = seq(1, length(sampleLevels), by = 2) - 0.5)
+stripes$ymax <- stripes$ymin + 1
+
+ggplot() +
+  geom_rect(data = stripes, aes(ymin = ymin, ymax = ymax), xmin = -Inf, xmax = Inf, fill = "grey90") +
+  geom_col(data = richnessByOrder, aes(x = Value, y = Prov, fill = Order), width = 0.8) +
+  geom_point(data = diversity, aes(x = Value, y = Prov), size = 1.2) +
+  facet_grid(. ~ Index, scales = "free_x") +
+  # Sample names on both sides
+  scale_y_discrete(sec.axis = dup_axis()) +
+  scale_fill_manual(values = orderPalette, name = "Ordning") +
+  labs(x = NULL, y = NULL) +
+  theme_minimal(base_size = 8) +
+  theme(axis.text.y = element_text(size = 6.5, face = "bold"),
+        axis.text.y.right = element_text(size = 6.5, face = "bold"),
+        strip.text = element_text(size = 12, face = "bold"),
+        panel.grid.major.y = element_blank(),
+        legend.position = "bottom")
+```
+
+```{r fig3, echo=FALSE, fig.height=13, fig.width=11, fig.cap=paste0("Relativ förekomst av de vanligaste taxa av ", targetGroup, " i varje prov. Färgen visar andelen av provets sekvenser (log10-skala, grå = ej detekterad). Taxa är grupperade efter ordning och sorterade efter totalt antal sekvenser.")}
+library(ggplot2)
+ 
+nTop <- 30 # number of taxa shown
+speciesCounts <- groupSpecies[, -c(1:10), drop = FALSE]
+
+# Percent of each sample's sequences (all taxa) so values are comparable across samples
+speciesPct <- sweep(as.matrix(speciesCounts), 2, colSums(speciesCounts), "/") * 100
+
+topIdx <- head(order(rowSums(speciesCounts), decreasing = TRUE), nTop)
+sampleLevels <- colnames(speciesCounts)
+sampleLevels <- sampleLevels[order(suppressWarnings(as.numeric(gsub("\\D", "", sampleLevels))), sampleLevels)]
+
+heatData <- data.frame(
+  Taxon = rep(groupSpecies$Latin[topIdx], times = length(sampleLevels)),
+  Order = rep(groupSpecies$Order[topIdx], times = length(sampleLevels)),
+  Prov = factor(rep(sampleLevels, each = length(topIdx)), levels = sampleLevels),
+  Pct = as.vector(speciesPct[topIdx, sampleLevels])
+)
+heatData$Taxon <- factor(heatData$Taxon, levels = rev(groupSpecies$Latin[topIdx]))
+heatData$Pct[heatData$Pct == 0] <- NA
+
+ggplot(heatData, aes(x = Prov, y = Taxon, fill = Pct)) +
+  geom_tile() +
+  facet_grid(Order ~ ., scales = "free_y", space = "free_y") +
+  scale_fill_viridis_c(trans = "log10", na.value = "grey92", name = "% av\nsekvenser",
+                       labels = function(x) format(x, scientific = FALSE, drop0trailing = TRUE)) +
+  labs(x = "Prov", y = NULL) +
+  theme_minimal(base_size = 9) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 5),
+        axis.text.y = element_text(face = "italic"),
+        panel.grid = element_blank(),
+        strip.text.y = element_text(angle = 0, hjust = 0))
 ```
 
 ```{r include=FALSE}

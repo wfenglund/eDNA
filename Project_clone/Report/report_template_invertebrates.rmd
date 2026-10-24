@@ -23,6 +23,7 @@ output:
     keep_md: yes
 bibliography: references.bib
 biblio-style: unsrt
+geometry: a4paper, margin=2cm
 ---
 ```{r setup, include=FALSE, cache = FALSE}
 require("knitr")
@@ -295,7 +296,7 @@ allOrders <- sort(unique(na.omit(c(groupSpecies$Order, groupGenera$Order, groupO
 orderPalette <- setNames(rep_len(MetAlPipe:::color25, length(allOrders)), allOrders)
 ```
 
-```{r fig1, fig.height=14, fig.width=11, echo=FALSE, fig.cap=paste0("Fördelning i procent av antal sekvenser från olika släkten av ", targetGroup, " i proverna detekterade med hjälp av primer ", primerName1, ". Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover.")}
+```{r fig1, fig.height=8.5, fig.width=6.7, echo=FALSE, fig.cap=paste0("Fördelning i procent av antal sekvenser från olika släkten av ", targetGroup, " i proverna detekterade med hjälp av primer ", primerName1, ". Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover.")}
 # simplify and add a flag for species/genera/families/orders. Set orders as default. Look at PCA and diversity plots etc next time.
 
 library(ggplot2)
@@ -312,8 +313,9 @@ FractionPlotGG <- function(data, species, col) {
     scale_fill_manual(values = col, name = NULL) +
     scale_x_continuous(expand = expansion(mult = c(0, 0.02))) +
     labs(x = "Andel (%)", y = NULL) +
-    theme_minimal(base_size = 11) +
-    theme(panel.grid.major.y = element_blank(), legend.position = "right")
+    theme_minimal(base_size = 10) +
+    theme(panel.grid.major.y = element_blank(), legend.position = "right",
+          axis.text.y = element_text(size = 6, face = "bold"))
 }
 
 
@@ -334,7 +336,7 @@ FractionPlotGG(groupCounts, groupOrders$Order, orderPalette)
 
 ```
 
-```{r fig2, echo=FALSE, fig.height=13, fig.width=9, fig.cap=paste0("Mångfald av ", targetGroup, " i varje prov, beräknad på samtliga identifierade taxa. Vänster: antal detekterade taxa, uppdelat på ordning. Mitten och höger: Shannons diversitetsindex (H') och Simpsons diversitetsindex (1 - D), där högre värden innebär större mångfald. Indexen bygger på antal sekvenser och ska ses som semikvantitativa.")}
+```{r fig2, echo=FALSE, fig.height=8.5, fig.width=6.7, fig.cap=paste0("Mångfald av ", targetGroup, " i varje prov, beräknad på samtliga identifierade taxa. Vänster: antal detekterade taxa, uppdelat på ordning. Mitten och höger: Shannons diversitetsindex (H') och Simpsons diversitetsindex (1 - D), där högre värden innebär större mångfald. Indexen bygger på antal sekvenser och ska ses som semikvantitativa.")}
 library(ggplot2)
 
 speciesCounts <- groupSpecies[, -c(1:10), drop = FALSE]
@@ -382,18 +384,27 @@ ggplot() +
   scale_y_discrete(sec.axis = dup_axis()) +
   scale_fill_manual(values = orderPalette, name = "Ordning") +
   labs(x = NULL, y = NULL) +
-  theme_minimal(base_size = 8) +
-  theme(axis.text.y = element_text(size = 6.5, face = "bold"),
-        axis.text.y.right = element_text(size = 6.5, face = "bold"),
+  theme_minimal(base_size = 10) +
+  theme(axis.text.y = element_text(size = 6, face = "bold"),
+        axis.text.y.right = element_text(size = 6, face = "bold"),
         strip.text = element_text(size = 12, face = "bold"),
         panel.grid.major.y = element_blank(),
         legend.position = "bottom")
 ```
 
-```{r fig3, echo=FALSE, fig.height=13, fig.width=11, fig.cap=paste0("Relativ förekomst av de 60 mest förekommande taxa av ", targetGroup, " över alla prover. Färgen visar andelen av provets sekvenser (log10-skala, grå = ej detekterad). Taxa är grupperade efter ordning och sorterade efter totalt antal sekvenser.")}
+```{r include=FALSE, echo=FALSE}
+if(nrow(groupSpecies) >= 60) { # if there are more than 60 taxa in species results
+  nTop <- 60 # display top 60
+  nTopString <- "de 60 vanligaste "
+} else {
+  nTop <- nrow(groupSpecies) # display all taxa
+  nTopString <- ""
+}
+```
+
+```{r fig3, echo=FALSE, fig.height=8.5, fig.width=6.7, fig.cap=paste0("Relativ förekomst av ", nTopString, "taxa av ", targetGroup, " över alla prover. Färgen visar andelen av provets sekvenser (log10-skala, grå = ej detekterad). Taxa är grupperade efter ordning och sorterade efter totalt antal sekvenser.")}
 library(ggplot2)
- 
-nTop <- 60 # number of taxa shown, change so that it is top 60 or all, and make the legend dynamic
+
 speciesCounts <- groupSpecies[, -c(1:10), drop = FALSE]
 
 # Percent of each sample's sequences (all taxa) so values are comparable across samples
@@ -412,17 +423,27 @@ heatData <- data.frame(
 heatData$Taxon <- factor(heatData$Taxon, levels = rev(groupSpecies$Latin[topIdx]))
 heatData$Pct[heatData$Pct == 0] <- NA
 
-ggplot(heatData, aes(x = Prov, y = Taxon, fill = Pct)) +
-  geom_tile() +
+# Coloured line to the right of each order panel, matching the colours in the other figures
+orderLines <- data.frame(Order = unique(heatData$Order), x = length(sampleLevels) + 1.5)
+
+ggplot(heatData, aes(x = Prov, y = Taxon)) +
+  geom_tile(aes(fill = Pct)) +
+  geom_segment(data = orderLines, aes(x = x, xend = x, y = -Inf, yend = Inf, colour = Order),
+               linewidth = 3, lineend = "butt", inherit.aes = FALSE) +
   facet_grid(Order ~ ., scales = "free_y", space = "free_y") +
-  scale_fill_viridis_c(trans = "log10", na.value = "grey92", name = "% av\nsekvenser",
-                       labels = function(x) format(x, scientific = FALSE, drop0trailing = TRUE)) +
+  scale_fill_viridis_c(trans = "log10", na.value = "grey92", name = "% av sekvenser",
+                       labels = function(x) format(x, scientific = FALSE, drop0trailing = TRUE), guide = guide_colourbar(title.position = "left", title.vjust = 0.8,
+                        barwidth = 15, barheight = 0.6)) +
+  scale_colour_manual(values = orderPalette, guide = "none") +
+  # Extra space on the right for the coloured lines
+  scale_x_discrete(expand = expansion(add = c(0.6, 2))) +
   labs(x = "Prov", y = NULL) +
-  theme_minimal(base_size = 9) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 5),
-        axis.text.y = element_text(face = "italic"),
+  theme_minimal(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6, face = "bold"),
+        axis.text.y = element_text(face = "bold.italic", size = 6), # abbreviate genera?
         panel.grid = element_blank(),
-        strip.text.y = element_text(angle = 0, hjust = 0))
+        strip.text.y = element_text(angle = 0, hjust = 0, face = "bold", size = 6),
+        legend.position = "bottom")
 ```
 
 ```{r include=FALSE}

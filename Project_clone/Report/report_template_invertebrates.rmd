@@ -390,10 +390,10 @@ ggplot() +
         legend.position = "bottom")
 ```
 
-```{r fig3, echo=FALSE, fig.height=13, fig.width=11, fig.cap=paste0("Relativ förekomst av de vanligaste taxa av ", targetGroup, " i varje prov. Färgen visar andelen av provets sekvenser (log10-skala, grå = ej detekterad). Taxa är grupperade efter ordning och sorterade efter totalt antal sekvenser.")}
+```{r fig3, echo=FALSE, fig.height=13, fig.width=11, fig.cap=paste0("Relativ förekomst av de 60 mest förekommande taxa av ", targetGroup, " över alla prover. Färgen visar andelen av provets sekvenser (log10-skala, grå = ej detekterad). Taxa är grupperade efter ordning och sorterade efter totalt antal sekvenser.")}
 library(ggplot2)
  
-nTop <- 30 # number of taxa shown
+nTop <- 60 # number of taxa shown, change so that it is top 60 or all, and make the legend dynamic
 speciesCounts <- groupSpecies[, -c(1:10), drop = FALSE]
 
 # Percent of each sample's sequences (all taxa) so values are comparable across samples

@@ -100,7 +100,7 @@ NATURHISTORISKA RIKSMUSEET • FORSKAR, BEVARAR OCH FÖRKLARAR • NRM.SE \\
 	%	Author name and information
 	%------------------------------------------------
 	\center
-	\includegraphics[width=330mm]{./NRM_figures/nrm-logo-staende-svensk-fullfarg}
+	\includegraphics[width=0.9\textwidth]{./NRM_figures/nrm-logo-staende-svensk-fullfarg.pdf}
 	\vspace{2cm}
 	%\parbox[t]{0.93\textwidth}{ % Box to inset this section slightly
 	%	\raggedleft % Right align the text

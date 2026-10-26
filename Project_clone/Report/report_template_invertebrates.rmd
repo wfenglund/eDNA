@@ -286,14 +286,14 @@ orderSummary <- orderSummary[order(-orderSummary$Andel), ]
 orderSummary$Andel <- ifelse(orderSummary$Andel < 0.1, "<0,1",
                              formatC(orderSummary$Andel, format = "f", digits = 1, decimal.mark = ","))
 colnames(orderSummary) <- c("Klass", "Ordning", "Familjer", "Släkten", "Arter/OTU",
-                            paste0("Prov (av ", ncol(sampleCols), ")"),
+                            paste0("Prover (av ", ncol(sampleCols), ")"),
                             "Andel av sekvenser (\\%)")
 
 kable(orderSummary, "latex", row.names = FALSE,
       caption = paste("Sammanfattning per ordning av", targetGroup, "som identifierats i proverna med klass, antal familjer, släkten och arter/OTU samt antal prov där ordningen detekterats med ordningens andel av det totala antalet sekvenser."),
       booktabs = T, escape = F, longtable = TRUE, linesep = "") %>%
       # kable_styling(latex_options = c("hold_position", "repeat_header")) # unstriped
-      kable_styling(latex_options = c("hold_position", "repeat_header", "striped"), font_size = 10) # striped
+      kable_styling(latex_options = c("hold_position", "repeat_header", "striped"), font_size = 9) # striped
 ```
 
 ```{r orderPalette, include=FALSE}

@@ -167,6 +167,8 @@ groupOrders <- sortColsNumerically(groupOrders, skipCols = c(1:5))
 # gör så att allting i rapporten utgår från groupSpecies/groupResults$groupSpecies
 # lägg in figurer över ASV-diversitet?
 
+# add a settings file and generate everything outside of this document?
+
 groupGenera <- groupGenera[!(groupGenera$Genus == "unknown"), ]
 groupFamilies <- groupFamilies[!(groupFamilies$Family == "unknown"), ]
 groupOrders <- groupOrders[!(groupOrders$Order == "unknown"), ]
@@ -260,13 +262,17 @@ Se tabell 2 för sammanfattning över samtliga identifierade ordningar av `r tar
 <!-- ``` -->
 
 ```{r tab2, echo=FALSE}
+# lägg till klass
+
 # Summary per order: taxonomic richness, detection frequency and read share
 sampleCols <- groupSpecies[, -c(1:10), drop = FALSE]
 totalReads <- sum(sampleCols)
 
+# split(seq_len(nrow(groupSpecies)), groupSpecies$Order) to group lines by order
 summaryList <- lapply(split(seq_len(nrow(groupSpecies)), groupSpecies$Order), function(idx) {
   orderCounts <- sampleCols[idx, , drop = FALSE]
   data.frame(
+    Klass = groupSpecies$Class[idx[1]],
     Ordning = groupSpecies$Order[idx[1]],
     Familjer = length(unique(groupSpecies$Family[idx])),
     Släkten = length(unique(groupSpecies$Genus[idx])),
@@ -279,12 +285,12 @@ orderSummary <- do.call(rbind, summaryList)
 orderSummary <- orderSummary[order(-orderSummary$Andel), ]
 orderSummary$Andel <- ifelse(orderSummary$Andel < 0.1, "<0,1",
                              formatC(orderSummary$Andel, format = "f", digits = 1, decimal.mark = ","))
-colnames(orderSummary) <- c("Ordning", "Familjer", "Släkten", "Arter/OTU",
+colnames(orderSummary) <- c("Klass", "Ordning", "Familjer", "Släkten", "Arter/OTU",
                             paste0("Prov (av ", ncol(sampleCols), ")"),
                             "Andel av sekvenser (\\%)")
 
 kable(orderSummary, "latex", row.names = FALSE,
-      caption = paste("Sammanfattning per ordning av", targetGroup, "som identifierats i proverna med antal familjer, släkten och arter/OTU samt antal prov där ordningen detekterats med ordningens andel av det totala antalet sekvenser."),
+      caption = paste("Sammanfattning per ordning av", targetGroup, "som identifierats i proverna med klass, antal familjer, släkten och arter/OTU samt antal prov där ordningen detekterats med ordningens andel av det totala antalet sekvenser."),
       booktabs = T, escape = F, longtable = TRUE, linesep = "") %>%
       # kable_styling(latex_options = c("hold_position", "repeat_header")) # unstriped
       kable_styling(latex_options = c("hold_position", "repeat_header", "striped"), font_size = 10) # striped
@@ -293,11 +299,14 @@ kable(orderSummary, "latex", row.names = FALSE,
 ```{r orderPalette, include=FALSE}
 # One fixed colour per order (alphabetical assignment) shared by all figures
 allOrders <- sort(unique(na.omit(c(groupSpecies$Order, groupGenera$Order, groupOrders$Order))))
-orderPalette <- setNames(rep_len(MetAlPipe:::color25, length(allOrders)), allOrders)
+# orderPalette <- setNames(rep_len(MetAlPipe:::color25, length(allOrders)), allOrders)
+orderPalette <- setNames(MetAlPipe:::color25[1:length(allOrders)], allOrders)
 ```
 
-```{r fig1, fig.height=8.5, fig.width=6.7, echo=FALSE, fig.cap=paste0("Fördelning i procent av antal sekvenser från olika släkten av ", targetGroup, " i proverna detekterade med hjälp av primer ", primerName1, ". Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover.")}
+```{r fig1, fig.height=8.5, fig.width=6.7, echo=FALSE, fig.cap=paste0("Fördelning i procent av antal sekvenser från olika ordningar av ", targetGroup, " i proverna detekterade med hjälp av primer ", primerName1, ". Den översta stapeln \'Totalt\' visar en sammanslagning av alla dessa sekvenser från alla prover.")}
 # simplify and add a flag for species/genera/families/orders. Set orders as default. Look at PCA and diversity plots etc next time.
+
+# This plot does not correspond with tab2
 
 library(ggplot2)
 
@@ -325,6 +334,7 @@ library(MetAlPipe)
 # Prepare the count data:
 # groupCounts <- groupGenera[, -c(1:7), drop = FALSE]
 groupCounts <- groupOrders[, -c(1:5), drop = FALSE]
+# groupCounts <- groupSpecies[, -c(1:10), drop = FALSE] # this has a different filtering parameter on ID
 groupCounts <- groupCounts[, rev(seq_along(groupCounts))] # reverse order of samples
 if(ncol(groupCounts) > 1) { # if more than one sample, add a total of all samples to the plot
   groupCounts <- cbind(Totalt = rowSums(groupCounts), groupCounts)
@@ -333,6 +343,7 @@ if(ncol(groupCounts) > 1) { # if more than one sample, add a total of all sample
 # Plot:
 # FractionPlot(data = groupCounts, species = groupOrders$Order, col = MetAlPipe:::color25, inset = c(-0.3, 0.01))
 FractionPlotGG(groupCounts, groupOrders$Order, orderPalette)
+# FractionPlotGG(groupCounts, groupSpecies$Order, orderPalette) # this has a different filtering parameter on ID
 
 ```
 
@@ -431,7 +442,9 @@ ggplot(heatData, aes(x = Prov, y = Taxon)) +
   geom_segment(data = orderLines, aes(x = x, xend = x, y = -Inf, yend = Inf, colour = Order),
                linewidth = 3, lineend = "butt", inherit.aes = FALSE) +
   facet_grid(Order ~ ., scales = "free_y", space = "free_y") +
-  scale_fill_viridis_c(trans = "log10", na.value = "grey92", name = "% av sekvenser",
+  # scale_fill_viridis_c(option = "mako", trans = "log10", na.value = "grey92", name = "% av sekvenser",
+  scale_fill_gradientn(colors = wesanderson::wes_palette("Zissou1")[1:4], trans = "log10", na.value = "grey92", name = "% av sekvenser",
+  # scale_fill_gradientn(colors = rev(wesanderson::wes_palette("Darjeeling1")), trans = "log10", na.value = "grey92", name = "% av sekvenser",
                        labels = function(x) format(x, scientific = FALSE, drop0trailing = TRUE), guide = guide_colourbar(title.position = "left", title.vjust = 0.8,
                         barwidth = 15, barheight = 0.6)) +
   scale_colour_manual(values = orderPalette, guide = "none") +
@@ -442,8 +455,62 @@ ggplot(heatData, aes(x = Prov, y = Taxon)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6, face = "bold"),
         axis.text.y = element_text(face = "bold.italic", size = 6), # abbreviate genera?
         panel.grid = element_blank(),
-        strip.text.y = element_text(angle = 0, hjust = 0, face = "bold", size = 6),
+        strip.text.y = element_text(angle = 0, hjust = 0, size = 9),
         legend.position = "bottom")
+```
+
+```{r fig_nmds, echo=FALSE, results="hide", fig.height=4.5, fig.width=6.7, fig.cap=paste0("Likhet mellan prover i artsammansättning av ", targetGroup, ", visualiserad med NMDS (icke-metrisk multidimensionell skalning). Varje punkt är ett prov och prover som ligger nära varandra har liknande sammansättning. Vänster: Bray-Curtis-avstånd baserat på antal sekvenser. Höger: Jaccard-avstånd baserat närvaro eller frånvaro av arter. Färgen visar provets Shannon-index. Ett lägre stressvärde innebär bättre överensstämmelse mellan avstånden i diagrammet och i data; värden under cirka 0,2 anses acceptabla.")}
+library(ggplot2)
+
+speciesCounts <- groupSpecies[, -c(1:10), drop = FALSE]
+comm <- t(as.matrix(speciesCounts)) # samples in rows, taxa in columns
+
+set.seed(6317)
+ndBray <- vegan::metaMDS(comm, distance = "bray", k = 2, trymax = 50, trace = 0)
+ndJac <- vegan::metaMDS(comm, distance = "jaccard", binary = TRUE, k = 2, trymax = 50, trace = 0)
+
+shannon <- apply(speciesCounts, 2, function(x) { p <- x[x > 0] / sum(x); -sum(p * log(p)) })
+nmdsData <- rbind(
+  data.frame(Prov = rownames(comm), vegan::scores(ndBray, display = "sites"),
+             Metod = sprintf("Bray-Curtis (antal sekvenser), stress = %.2f", ndBray$stress),
+             Shannon = shannon),
+  data.frame(Prov = rownames(comm), vegan::scores(ndJac, display = "sites"),
+             Metod = sprintf("Jaccard (förekomst), stress = %.2f", ndJac$stress),
+             Shannon = shannon)
+)
+
+ggplot(nmdsData, aes(x = NMDS1, y = NMDS2, colour = Shannon)) +
+  geom_point(size = 2) +
+  # geom_text(aes(label = gsub("\\D", "", Prov)), size = 2, vjust = -0.9,
+  geom_text(aes(label = Prov), size = 2, vjust = -0.9,
+            check_overlap = TRUE, colour = "black") +
+  facet_wrap(~ Metod, scales = "free") +
+  # scale_colour_viridis_c(name = "Shannon (H')") +
+  scale_colour_gradientn(colors = rev(wesanderson::wes_palette("Zissou1")[1:4]), name = "Shannon (H')") +
+  theme_minimal(base_size = 8) +
+  theme(strip.text = element_text(face = "bold", size = 8), legend.position = "bottom")
+```
+
+```{r fig_accum, echo=FALSE, results="hide", fig.height=3.5, fig.width=6.7, fig.cap=paste0("A: Kumulativt antal taxa av ", targetGroup, " när fler prover läggs till (medelvärde av 100 slumpade provordningar, skuggat område visar standardavvikelsen). En kurva som planar ut tyder på att fler prover skulle ge få nya taxa. B: Antal detekterade taxa i varje prov i förhållande till antal sekvenser i provet.")}
+set.seed(6317)
+acc <- vegan::specaccum(comm > 0, method = "random", permutations = 100)
+accData <- data.frame(Prov = acc$sites, Taxa = acc$richness,
+                      Lo = acc$richness - acc$sd, Hi = acc$richness + acc$sd)
+depthData <- data.frame(Sekvenser = rowSums(comm), Taxa = rowSums(comm > 0))
+
+gAcc <- ggplot(accData, aes(x = Prov, y = Taxa)) +
+  geom_ribbon(aes(ymin = Lo, ymax = Hi), alpha = 0.25) +
+  geom_line() +
+  labs(x = "Antal prov", y = "Kumulativt antal taxa") +
+  theme_minimal(base_size = 8)
+
+gDepth <- ggplot(depthData, aes(x = Sekvenser, y = Taxa)) +
+  geom_point(alpha = 0.7) +
+  scale_x_log10(labels = scales::label_comma(big.mark = " ")) +
+  labs(x = "Antal sekvenser i provet (log10)", y = "Antal taxa i provet") +
+  theme_minimal(base_size = 8)
+
+cowplot::plot_grid(gAcc, gDepth, labels = c("A", "B"), label_size = 10)
 ```
 
 ```{r include=FALSE}

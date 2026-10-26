@@ -443,7 +443,8 @@ ggplot(heatData, aes(x = Prov, y = Taxon)) +
                linewidth = 3, lineend = "butt", inherit.aes = FALSE) +
   facet_grid(Order ~ ., scales = "free_y", space = "free_y") +
   # scale_fill_viridis_c(option = "mako", trans = "log10", na.value = "grey92", name = "% av sekvenser",
-  scale_fill_gradientn(colors = rev(wesanderson::wes_palette("Zissou1")[1:4]), trans = "log10", na.value = "grey92", name = "% av sekvenser",
+  scale_fill_gradientn(colors = wesanderson::wes_palette("Zissou1")[1:4], trans = "log10", na.value = "grey92", name = "% av sekvenser",
+  # scale_fill_gradientn(colors = rev(wesanderson::wes_palette("Darjeeling1")), trans = "log10", na.value = "grey92", name = "% av sekvenser",
                        labels = function(x) format(x, scientific = FALSE, drop0trailing = TRUE), guide = guide_colourbar(title.position = "left", title.vjust = 0.8,
                         barwidth = 15, barheight = 0.6)) +
   scale_colour_manual(values = orderPalette, guide = "none") +
@@ -454,7 +455,7 @@ ggplot(heatData, aes(x = Prov, y = Taxon)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6, face = "bold"),
         axis.text.y = element_text(face = "bold.italic", size = 6), # abbreviate genera?
         panel.grid = element_blank(),
-        strip.text.y = element_text(angle = 0, hjust = 0, face = "bold", size = 6),
+        strip.text.y = element_text(angle = 0, hjust = 0, size = 9),
         legend.position = "bottom")
 ```
 

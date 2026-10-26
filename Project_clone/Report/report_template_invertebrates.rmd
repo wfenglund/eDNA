@@ -187,7 +187,7 @@ groupPercent85 <- FixPercent(groupSeqs85 / primerSeqs) # Percentage of sequences
 # commonPercent <- paste0("~", round(sum(groupData[1:commonNo, -c(1, 2)]) / sum(groupData[, -c(1, 2)]) * 100)) # proportion of sequences that [commonNo] make up
 
 # primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent85, "% (", FixMillion(groupSeqs85), ") av sekvenserna ", targetGroup, ", varav ~", FixPercent(groupSeqs98 / groupSeqs85), "% (", FixMillion(groupSeqs98), ") kunde bestämmas hela vägen till art. Resterande sekvenser bestämdes till åtminstone släkte, familj eller ordning. Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 och ", seqPlotFigures, " för relativa andelar sekvenser från varje ordning i varje prov).")
-primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent85, "% (", FixMillion(groupSeqs85), ") av sekvenserna ", targetGroup, ", varav ~", FixPercent(groupSeqs98 / groupSeqs85), "% (", FixMillion(groupSeqs98), ") kunde bestämmas hela vägen till art. Resterande sekvenser bestämdes till åtminstone släkte, familj eller ordning. Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 för relativa andelar sekvenser från varje ordning, figur 2 för mångfald av ", targetGroup, " i varje prov. Se även figur 3 för förekomst av de 30 vanligaste arterna över proverna).")
+primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent85, "% (", FixMillion(groupSeqs85), ") av sekvenserna ", targetGroup, ", varav ~", FixPercent(groupSeqs98 / groupSeqs85), "% (", FixMillion(groupSeqs98), ") kunde bestämmas hela vägen till art. Resterande sekvenser bestämdes till åtminstone släkte, familj eller ordning. Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 för relativa andelar sekvenser från varje ordning, figur 2 för mångfald av ", targetGroup, " i varje prov. Se även figur 3 för förekomst av de 60 vanligaste arterna över proverna, samt figur 4 för visualiserad jämförelse mellan proverna och figur 5 för indikation på hur resultat kan tolkas).")
 ```
 
 ## Uppdrag
@@ -347,7 +347,7 @@ FractionPlotGG(groupCounts, groupOrders$Order, orderPalette)
 
 ```
 
-```{r fig2, echo=FALSE, fig.height=8.5, fig.width=6.7, fig.cap=paste0("Mångfald av ", targetGroup, " i varje prov, beräknad på samtliga identifierade taxa. Vänster: antal detekterade taxa, uppdelat på ordning. Mitten och höger: Shannons diversitetsindex (H') och Simpsons diversitetsindex (1 - D), där högre värden innebär större mångfald. Indexen bygger på antal sekvenser och ska ses som semikvantitativa.")}
+```{r fig2, echo=FALSE, fig.height=8.5, fig.width=6.7, fig.cap=paste0("Mångfald av ", targetGroup, " i varje prov, beräknad på samtliga identifierade taxa. Vänster: antal detekterade taxa, uppdelat på ordning. Mitten: Shannons diversitetsindex (H'). Höger: Simpsons diversitetsindex (1 - D). Ett högre diversitetsindex indikerar större mångfald i det provet. Indexen bygger på antal sekvenser och bör ses som semikvantitativa då metabarcodingdata har en koppling men ej ett 1:1-förhållande till biomassa.")}
 library(ggplot2)
 
 speciesCounts <- groupSpecies[, -c(1:10), drop = FALSE]
@@ -455,11 +455,11 @@ ggplot(heatData, aes(x = Prov, y = Taxon)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6, face = "bold"),
         axis.text.y = element_text(face = "bold.italic", size = 6), # abbreviate genera?
         panel.grid = element_blank(),
-        strip.text.y = element_text(angle = 0, hjust = 0, size = 9),
+        strip.text.y = element_text(angle = 0, hjust = 0, size = 8),
         legend.position = "bottom")
 ```
 
-```{r fig_nmds, echo=FALSE, results="hide", fig.height=4.5, fig.width=6.7, fig.cap=paste0("Likhet mellan prover i artsammansättning av ", targetGroup, ", visualiserad med NMDS (icke-metrisk multidimensionell skalning). Varje punkt är ett prov och prover som ligger nära varandra har liknande sammansättning. Vänster: Bray-Curtis-avstånd baserat på antal sekvenser. Höger: Jaccard-avstånd baserat närvaro eller frånvaro av arter. Färgen visar provets Shannon-index. Ett lägre stressvärde innebär bättre överensstämmelse mellan avstånden i diagrammet och i data; värden under cirka 0,2 anses acceptabla.")}
+```{r fig_nmds, echo=FALSE, results="hide", fig.height=4.5, fig.width=6.7, fig.cap=paste0("Likhet mellan prover i artsammansättning av ", targetGroup, ", visualiserad med NMDS (Non-metric MultiDimensional Scaling). Närliggande prover har liknande sammansättning. Vänster: Bray-Curtis-avstånd baserat på antal sekvenser. Höger: Jaccard-avstånd baserat på närvaro/frånvaro av arter. Ett lägre stressvärde innebär bättre överensstämmelse mellan avstånd i diagram och i ursprungligt data; värden under cirka 0,2 anses acceptabla. Färgen visar provets Shannon-diversitetsindex, där en högre siffra indikerar högre mångfald i det provet.")}
 library(ggplot2)
 
 speciesCounts <- groupSpecies[, -c(1:10), drop = FALSE]
@@ -475,7 +475,7 @@ nmdsData <- rbind(
              Metod = sprintf("Bray-Curtis (antal sekvenser), stress = %.2f", ndBray$stress),
              Shannon = shannon),
   data.frame(Prov = rownames(comm), vegan::scores(ndJac, display = "sites"),
-             Metod = sprintf("Jaccard (förekomst), stress = %.2f", ndJac$stress),
+             Metod = sprintf("Jaccard (närvaro/frånvaro), stress = %.2f", ndJac$stress),
              Shannon = shannon)
 )
 
@@ -491,18 +491,21 @@ ggplot(nmdsData, aes(x = NMDS1, y = NMDS2, colour = Shannon)) +
   theme(strip.text = element_text(face = "bold", size = 8), legend.position = "bottom")
 ```
 
-```{r fig_accum, echo=FALSE, results="hide", fig.height=3.5, fig.width=6.7, fig.cap=paste0("A: Kumulativt antal taxa av ", targetGroup, " när fler prover läggs till (medelvärde av 100 slumpade provordningar, skuggat område visar standardavvikelsen). En kurva som planar ut tyder på att fler prover skulle ge få nya taxa. B: Antal detekterade taxa i varje prov i förhållande till antal sekvenser i provet.")}
+```{r fig_accum, echo=FALSE, results="hide", fig.height=3.5, fig.width=6.7, fig.cap=paste0("A: Kumulativt antal taxa av ", targetGroup, " när fler prover läggs till (medelvärde av 100 slumpade provordningar, skuggat område visar standardavvikelsen). En kurva som planar ut tyder på att fler prover skulle ge få nya taxa medan en stigande kurva indikerar att mer prover tagna skulle leda till fler identifierade taxa. B: Antal detekterade taxa i varje prov i förhållande till antal sekvenser i provet. Ett mer linjärt förhållande indikerar att skillnader mellan prover kan förklaras med hjälp av sekvenseringsdjupsskillnader.")}
 set.seed(6317)
+# samples are added in random order 100 times. The line is the average and the grey band is one standard deviation. If the curve flattens additional samples add little. If it is climbing steeply not all diversity is captured. Total 291 should be viewed as a minimum in this case. Shows how complete the survey is, supports that a negative result does not prove absence. "Did you sample enough"
 acc <- vegan::specaccum(comm > 0, method = "random", permutations = 100)
 accData <- data.frame(Prov = acc$sites, Taxa = acc$richness,
                       Lo = acc$richness - acc$sd, Hi = acc$richness + acc$sd)
-depthData <- data.frame(Sekvenser = rowSums(comm), Taxa = rowSums(comm > 0))
 
 gAcc <- ggplot(accData, aes(x = Prov, y = Taxa)) +
   geom_ribbon(aes(ymin = Lo, ymax = Hi), alpha = 0.25) +
   geom_line() +
   labs(x = "Antal prov", y = "Kumulativt antal taxa") +
   theme_minimal(base_size = 8)
+
+# Each point is a sample. X = n sequences in sample, Y = n taxa detected in sample. Shows if sample species richness is a result of how deeply it was sequenced. Shows if the diversity domparisons and NMDS can be trusted or if they simply display sequencing depth. "Are the samples comparable?"
+depthData <- data.frame(Sekvenser = rowSums(comm), Taxa = rowSums(comm > 0))
 
 gDepth <- ggplot(depthData, aes(x = Sekvenser, y = Taxa)) +
   geom_point(alpha = 0.7) +

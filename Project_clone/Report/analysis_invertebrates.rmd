@@ -97,7 +97,7 @@ AddTaxonomy <- function(countsResNotes) {
       print(groupTax$Latin[i])
       groupTax$Family[i] <- groupTax$Genus[i] # if no family, assume hit name is a family
     }
-    if(groupTax$Genus[i] %in% c("Coleoptera", "Diptera", "Lepidoptera", "Ephemeroptera") & groupTax$Order[i] == "unknown") {
+    if(groupTax$Genus[i] %in% c("Coleoptera", "Diptera", "Lepidoptera", "Ephemeroptera", "Psocoptera", "Orthoptera", "Cyclopoida") & groupTax$Order[i] == "unknown") {
       print(groupTax$Latin[i])
       groupTax$Order[i] <- groupTax$Genus[i]
     }

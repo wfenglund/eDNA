@@ -309,9 +309,7 @@ orderPalette <- setNames(MetAlPipe:::color25[1:length(allOrders)], allOrders)
 ```
 
 ```{r fig1, fig.height=figHeight, fig.width=6.7, echo=FALSE, fig.cap=paste0("Fördelning i procent av antal sekvenser från olika ordningar av ", targetGroup, " i ", sampleWordDefinitive, " detekterade med hjälp av primer ", primerName1, ".", sampleTotalText)}
-# simplify and add a flag for species/genera/families/orders. Set orders as default. Look at PCA and diversity plots etc next time.
-
-# This plot does not correspond with tab2
+# simplify and add a flag for species/genera/families/orders?
 
 library(ggplot2)
 
@@ -333,7 +331,6 @@ FractionPlotGG <- function(data, species, col) {
           axis.text.y = element_text(size = 8, face = "bold"))
 }
 
-
 # if figure is too tall or short, change to either fig.height=7 or fig.height=14 on above line
 library(MetAlPipe)
 
@@ -353,7 +350,6 @@ if(ncol(groupCounts) > 1) { # if more than one sample, add a total of all sample
 
 # Plot:
 FractionPlotGG(groupCounts, orderNames, orderPalette)
-
 ```
 
 ```{r fig2, echo=FALSE, fig.height=figHeight, fig.width=6.7, fig.cap=paste0("Mångfald av ", targetGroup, " i ", sampleWordDefinitive, ", beräknad på samtliga identifierade taxa. Vänster: antal detekterade taxa, uppdelat på ordning. Mitten: Shannons diversitetsindex (H'). Höger: Simpsons diversitetsindex (1 - D). Ett högre diversitetsindex indikerar större mångfald i provet. Indexen bygger på antal sekvenser och bör ses som semikvantitativa då metabarcodingdata har en koppling men ej ett 1:1-förhållande till biomassa.")}

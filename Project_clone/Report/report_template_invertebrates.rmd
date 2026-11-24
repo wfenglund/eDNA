@@ -58,13 +58,6 @@ sampleCutoff <- "0,1" # Within sample cutoff
 targetGroup <- "evertebrater" # group of organism focused on
 
 primerName1 <- "COI"
-primerName2 <- "16S" # if relevant
-
-commonNo <- "3" # How many species that stood for [commonPercent] of all sequences
-commonNo2 <- "3" # same as above but for second primer
-
-seqPlotFigures <- "3-X" # Which figure numbers belong to the SeqPlots? e.G. "2" or "2-4" etc.
-seqPlotFigures2 <- "4-X" # -"-
 
 # References (uncomment the appropriate choice):
 primerVar <- list(citation = "[@elbrecht2019validation]", index = c(8)) # IBA (insects)
@@ -158,7 +151,6 @@ groupSpecies <- sortColsNumerically(groupSpecies, skipCols = c(1:9))
 # groupSpecies <- cbind(groupData$Latin, groupData$Swedish)
 # colnames(groupSpecies) <- c("Latin", "Svenska")
 
-# gör så att allting i rapporten utgår från groupSpecies/groupResults$groupSpecies
 # lägg in figurer över ASV-diversitet?
 
 # add a settings file and generate everything outside of this document?
@@ -176,8 +168,6 @@ minSeqs <- FixMillion(min(rawSeqs)) # Number of sequences in the sample with few
 maxSeqs <- FixMillion(max(rawSeqs)) # Number of sequences in the sample with most sequences
 primerPercent <- FixPercent(primerSeqs / sum(rawSeqs)) # Percentage of sequences that contained primers
 groupPercent98 <- FixPercent(groupSeqs98 / primerSeqs) # Percentage of sequences belonging to target group
-# groupPercent85 <- FixPercent(groupSeqs85 / primerSeqs) # Percentage of sequences belonging to target group
-# commonPercent <- paste0("~", round(sum(groupData[1:commonNo, -c(1, 2)]) / sum(groupData[, -c(1, 2)]) * 100)) # proportion of sequences that [commonNo] make up
 
 if(speciesNo > 60) { # if there are more than 60 taxa in species results
   nTop <- 60 # display top 60
@@ -217,7 +207,6 @@ if(samplesNo > 7) {
   sampleTotalsText <- ""
 }
 
-# primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent85, "% (", FixMillion(groupSeqs85), ") av sekvenserna ", targetGroup, ", varav ~", FixPercent(groupSeqs98 / groupSeqs85), "% (", FixMillion(groupSeqs98), ") kunde bestämmas hela vägen till art. Resterande sekvenser bestämdes till åtminstone släkte, familj eller ordning. Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 och ", seqPlotFigures, " för relativa andelar sekvenser från varje ordning i varje prov).")
 primerText1 <- paste0("För ", primerName1, " innehöll omkring ", primerPercent, "% (", FixMillion(primerSeqs), ") av sekvenserna förväntade primers och var av tillräckligt god kvalitet för att bibehållas i analysen. Av dessa tillhörde ~", groupPercent98, "% (", FixMillion(groupSeqs98), ") av sekvenserna ", targetGroup, ". Sekvenserna från ", targetGroup, " tillhörde ", speciesNo, " olika arter (se figur 1 för relativa andelar sekvenser från varje ordning, figur 2 för mångfald av ", targetGroup, " ", sampleText,". Se även figur 3 för relativ förekomst av ", nTopString, "taxa ", sampleText, ", samt figur 4 för indikation på hur resultat kan tolkas", figFiveText, ").")
 ```
 
@@ -279,23 +268,7 @@ Se tabell 2 för sammanfattning över samtliga identifierade ordningar av
 `r targetGroup`. Övriga sekvenser var av låg kvalitet eller var spår av andra
 organismer.
 
-<!-- # ```{r tab2, echo=FALSE} -->
-<!-- # add to fish document but add redlist, species, family, order -->
-<!-- # fixedCaption <- paste(paste("Tabell över latinska och svenska namn på de arter av", targetGroup, "som identifierats i proverna. Om sekvenser ej kunde bestämmas till exakt art anges i dessa fall "), "sp.", " eller vilka två arter det kan handla om.", sep = "'") -->
-
-<!-- # tableTaxa <- cbind(groupGenera$Genus, groupGenera$Family, groupGenera$Order) -->
-<!-- # colnames(tableTaxa) <- c("Släkte", "Familj", "Ordning") -->
-
-<!-- # kable(tableTaxa, "latex", -->
-<!-- # caption = fixedCaption, -->
-<!-- # booktabs = T, escape = F, linesep = "")%>% -->
-<!-- # kable_styling(latex_options = "hold_position")%>% -->
-<!-- # column_spec(1, italic = TRUE) -->
-<!-- ``` -->
-
 ```{r tab2, echo=FALSE}
-# lägg till klass
-
 # Summary per order: taxonomic richness, detection frequency and read share
 sampleCols <- groupSpecies[, -c(1:9), drop = FALSE]
 totalReads <- sum(sampleCols)
@@ -579,35 +552,6 @@ ggplot(distData, aes(x = Prov1, y = Prov2, fill = Avstand)) +
         panel.grid = element_blank())
 ```
 
-```{r include=FALSE}
-# groupDataFrame <- as.data.frame(groupData)
-# names(groupDataFrame) <- make.names(names(groupDataFrame))
-# 
-# options(scipen = 5)
-# 
-# groupDataFrame$Swedish <- str_pad(groupDataFrame$Swedish, side = "left", pad = " ", width = max(nchar(groupDataFrame$Swedish)))
-# 
-# indplots <- list()
-# for(i in names(groupDataFrame[3:ncol(groupDataFrame)])) {
-#    indplots[[i]] <- SeqPlot(data = groupDataFrame, sample = i, title = i, species = "Swedish", log10 = FALSE)
-# }
-# 
-# if("allResults2.rds" %in% list.files(".")) { # if two primers
-#   groupDataFrame2 <- as.data.frame(groupData2)
-#   names(groupDataFrame2) <- make.names(names(groupDataFrame2))
-#   
-#   options(scipen = 5)
-#   
-#   groupDataFrame2$Swedish <- str_pad(groupDataFrame2$Swedish, side = "left", pad = " ", width = max(nchar(groupDataFrame2$Swedish)))
-#   
-#   indplots2 <- list()
-#   for(i in names(groupDataFrame2[3:ncol(groupDataFrame2)])) {
-#      indplots2[[i]] <- SeqPlot(data = groupDataFrame2, sample = i, title = i, species = "Swedish", log10 = FALSE)
-# }
-#   
-# }
-```
-
 \newpage
 
 ## Sammanfattning
@@ -618,56 +562,6 @@ nödvändigtvis att dessa arter är frånvarande. Vi vill även påpeka att
 DNA rör sig med vatten och att en eventuell lokal uppströms kan påverka vilka
 arter som detekteras vid en lokal nedströms. Detta kan vara värt att ha i åtanke
 vid tolkning av inventeringsresultat från eDNA.
-
-```{r echo=FALSE, fig.height=13, fig.width=9, fig.cap=paste0("Antal sekvenser från varje art av ", targetGroup, " detekterade med ", primerName1, " i enskilda prover.")}
-# options(scipen = 5)
-# plot_grid(plotlist = indplots[1:5], align = "v", axis = "l", ncol = 1)
-```
-
-```{r fig5, fig.height=7, fig.width=14, echo=FALSE, fig.cap="Simpsons diversitetsindex för varje prov. Simpson (1 - D) ger sannolikheten att två slumpmässiga sekvenser dragna ur ett prov tillhör samma art. En högre siffra föreslår en högre diversitet inom det provet."}
-# PlotAlphaDiv <- function(plotData, dataNames, plotCol) {
-#   if(length(plotData) == 1 && !is.list(plotData)) {
-#     dataList <- as.list(plotData)
-#   } else {
-#     dataList <- plotData
-#   }
-#   .addSize <- function(group) {
-#     name <- paste0(group[1], "\nn=", length(group[[2]]))
-#     return(name)
-#   }
-#   newNames <- apply(X = cbind(dataNames, plotData), MARGIN = 1, FUN = .addSize)
-#   ylabel <- ""
-#   if(length(newNames) == 1) {ylabel <- newNames}
-#   par(mar = c(4.1, 9.1, 4.1, 12.1), xpd = TRUE, las = 1, srt = 0, cex = 1.2, bty = "n")
-#   boxplot(dataList, horizontal = TRUE, names = newNames, col = plotCol, las = 1)
-#   text(-0.05, 1, ylabel, adj = 1)
-# }
-# 
-# # Format data:
-# countsMatrix <- as.matrix(t(groupData[,-c(1, 2)]))
-# # simpValues <- vegan::diversity(x = countsMatrix, index = "simpson")
-# 
-# # Calculate Simpson:
-# if("allResults2.rds" %in% list.files(".")) { # if two primers
-#   countsMatrix2 <- as.matrix(t(allResults2$Clean[,-c(1, 2)]))
-#   plotInput <- list(vegan::diversity(x = countsMatrix, index = "simpson"), vegan::diversity(x = countsMatrix2, index = "simpson"))
-#   plotNames <- list(primerName1, primerName2) # needs to be the same length as 'plotInput'
-# } else {
-#   plotInput <- list(vegan::diversity(x = countsMatrix, index = "simpson"))
-#   plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
-# }
-# 
-# # Group samples (optional):
-# #group1 <- split(simpValues, c('a', 'b'))$a
-# #group2 <- split(simpValues, c('a', 'b'))$b
-# 
-# # Prepare plot variables:
-# # plotInput <- list(simpValues) # add several if needed
-# # plotNames <- list("Alla prover") # needs to be the same length as 'plotInput'
-# plotPalette <- wesanderson::wes_palette("Zissou1")#[c(3, 1)]
-# 
-# PlotAlphaDiv(plotData = plotInput, dataNames = plotNames, plotCol = plotPalette)
-```
 
 ## Projektinformation
 Analysdata och resultat lagras tills vidare hos NRM och är open access. Vid
